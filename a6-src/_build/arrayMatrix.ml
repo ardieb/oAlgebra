@@ -55,6 +55,8 @@ let scale = fun (c:v) (m:matrix) ->
     end
   done; m
 
+(** [partition (x1,y1) (x2,y2) m] is the sub matrix of [n] with rows [y1..y2] 
+  * and columns [x1..x2] *)
 let partition = fun ((x1,y1):int*int) ((x2,y2):int*int) (m:matrix) -> 
   let p,r = dim m in
   if y1 > p || y2 > p || x1 > r || x2 > r then raise MatrixError else
