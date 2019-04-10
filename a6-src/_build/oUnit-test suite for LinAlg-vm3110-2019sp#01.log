@@ -1,12 +1,60 @@
-2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:0:Add - 0 + 0 = 0.
-2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:0:Add - 0 + 0 = 0 is successful.
-2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:0:Add - 0 + 0 = 0.
-2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:3:Add - sum fraction in simplest form.
-2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:3:Add - sum fraction in simplest form is successful.
-2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:3:Add - sum fraction in simplest form.
-2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:5:Add - sum a fraction > 1.
-2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:5:Add - sum a fraction > 1 is successful.
-2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:5:Add - sum a fraction > 1.
-2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:8:Add - +/-, sum negative.
-2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:8:Add - +/-, sum negative is successful.
-2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:8:Add - +/-, sum negative.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:0:Add - 0 + 0 = 0.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:0:Add - 0 + 0 = 0 is successful.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:0:Add - 0 + 0 = 0.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:2:Add - fractions add up to 1.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:2:Add - fractions add up to 1 is successful.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:2:Add - fractions add up to 1.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:4:Add - sum fraction in simplest form.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:4:Add - sum fraction in simplest form is successful.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:4:Add - sum fraction in simplest form.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:6:Add - sum a fraction > 1.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:6:Add - sum a fraction > 1 is successful.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:6:Add - sum a fraction > 1.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:7:Add - adding fractions > 1.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:7:Add - adding fractions > 1 is successful.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:7:Add - adding fractions > 1.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:9:Add - +/-, sum negative.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:9:Add - +/-, sum negative is successful.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:9:Add - +/-, sum negative.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:10:Add - sum of negatives.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:10:Add - sum of negatives is successful.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:10:Add - sum of negatives.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:12:Add - negative wohle num < -1.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:12:Add - negative wohle num < -1 is successful.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:12:Add - negative wohle num < -1.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:14:Mul - x * 0 = 0.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:14:Mul - x * 0 = 0 is successful.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:14:Mul - x * 0 = 0.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:15:Mul - x * 1 = x.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:15:Mul - x * 1 = x is successful.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:15:Mul - x * 1 = x.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:17:Mul - fractions > 1.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:17:Mul - fractions > 1 is successful.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:17:Mul - fractions > 1.
+2019-04-10T16:13:07+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:19:Mul - +/- numerators.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:19:Mul - +/- numerators is successful.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:19:Mul - +/- numerators.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:20:Mul - +/- denominators.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:20:Mul - +/- denominators is successful.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:20:Mul - +/- denominators.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:22:Div - x / x = 1.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:22:Div - x / x = 1 is successful.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:22:Div - x / x = 1.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:24:Div - whole #s.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:24:Div - whole #s is successful.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:24:Div - whole #s.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:26:Div - +/- -> -.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:26:Div - +/- -> - is successful.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:26:Div - +/- -> -.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:27:Div - -/- -> +.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:27:Div - -/- -> + is successful.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:27:Div - -/- -> +.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:28:Sub - x - 0 = x.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:28:Sub - x - 0 = x is successful.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:28:Sub - x - 0 = x.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:30:Sub - x - y < 0.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:30:Sub - x - y < 0 is successful.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:30:Sub - x - y < 0.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:32:Sub - subtracting negative.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:32:Sub - subtracting negative is successful.
+2019-04-10T16:13:08+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:32:Sub - subtracting negative.
