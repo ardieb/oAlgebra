@@ -7,11 +7,11 @@ end
 
 module type Formattable = sig 
   type t
-  val format : Format.formatter -> t -> unit
+  val format : Format.formatter -> t -> unit 
 end
 
 module type NUM = sig
-  type t
+  type t  
   include Comparable with type t := t
   include Formattable with type t := t
   exception ArithmeticError
@@ -50,4 +50,4 @@ end
 
 module type MATRIX_MAKER = 
   functor (T:NUM) ->
-  MATRIX with module N := T
+    MATRIX with module N := T

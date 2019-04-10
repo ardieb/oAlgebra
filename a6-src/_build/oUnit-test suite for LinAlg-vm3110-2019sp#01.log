@@ -1,0 +1,12 @@
+2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:0:Add - 0 + 0 = 0.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:0:Add - 0 + 0 = 0 is successful.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:0:Add - 0 + 0 = 0.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:3:Add - sum fraction in simplest form.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:3:Add - sum fraction in simplest form is successful.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:3:Add - sum fraction in simplest form.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:5:Add - sum a fraction > 1.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:5:Add - sum a fraction > 1 is successful.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:5:Add - sum a fraction > 1.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: Start test test suite for LinAlg:8:Add - +/-, sum negative.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: Test test suite for LinAlg:8:Add - +/-, sum negative is successful.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#01 I: End test test suite for LinAlg:8:Add - +/-, sum negative.

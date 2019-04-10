@@ -50,4 +50,4 @@ end
 
 module type MATRIX_MAKER = 
   functor (T:NUM) ->
-  MATRIX with module N := T
+    MATRIX with module N := T

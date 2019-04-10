@@ -1,0 +1,18 @@
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: Start test test suite for LinAlg:1:Add - fractions add up to 1.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: Test test suite for LinAlg:1:Add - fractions add up to 1 is successful.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: End test test suite for LinAlg:1:Add - fractions add up to 1.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: Start test test suite for LinAlg:2:Add - fractions add up to whole number > 1.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: Test test suite for LinAlg:2:Add - fractions add up to whole number > 1 is successful.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: End test test suite for LinAlg:2:Add - fractions add up to whole number > 1.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: Start test test suite for LinAlg:4:Add - sum needs to be simplified.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: Test test suite for LinAlg:4:Add - sum needs to be simplified is successful.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: End test test suite for LinAlg:4:Add - sum needs to be simplified.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: Start test test suite for LinAlg:6:Add - adding fractions > 1.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: Test test suite for LinAlg:6:Add - adding fractions > 1 is successful.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: End test test suite for LinAlg:6:Add - adding fractions > 1.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: Start test test suite for LinAlg:7:Add - +/-, sum positive.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: Test test suite for LinAlg:7:Add - +/-, sum positive is successful.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: End test test suite for LinAlg:7:Add - +/-, sum positive.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: Start test test suite for LinAlg:9:Add - sum of negatives.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: Test test suite for LinAlg:9:Add - sum of negatives is successful.
+2019-04-10T12:24:27+00:00 vm3110-2019sp#02 I: End test test suite for LinAlg:9:Add - sum of negatives.
