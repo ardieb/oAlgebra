@@ -154,45 +154,8 @@ let reduce = fun (m:matrix) ->
     end
     | None -> backward (i - 1) in
   forward 0; backward (p - 1); !memo
-
-let supp_matrix_1st_row = fun (m:matrix) (col:int) -> 
-  let (rows,cols) = dim m in
-  let new_mat = make (rows-1) (rows-1) N.zero [[]] in
-  for i = 1 to (rows-1) do 
-    for j = 0 to (rows-1) do 
-      if (j < col) then new_mat.(i-1).(j) <- m.(i).(j)
-      else if (j > col) then new_mat.(i-1).(j-1) <- m.(i).(j)
-    done;
-  done;
-  new_mat
-
-let rec determinant = fun (m:matrix) -> 
-  let (row,col) = dim m in if row<>col || row<2 then raise MatrixError else 
-  if row=2 then let (a,b,c,d) = 
-    (m.(0).(0),
-      m.(0).(1),
-      m.(1).(0),
-      m.(1).(1)) in 
-    N.sub (N.mul a d) (N.mul b c) else 
-    let sum = ref N.zero in 
-    for counter = 0 to (row-1) do
-      let neg_or_pos = if (counter mod 2)=0 then N.one else N.neg N.one in 
-      sum := N.add (!sum) 
-          (neg_or_pos |> N.mul m.(0).(counter) |> N.mul 
-              (determinant (supp_matrix_1st_row m counter)))
-    done; !sum
-(** [augment m1 m2] is the matrix obtained by appending 
-    * the columns of [m2] to [m1] 
-    * Requires: [m1] and [m2] have the same number of rows*)
-let augment = fun (m1:matrix) (m2:matrix) -> 
-  let (m,n), (p,r) = dim m1, dim m2 in
-  if m != p then raise MatrixError else
-    let res = make m (n+r) N.zero [[]] in 
-    for i = 0 to m-1 do 
-      for j = 0 to (n+r-1) do 
-        res.(i).(j) <- if (j < n) then m1.(i).(j)
-          else m2.(i).(j-n)
-      done; done; res
+  
+let augment = fun (m1:matrix) (m2:matrix) -> failwith "TODO"
 let inverse = fun (m:matrix) -> failwith "TODO"
 let eigenvalues = fun (m:matrix) -> failwith "TODO"
 let eigenvectors = fun (m:matrix) -> failwith "TODO"
