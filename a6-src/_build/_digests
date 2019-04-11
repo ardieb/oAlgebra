@@ -1,0 +1,8 @@
+"Rule: ocaml: mli -> cmi (%=rationals )": "\tH\231\193];\023vT\179N4\209+\0201"
+"Rule: ocaml dependencies mli (%=rationals )": "\250\210\145\218\237'O\r\237\t\157\200\015\237\138\233"
+"Rule: ocaml dependencies ml (%=rationals )": "\128\"\228\221\251\t\173\213\221\0293@\146+\019i"
+"Resource: /Users/arthurburke/Cornell/Spring 2019/CS 3110/Projects/A6-OAlgebra/a6-src/rationals.ml": "\212\029\140\217\143\000\178\004\233\128\t\152\236\248B~"
+"Rule: ocaml dependencies mli (%=matrix )": "Q\211\015c``\231\198\164zS\024\128\027\210\168"
+"Resource: /Users/arthurburke/Cornell/Spring 2019/CS 3110/Projects/A6-OAlgebra/a6-src/rationals.mli": "3L\029\188\174f\193\225\227\178\168W\128\188\127g"
+"Resource: /Users/arthurburke/Cornell/Spring 2019/CS 3110/Projects/A6-OAlgebra/a6-src/matrix.mli": "2L\228q1\012+\217\147\241\"\249\019\185\214\019"
+"Rule: ocaml: mli -> cmi (%=matrix )": "\000T\137\198\007m$\021\251\188\02940\014Q\248"
