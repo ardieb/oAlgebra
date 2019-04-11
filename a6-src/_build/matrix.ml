@@ -31,7 +31,7 @@ module type MATRIX = sig
   type v = N.t
   exception MatrixError
   type matrix
-  val identity : int -> matrix
+  val diagonal : int -> int -> matrix
   val make : int -> int -> v -> v list list -> matrix
   val dim : matrix -> int*int
   val transpose : matrix -> matrix

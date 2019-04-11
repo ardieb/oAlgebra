@@ -23,4 +23,7 @@ ocamlfind ocamlc -c -package unix -package oUnit -package str -package qcheck -o
 ocamlfind ocamldep -package unix -package oUnit -package str -package qcheck -modules arrayMatrix.ml > arrayMatrix.ml.depends
 # Target: arrayMatrix.cmo, tags: { package(oUnit), package(qcheck), package(str), package(unix), byte, compile, extension:cmo, extension:ml, file:arrayMatrix.cmo, file:arrayMatrix.ml, implem, ocaml, quiet, traverse }
 ocamlfind ocamlc -c -package unix -package oUnit -package str -package qcheck -o arrayMatrix.cmo arrayMatrix.ml
++ ocamlfind ocamlc -c -package unix -package oUnit -package str -package qcheck -o arrayMatrix.cmo arrayMatrix.ml
+File "arrayMatrix.ml", line 99, characters 6-10:
+Warning 26: unused variable swap.
 # Compilation successful.

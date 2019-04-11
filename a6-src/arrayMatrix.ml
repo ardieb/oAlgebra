@@ -18,9 +18,9 @@ let make = fun (rows:int) (cols:int) (init:v) (l:v list list) ->
   List.iteri (fun i row -> List.iteri (fun j e -> m.(i).(j) <- e) row) l;
   (m : matrix)
 
-(** [identity n] is the [n] x [n] identity matrix *)
-let identity = fun (n:int) -> 
-  let m = make n n N.zero [[]] in
+(** [diagonal n r] is the [n] x [r] diagonal matrix with [1]'s on its diagonal *)
+let diagonal = fun (n:int) (r:int) -> 
+  let m = make n r N.zero [[]] in
   for i = 0 to n-1 do
     m.(i).(i) <- N.one;
   done; m
@@ -48,10 +48,11 @@ let dot = fun (u:matrix) (v:matrix) ->
 (** [scale c m] is the matrix [m] scaled by constant [c] *)
 let scale = fun (c:v) (m:matrix) -> 
   let p,r = dim m in
+  let res = make p r N.zero [[]] in
   for i = 0 to p-1 do
   for j = 0 to r-1 do
-    m.(i).(j) <- N.mul m.(i).(j) c
-  done; done; m
+    res.(i).(j) <- N.mul m.(i).(j) c
+  done; done; res
 
 (** [partition (x1,y1) (x2,y2) m] is the sub matrix of [n] with rows [y1..y2] 
   * and columns [x1..x2] 
@@ -91,8 +92,69 @@ let add = fun (m1:matrix) (m2:matrix) ->
   for j = 0 to n-1 do
     res.(i).(j) <- N.add m1.(i).(j) m2.(i).(j)
   done; done; res
+
+(* matrix for swapping the ith and jth rows *)
+let swaprows = fun (m:matrix) (i,j:int*int) -> 
+  let e = fun (i:int) (j:int) (p,r:int*int) ->
+  let res = (diagonal p r) in
+  res.(i).(i) <- N.zero;
+  res.(j).(j) <- N.zero;
+  res.(i).(j) <- N.one;
+  res.(j).(i) <- N.one;
+  res in
+  mul (e i j (dim m)) m
+(* matrix for multiplying a row *)
+let mulrows = fun (m:matrix) (i:int) (c:v) ->
+  let e = fun (i:int) (c:v) (p,r:int*int) ->
+  let res = (diagonal p r) in
+  res.(i).(i) <- c;
+  res in
+  mul (e i c (dim m)) m
+(* matrix for adding one row to another *)
+let addrows = fun (m:matrix) (i,j:int*int) (c:v) ->
+  let e = fun (i:int) (j:int) (c:v) (p,r:int*int) -> 
+  let res = (diagonal p r) in
+  res.(i).(j) <- c;
+  res in
+  mul (e i j c (dim m)) m
+(* finds the left most pivot in row i *)
+let pivot = fun (m:matrix) (i:int) ->
+  let p,r = dim m in
+  let x = ref (r-1) in
+  while N.compare m.(i).(!x) N.zero = EQ && !x > -1 do
+    x := !x - 1;
+  done;
+  if !x < 0 then None else Some !x
+
+let reduce = fun (m:matrix) -> 
+  let p,r = dim m in
+  let memo = ref m in
+  (* Gets matrix in upper triangular form *)
+  let rec forward = fun (i:int) ->
+    if i >= p - 1 then () else
+    match pivot (!memo) i with
+    | Some x -> begin (* Reduces all values below the pivot to zero *)
+      for y=i+1 to p - 1 do
+        let c = N.neg (N.div (!memo).(y).(x) (!memo).(i).(x)) in 
+        memo := addrows (!memo) (i,y) c
+      done; forward (i + 1)
+    end
+    | None -> (* Swaps this row with the row below it and tries forward again *)
+      if i = p - 1 then () else
+      memo := swaprows (!memo) (i,i+1);
+      forward i in
+  let rec backward = fun (i:int) ->
+    if i <= 0 then () else 
+    match pivot (!memo) i with
+    | Some x -> begin
+      for y=i-1 downto 0 do
+      let c = N.neg (N.div) (!memo).(y).(x) (!memo).(i).(x) in
+      memo := addrows (!memo) (i,y) c
+    done; backward (i - 1)
+    end
+    | None -> backward (i - 1) in
+  forward 0; backward (p - 1); !memo
   
-let reduce = fun (m:matrix) -> failwith "TODO"
 let augment = fun (m1:matrix) (m2:matrix) -> failwith "TODO"
 let inverse = fun (m:matrix) -> failwith "TODO"
 let eigenvalues = fun (m:matrix) -> failwith "TODO"

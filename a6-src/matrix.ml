@@ -22,6 +22,7 @@ module type NUM = sig
   val div : t -> t -> t
   val sub : t -> t -> t
   val abs : t -> t
+  val neg : t -> t
   val to_float : t -> float
   val to_string : t -> string
 end
@@ -31,7 +32,7 @@ module type MATRIX = sig
   type v = N.t
   exception MatrixError
   type matrix
-  val identity : int -> matrix
+  val diagonal : int -> int -> matrix
   val make : int -> int -> v -> v list list -> matrix
   val dim : matrix -> int*int
   val transpose : matrix -> matrix

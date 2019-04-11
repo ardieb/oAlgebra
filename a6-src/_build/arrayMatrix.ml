@@ -18,9 +18,9 @@ let make = fun (rows:int) (cols:int) (init:v) (l:v list list) ->
   List.iteri (fun i row -> List.iteri (fun j e -> m.(i).(j) <- e) row) l;
   (m : matrix)
 
-(** [identity n] is the [n] x [n] identity matrix *)
-let identity = fun (n:int) -> 
-  let m = make n n N.zero [[]] in
+(** [diagonal n r] is the [n] x [r] diagonal matrix with [1]'s on its diagonal *)
+let diagonal = fun (n:int) (r:int) -> 
+  let m = make n r N.zero [[]] in
   for i = 0 to n-1 do
     m.(i).(i) <- N.one;
   done; m
@@ -35,28 +35,34 @@ let transpose = fun (m:matrix) ->
   let m' = Array.make_matrix cols rows T.zero in
   Array.iteri (fun i row -> Array.iteri (fun j e -> m'.(j).(i) <- e) row) m; m
 
-(** [dot u v] is the dot product of two vectors (1d matricies) *)
+(** [dot u v] is the dot product of two vectors (1d matricies) 
+  * Requires: [u] and [v] have the same height and have width of [1] *)
 let dot = fun (u:matrix) (v:matrix) ->
   let (m,n),(p,r) = dim u, dim v in
   if n != 1 || r != 1 || m != p then raise MatrixError else
   let res = ref T.zero in
   for i = 0 to m-1 do 
-    res := T.add !res (T.mul u.(i).(0) v.(i).(0))
+    res := N.add !res (N.mul u.(i).(0) v.(i).(0))
   done; !res
 
 (** [scale c m] is the matrix [m] scaled by constant [c] *)
 let scale = fun (c:v) (m:matrix) -> 
   let p,r = dim m in
+  let res = make p r N.zero [[]] in
   for i = 0 to p-1 do
   for j = 0 to r-1 do
-    m.(i).(j) <- N.mul m.(i).(j) c
-  done; done; m
+    res.(i).(j) <- N.mul m.(i).(j) c
+  done; done; res
 
 (** [partition (x1,y1) (x2,y2) m] is the sub matrix of [n] with rows [y1..y2] 
-  * and columns [x1..x2] *)
+  * and columns [x1..x2] 
+  * Requires: x1 and x2 are less than the width of the matrix
+  * y1 and y2 are less than the height of the matrix
+  * x1 < x2 and y1 < y2 *)
 let partition = fun ((x1,y1):int*int) ((x2,y2):int*int) (m:matrix) -> 
   let p,r = dim m in
-  if y1 > p || y2 > p || x1 > r || x2 > r then raise MatrixError else
+  if y1 > p || y2 > p || x1 > r || x2 > r || x1 > x2 || y1 > y2 
+  then raise MatrixError else
   let partition = make (y1-y2+1) (x2-x1+1) N.zero [[]] in
   for i = 0 to (y1-y2) do
   for j = 0 to (x1-x2) do
@@ -64,7 +70,8 @@ let partition = fun ((x1,y1):int*int) ((x2,y2):int*int) (m:matrix) ->
   done; done;
   partition
 
-(** [mul m1 m2] is the product of two matricies [m1] and [m2] *)
+(** [mul m1 m2] is the product of two matricies [m1] and [m2] 
+  * Requires: the width of [m1] is equal to the height of [m2] *)
 let mul = fun (m1:matrix) (m2:matrix) -> 
   let (m,n),(p,r) = dim m1, dim m2 in
   if n != p then raise MatrixError else 
@@ -74,9 +81,29 @@ let mul = fun (m1:matrix) (m2:matrix) ->
   for j = 0 to r-1 do
     res.(i).(j) <- dot (partition (i,0) (i,n-1) m1) (partition (j,0) (j,p-1) m2)
   done; done; res
-  
-let add = fun (m1:matrix) (m2:matrix) -> failwith "TODO"
-let reduce = fun (m:matrix) -> failwith "TODO"
+
+(** [add m1 m2] is the sum of matricies [m1] and [m2] 
+  * Requires: [m1] and [m2] have the same dimensions *)
+let add = fun (m1:matrix) (m2:matrix) -> 
+  let (m,n), (p,r) = dim m1, dim m2 in
+  if m != p || n != r then raise MatrixError else
+  let res = make m n N.zero [[]] in
+  for i = 0 to m-1 do
+  for j = 0 to n-1 do
+    res.(i).(j) <- N.add m1.(i).(j) m2.(i).(j)
+  done; done; res
+
+let rec reduce = fun (m:matrix) -> 
+  let p,r = dim m in
+  (* matrix for swapping the ith and jth rows *)
+  let swap = fun (i:int) (j:int) ->
+    let res = (diagonal p r) in
+    res.(i).(i) <- N.zero;
+    res.(j).(j) <- N.zero;
+    res.(i).(j) <- N.one;
+    res.(j).(i) <- N.one;
+    res in
+  failwith "TODO"
 let augment = fun (m1:matrix) (m2:matrix) -> failwith "TODO"
 let inverse = fun (m:matrix) -> failwith "TODO"
 let eigenvalues = fun (m:matrix) -> failwith "TODO"
