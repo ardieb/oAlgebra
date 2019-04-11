@@ -7,16 +7,17 @@ end
 
 module type Formattable = sig 
   type t
-  val format : Format.formatter -> t -> unit
+  val format : Format.formatter -> t -> unit 
 end
 
 module type NUM = sig
-  type t
+  type t  
   include Comparable with type t := t
   include Formattable with type t := t
   exception ArithmeticError
   val zero : t
   val one : t
+  val neg_one : t
   val add : t -> t -> t
   val mul : t -> t -> t
   val div : t -> t -> t
@@ -47,8 +48,9 @@ module type MATRIX = sig
   val augment : matrix -> matrix -> matrix
   val partition : int * int -> int * int -> matrix -> matrix 
   val solve : matrix -> matrix -> matrix
+  val determinant : matrix -> v
 end
 
 module type MATRIX_MAKER = 
   functor (T:NUM) ->
-  MATRIX with module N := T
+    MATRIX with module N := T
