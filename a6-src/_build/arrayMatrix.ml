@@ -81,7 +81,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
           res.(i).(j) <- dot (partition (i,0) (i,n-1) m1) (partition (j,0) (j,p-1) m2)
         done; done; res
 
-  (** [add m1 m2] is the sum of matricies [m1] and [m2] 
+  (** [add m1 m2] is the sum of matrices [m1] and [m2] 
     * Requires: [m1] and [m2] have the same dimensions *)
   let add = fun (m1:matrix) (m2:matrix) -> 
     let (m,n), (p,r) = dim m1, dim m2 in
@@ -93,7 +93,20 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         done; done; res
 
   let reduce = fun (m:matrix) -> failwith "TODO"
-  let augment = fun (m1:matrix) (m2:matrix) -> failwith "TODO"
+
+  (** [augment m1 m2] is the matrix obtained by appending 
+    * the columns of [m2] to [m1] 
+    * Requires: [m1] and [m2] have the same number of rows*)
+  let augment = fun (m1:matrix) (m2:matrix) -> 
+    let (m,n), (p,r) = dim m1, dim m2 in
+    if m != p then raise MatrixError else
+      let res = make m (n+r) N.zero [[]] in 
+      for i = 0 to m-1 do 
+        for j = 0 to (n+r-1) do 
+          res.(i).(j) <- if (j < n) then m1.(i).(j)
+            else m2.(i).(j-n)
+        done; done; res
+
   let inverse = fun (m:matrix) -> failwith "TODO"
   let eigenvalues = fun (m:matrix) -> failwith "TODO"
   let eigenvectors = fun (m:matrix) -> failwith "TODO"
@@ -102,8 +115,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   let supp_matrix_1st_row = fun (m:matrix) (col:int) -> 
     let (rows,cols) = dim m in
     let new_mat = make (rows-1) (rows-1) N.zero [[]] in
-    for i = 1 to rows do 
-      for j = 0 to rows do 
+    for i = 1 to (rows-1) do 
+      for j = 0 to (rows-1) do 
         if (j < col) then new_mat.(i-1).(j) <- m.(i).(j)
         else if (j > col) then new_mat.(i-1).(j-1) <- m.(i).(j)
       done;
@@ -123,7 +136,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     else 
 
       let sum = ref N.zero in 
-      for counter = 0 to row do
+      for counter = 0 to (row-1) do
         let neg_or_pos = if (counter mod 2)=0 then N.one else N.neg_one in 
         sum := N.add (!sum) 
             (neg_or_pos |> N.mul m.(0).(counter) |> N.mul 

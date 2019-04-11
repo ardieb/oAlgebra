@@ -20,7 +20,7 @@ ocamlfind ocamldep -package unix -package oUnit -package str -package qcheck -mo
 # Target: arrayMatrix.cmi, tags: { package(oUnit), package(qcheck), package(str), package(unix), byte, compile, extension:mli, file:arrayMatrix.mli, interf, ocaml, quiet, traverse }
 ocamlfind ocamlc -c -package unix -package oUnit -package str -package qcheck -o arrayMatrix.cmi arrayMatrix.mli # cached
 # Target: arrayMatrix.ml.depends, tags: { package(oUnit), package(qcheck), package(str), package(unix), extension:ml, file:arrayMatrix.ml, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package unix -package oUnit -package str -package qcheck -modules arrayMatrix.ml > arrayMatrix.ml.depends
+ocamlfind ocamldep -package unix -package oUnit -package str -package qcheck -modules arrayMatrix.ml > arrayMatrix.ml.depends # cached
 # Target: arrayMatrix.cmo, tags: { package(oUnit), package(qcheck), package(str), package(unix), byte, compile, extension:cmo, extension:ml, file:arrayMatrix.cmo, file:arrayMatrix.ml, implem, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package unix -package oUnit -package str -package qcheck -o arrayMatrix.cmo arrayMatrix.ml
+ocamlfind ocamlc -c -package unix -package oUnit -package str -package qcheck -o arrayMatrix.cmo arrayMatrix.ml # cached
 # Compilation successful.

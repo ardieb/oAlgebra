@@ -115,8 +115,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   let supp_matrix_1st_row = fun (m:matrix) (col:int) -> 
     let (rows,cols) = dim m in
     let new_mat = make (rows-1) (rows-1) N.zero [[]] in
-    for i = 1 to rows do 
-      for j = 0 to rows do 
+    for i = 1 to (rows-1) do 
+      for j = 0 to (rows-1) do 
         if (j < col) then new_mat.(i-1).(j) <- m.(i).(j)
         else if (j > col) then new_mat.(i-1).(j-1) <- m.(i).(j)
       done;
@@ -136,7 +136,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     else 
 
       let sum = ref N.zero in 
-      for counter = 0 to row do
+      for counter = 0 to (row-1) do
         let neg_or_pos = if (counter mod 2)=0 then N.one else N.neg_one in 
         sum := N.add (!sum) 
             (neg_or_pos |> N.mul m.(0).(counter) |> N.mul 
