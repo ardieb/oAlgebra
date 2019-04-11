@@ -11,6 +11,8 @@ module RATIONAL : (NUM with type t := int * int) = struct
   let zero = (0, 1)
   (** [one] is the one representation of a rational number *)
   let one = (1, 1)
+  (** [neg_one] is the negative one representation of a rational number *)
+  let neg_one = ((-1), 1)
   (** [rep_ok r] fails if r is not a valid t number, does nothing otherwise *)
   let rep_ok = fun ((_,d):t) ->
     if d = 0 then raise ArithmeticError else ()
