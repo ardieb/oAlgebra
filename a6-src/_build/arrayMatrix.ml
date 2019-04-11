@@ -6,14 +6,14 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
 (* RI: The length of the rows of the matrix must all be equal and the elements of
  * the matrix must be numeric *)
 module N = T
-type v = N.t
-type matrix = v array array
+type value = N.t
+type matrix = value array array
 exception MatrixError
 
 (** [make rows cols init l] creates a new matrix with [rows] rows and [cols]
   * columns, initialized with the value [init], and filled with values from
   * [l] in by position in the list as a 2d array *)
-let make = fun (rows:int) (cols:int) (init:v) (l:v list list) ->
+let make = fun (rows:int) (cols:int) (init:value) (l:value list list) ->
   let m = Array.make_matrix rows cols init in
   List.iteri (fun i row -> List.iteri (fun j e -> m.(i).(j) <- e) row) l;
   (m : matrix)
@@ -46,7 +46,7 @@ let dot = fun (u:matrix) (v:matrix) ->
   done; !res
 
 (** [scale c m] is the matrix [m] scaled by constant [c] *)
-let scale = fun (c:v) (m:matrix) -> 
+let scale = fun (c:value) (m:matrix) -> 
   let p,r = dim m in
   let res = make p r N.zero [[]] in
   for i = 0 to p-1 do
@@ -93,6 +93,8 @@ let add = fun (m1:matrix) (m2:matrix) ->
     res.(i).(j) <- N.add m1.(i).(j) m2.(i).(j)
   done; done; res
 
+
+(* HELPERS-FOR-REDUCE *)
 (* matrix for swapping the ith and jth rows *)
 let swaprows = fun (m:matrix) (i,j:int*int) -> 
   let e = fun (i:int) (j:int) (p,r:int*int) ->
@@ -103,20 +105,23 @@ let swaprows = fun (m:matrix) (i,j:int*int) ->
   res.(j).(i) <- N.one;
   res in
   mul (e i j (dim m)) m
+
 (* matrix for multiplying a row *)
-let mulrows = fun (m:matrix) (i:int) (c:v) ->
-  let e = fun (i:int) (c:v) (p,r:int*int) ->
+let mulrows = fun (m:matrix) (i:int) (c:value) ->
+  let e = fun (i:int) (c:value) (p,r:int*int) ->
   let res = (diagonal p r) in
   res.(i).(i) <- c;
   res in
   mul (e i c (dim m)) m
+
 (* matrix for adding one row to another *)
-let addrows = fun (m:matrix) (i,j:int*int) (c:v) ->
-  let e = fun (i:int) (j:int) (c:v) (p,r:int*int) -> 
+let addrows = fun (m:matrix) (i,j:int*int) (c:value) ->
+  let e = fun (i:int) (j:int) (c:value) (p,r:int*int) -> 
   let res = (diagonal p r) in
   res.(i).(j) <- c;
   res in
   mul (e i j c (dim m)) m
+
 (* finds the left most pivot in row i *)
 let pivot = fun (m:matrix) (i:int) ->
   let p,r = dim m in
@@ -154,8 +159,44 @@ let reduce = fun (m:matrix) ->
     end
     | None -> backward (i - 1) in
   forward 0; backward (p - 1); !memo
-  
-let augment = fun (m1:matrix) (m2:matrix) -> failwith "TODO"
+
+let supp_matrix_1st_row = fun (m:matrix) (col:int) -> 
+  let (rows,cols) = dim m in
+  let new_mat = make (rows-1) (rows-1) N.zero [[]] in
+  for i = 1 to (rows-1) do 
+    for j = 0 to (rows-1) do 
+      if (j < col) then new_mat.(i-1).(j) <- m.(i).(j)
+      else if (j > col) then new_mat.(i-1).(j-1) <- m.(i).(j)
+    done; done; new_mat
+
+let rec determinant = fun (m:matrix) -> 
+  let (row,col) = dim m in if row<>col || row<2 then raise MatrixError else 
+  if row=2 then let (a,b,c,d) = 
+    (m.(0).(0),
+      m.(0).(1),
+      m.(1).(0),
+      m.(1).(1)) in 
+    N.sub (N.mul a d) (N.mul b c) else 
+    let sum = ref N.zero in 
+    for counter = 0 to (row-1) do
+      let neg_or_pos = if (counter mod 2)=0 then N.one else N.neg N.one in 
+      sum := N.add (!sum) 
+          (neg_or_pos |> N.mul m.(0).(counter) |> N.mul 
+              (determinant (supp_matrix_1st_row m counter)))
+    done; !sum
+    
+(** [augment m1 m2] is the matrix obtained by appending 
+    * the columns of [m2] to [m1] 
+    * Requires: [m1] and [m2] have the same number of rows*)
+let augment = fun (m1:matrix) (m2:matrix) -> 
+  let (m,n), (p,r) = dim m1, dim m2 in
+  if m != p then raise MatrixError else
+    let res = make m (n+r) N.zero [[]] in 
+    for i = 0 to m-1 do 
+      for j = 0 to (n+r-1) do 
+        res.(i).(j) <- if (j < n) then m1.(i).(j)
+          else m2.(i).(j-n)
+      done; done; res
 let inverse = fun (m:matrix) -> failwith "TODO"
 let eigenvalues = fun (m:matrix) -> failwith "TODO"
 let eigenvectors = fun (m:matrix) -> failwith "TODO"

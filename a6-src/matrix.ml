@@ -29,25 +29,25 @@ end
 
 module type MATRIX = sig
   module N : NUM
-  type v = N.t
+  type value = N.t
   exception MatrixError
   type matrix
   val diagonal : int -> int -> matrix
-  val make : int -> int -> v -> v list list -> matrix
+  val make : int -> int -> value -> value list list -> matrix
   val dim : matrix -> int*int
   val transpose : matrix -> matrix
-  val dot : matrix -> matrix -> v
+  val dot : matrix -> matrix -> value
   val mul : matrix -> matrix -> matrix
   val add : matrix -> matrix -> matrix
-  val scale : v -> matrix -> matrix
+  val scale : value -> matrix -> matrix
   val inverse : matrix -> matrix
-  val eigenvalues : matrix -> v list
+  val eigenvalues : matrix -> value list
   val eigenvectors : matrix -> matrix list
   val reduce : matrix -> matrix
   val augment : matrix -> matrix -> matrix
   val partition : int * int -> int * int -> matrix -> matrix 
   val solve : matrix -> matrix -> matrix
-  val determinant : matrix -> v
+  val determinant : matrix -> value
 end
 
 module type MATRIX_MAKER = 
