@@ -29,7 +29,7 @@ let rationals_tests =
     make_op_test "Add - sum a fraction > 1" add (1, 2) (2, 2) (3, 2);
     make_op_test "Add - adding fractions > 1" add (42, 5) (21, 5) (63, 5);
     make_op_test "Add - +/-, sum positive" add (1, 2) (-1, 4) (1, 4);
-    make_op_test "Add - +/-, sum negative" add (1,4) (-1,2) (1,-4);
+    make_op_test "Add - +/-, sum negative" add (1,4) (-1,2) (-1,4);
     make_op_test "Add - sum of negatives" add (-1,4) (-1,3) (-7,12);
     make_op_test "Add - negative whole num" add (-1,4) (-3,4) (-1,1);
     make_op_test "Add - negative wohle num < -1" add (-3,2) (-1,2) (-2,1);
@@ -40,20 +40,20 @@ let rationals_tests =
     make_op_test "Mul - fractions" mul (1,2) (1,4) (1,8);
     make_op_test "Mul - fractions > 1" mul (3,2) (5,2) (15,4);
     make_op_test "Mul - whole numbers" mul (4,2) (3,1) (6,1);
-    make_op_test "Mul - +/- numerators" mul (-1,2) (1,4) (1,-8);
-    make_op_test "Mul - +/- denominators" mul (1,2) (1,-2) (1,-4);
+    make_op_test "Mul - +/- numerators" mul (-1,2) (1,4) (-1,8);
+    make_op_test "Mul - +/- denominators" mul (1,2) (-1,2) (-1,4);
     make_op_test "Mul - -/- -> +" mul (-1,2) (-1,2) (1,4);
 
     make_op_test "Div - x / x = 1" div (1,2) (1,2) (1,1);
     make_op_test "Div - x / 1 = x" div (1,2) (1,1) (1,2);
     make_op_test "Div - whole #s" div (4,1) (2,1) (2,1);
     make_op_test "Div - +/+ fractions" div (1,4) (1,2) (1,2);
-    make_op_test "Div - +/- -> -" div (1,4) (-1,2) (1,-2);
-    make_op_test "Div - -/- -> +" div (-1,4) (1,-2) (1,2);
+    make_op_test "Div - +/- -> -" div (1,4) (-1,2) (-1,2);
+    make_op_test "Div - -/- -> +" div (-1,4) (-1,2) (1,2);
 
     make_op_test "Sub - x - 0 = x" sub (1,2) (0,1) (1,2);
     make_op_test "Sub - x - y > 0" sub (1,2) (1,4) (1,4);
-    make_op_test "Sub - x - y < 0" sub (1,4) (1,2) (1,-4);
+    make_op_test "Sub - x - y < 0" sub (1,4) (1,2) (-1,4);
     make_op_test "Sub --x - y < 0" sub (-1,4) (1,2) (-3,4);
     make_op_test "Sub - subtracting negative" sub (1,4) (-1,2) (3,4);
   ]
