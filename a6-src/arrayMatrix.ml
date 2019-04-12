@@ -233,6 +233,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
                (determinant (supp_matrix m 1 counter)))
       done; !sum
 
+  (** [identity n] is an [n] by [n] identity matrix*)
   let identity = fun (n:int) -> 
     let empty = make n n N.zero [[]] in 
     for i = 0 to (n-1) do 
