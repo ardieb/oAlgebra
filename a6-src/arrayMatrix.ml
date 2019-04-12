@@ -247,7 +247,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     else
       let augmented = augment m (identity rows) in 
       let reduced = reduce augmented in 
-      partition (cols, 0) (2*cols, rows-1) reduced
+      partition (cols, 0) (2*cols-1, rows-1) reduced
 
   let eigenvalues = fun (m:matrix) -> failwith "TODO"
   let eigenvectors = fun (m:matrix) -> failwith "TODO"
