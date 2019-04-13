@@ -319,7 +319,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     scale (N.div (dot v1 v2) (dot v2 v2)) v2
 
   (** [col m i] is the [j]th column of matrix m *)
-  let col = fun (m:matrix) (j:int) ->
+  let column = fun (m:matrix) (j:int) ->
     let (rows, _) = dim m in
     let c = make rows 1 N.zero [[]] in
     for i = 0 to rows-1 do
@@ -329,18 +329,32 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   let normalize = fun (v:matrix) -> 
     scale (N.div N.one (dot v v)) v
 
-  let qr_fact = fun (m:matrix) -> 
+  let qr_fact_q = fun (m:matrix) -> 
     let (rows, cols) = dim m in
     (*Base case*)
     let q = ref (make rows 0 N.zero [[]]) in
     for curr_col_ind = 0 to cols-1 do 
-      let curr_col = col m curr_col_ind in
-      let curr_u = ref (col m curr_col_ind) in
+      let curr_col = column m curr_col_ind in
+      let curr_u = ref (column m curr_col_ind) in
       for curr_num = 0 to curr_col_ind - 1 do 
-        curr_u := subtract !curr_u (proj curr_col (col !q curr_num))
+        curr_u := subtract !curr_u (proj curr_col (column !q curr_num))
       done;
       q := augment !q (normalize !curr_u)
-    done; q
+    done; !q
+
+  let qr_fact_r = fun (m:matrix) (q:matrix)-> 
+    let (rows, cols) = dim m in
+    let r = make rows cols N.zero [[]] in
+    for col = 0 to cols-1 do
+      for row = 0 to col do
+        r.(row).(col) <- dot (column q row) (column m col)
+      done;
+    done; r
+
+  let qr_fact = fun (m:matrix) ->
+    let q = qr_fact_q m in
+    let r = qr_fact_r m q in
+    (q,r)
 
   let eigenvalues = fun (m:matrix) -> failwith "TODO"
   let eigenvectors = fun (m:matrix) -> failwith "TODO"
