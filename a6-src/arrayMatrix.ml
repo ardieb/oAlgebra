@@ -269,9 +269,10 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
 
     let curr_row = ref 0 in
     while !curr_row < rows do 
-      match pivot m !curr_row with 
-      | Some position -> Hashtbl.remove vectors position
-      | None -> ()
+      (match pivot m !curr_row with 
+       | Some position -> Hashtbl.remove vectors position
+       | None -> ());
+      curr_row := !curr_row + 1
     done;
     vectors
 
