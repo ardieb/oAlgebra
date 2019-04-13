@@ -1,5 +1,5 @@
 open Matrix
-module RATIONAL : NUM with type t := int*int = struct
+module RATIONAL : NUM with type t = int * int = struct
 (** A module for working with t numbers *)
 exception ArithmeticError
 

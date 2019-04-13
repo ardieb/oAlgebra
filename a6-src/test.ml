@@ -1,7 +1,6 @@
 open OUnit2
-open Matrix
 open Rationals
-open Num
+open Matrix
 
 let cmp_rat = fun x1 x2 -> 
     match RATIONAL.compare x1 x2 with
@@ -14,14 +13,17 @@ let make_op_test
     (input2: int*int)
     (expected_output: int*int) : test =
   name >:: (fun _ -> 
-      assert_equal (op input1 input2) expected_output ~cmp:cmp_rat)
+      assert_equal (op 
+      (input1) 
+      (input2)) 
+      (expected_output)
+       ~cmp:cmp_rat)
 
 let rationals_tests =
   let add = RATIONAL.add in
   let mul = RATIONAL.mul in
   let div = RATIONAL.div in
   let sub = RATIONAL.sub in
-  
   [
     make_op_test "Add - 0 + 0 = 0" add (0,1) (0,1) (0,1);
     make_op_test "Add - x + 0 = x" add (1,1) (0,10) (1,1);
