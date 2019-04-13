@@ -18,6 +18,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     List.iteri (fun i row -> List.iteri (fun j e -> m.(i).(j) <- e) row) l;
     (m : matrix)
 
+  (* TODO: what if n>r? that would give index out of bounds error *)
   (** [diagonal n r] is the [n] x [r] diagonal matrix with [1]'s on its diagonal *)
   let diagonal = fun (n:int) (r:int) -> 
     let m = make n r N.zero [[]] in
@@ -248,6 +249,45 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       let augmented = augment m (identity rows) in 
       let reduced = reduce augmented in 
       partition (cols, 0) (2*cols-1, rows-1) reduced
+
+  (* let num_pivots = fun (m:matrix) -> 
+     let (rows, cols) = dim m in 
+     let curr_pivots = ref 0 in 
+     let curr_row = ref 0 in
+     while !curr_row < rows do 
+      match pivot m !curr_row with 
+      | Some col -> curr_pivots := !curr_pivots + 1;
+        curr_row := !curr_row + 1
+      | None -> curr_pivots := !curr_pivots;
+        curr_row := !curr_row + 1
+     done;
+     !curr_pivots
+
+     let null_space = fun (m:matrix) -> 
+     let (rows, cols) = dim m in
+     let rref = reduce m in 
+     let no_pivots = num_pivots rref in 
+     let vectors = Array.make (cols - no_pivots) (make rows 1 N.zero [[]]) in
+     let curr_row = ref 0 in 
+     let curr_free = ref 0 in
+     while !curr_row < rows do 
+      match pivot m !curr_row with 
+      | Some pivot_col ->
+        if pivot_col <> !curr_row then (vectors.(!curr_free).(!curr_row).(0) <- 
+                                          N.one;
+                                        curr_free := !curr_free + 1)
+        else
+          let curr_col = ref (pivot_col+1) in
+          while !curr_col < cols do 
+            vectors.(!curr_col - pivot_col).(!curr_row).(0) <- 
+              N.neg rref.(!curr_row).(!curr_col);
+            curr_col := !curr_col +1
+          done;
+      | None -> curr_row := !curr_row + 1;
+        curr_row := !curr_row + 1;
+     done;
+     vectors *)
+
 
   let eigenvalues = fun (m:matrix) -> failwith "TODO"
   let eigenvectors = fun (m:matrix) -> failwith "TODO"
