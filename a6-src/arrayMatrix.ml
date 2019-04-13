@@ -250,43 +250,57 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       let reduced = reduce augmented in 
       partition (cols, 0) (2*cols-1, rows-1) reduced
 
-  let num_pivots = fun (m:matrix) -> 
+  (** [set m row col entry] sets [row] [col] of [m]atrix to [entry]*)
+  let set = fun (m:matrix) (row:int) (col:int) (entry:N.t)-> 
+    m.(row).(col) <- entry; m
+
+  (** [pivots m] returns a hashtable with the same number of bindings as 
+      matrix [m]'s free varaibles. The keys are the positions of the free columns
+      and the values are empty vectors*)
+  let null_space_vectors = fun (m:matrix) -> 
     let (rows, cols) = dim m in 
-    let vectors = Hashtbl.create cols (make rows 1 N.zero [[]]) in
+    let vectors = Hashtbl.create cols in
+
+    for i = 0 to (cols-1) do
+      let empty_vector = make rows 1 N.zero [[]] in 
+      let free_vector = set empty_vector i 0 N.one in
+      Hashtbl.add vectors i free_vector
+    done;
+
     let curr_row = ref 0 in
     while !curr_row < rows do 
       match pivot m !curr_row with 
-      | Some _ -> curr_pivots := !curr_pivots + 1;
-        curr_row := !curr_row + 1
-      | None -> curr_pivots := !curr_pivots;
-        curr_row := !curr_row + 1
+      | Some position -> Hashtbl.remove vectors position
+      | None -> ()
     done;
-    !curr_pivots
+    vectors
 
   let null_space = fun (m:matrix) -> 
     let (rows, cols) = dim m in
     let rref = reduce m in 
-    let no_pivots = num_pivots rref in 
-    let vectors = Array.make (cols - no_pivots) (make rows 1 N.zero [[]]) in
+    let vectors = null_space_vectors rref in
+
     let curr_row = ref 0 in 
-    let curr_free = ref 0 in
     while !curr_row < rows do 
-      match pivot m !curr_row with 
-      | Some pivot_col ->
-        if pivot_col <> !curr_row then (vectors.(!curr_free).(!curr_row).(0) <- 
-                                          N.one;
-                                        curr_free := !curr_free + 1)
-        else
-          let curr_col = ref (pivot_col+1) in
-          while !curr_col < cols do 
-            vectors.(!curr_col - pivot_col).(!curr_row).(0) <- 
-              N.neg rref.(!curr_row).(!curr_col);
-            curr_col := !curr_col +1
-          done;
-      | None -> curr_row := !curr_row + 1;
-        curr_row := !curr_row + 1;
+
+      (match pivot m !curr_row with 
+       | Some piv_col -> 
+         let curr_col = ref (piv_col+1) in 
+         while !curr_col < cols do 
+
+           (match Hashtbl.find_opt vectors !curr_col with 
+            | Some free_vector -> let free_vector = set free_vector !curr_row 0 
+                                      (N.neg (m.(!curr_row).(!curr_col))) in
+              Hashtbl.replace vectors !curr_col free_vector;
+            | None -> ());
+           curr_col := !curr_col + 1
+
+         done;
+       | None -> ());
+      curr_row := !curr_row + 1
+
     done;
-    vectors 
+    Hashtbl.fold (fun k v acc -> v :: acc) vectors []
 
 
   let eigenvalues = fun (m:matrix) -> failwith "TODO"

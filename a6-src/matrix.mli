@@ -48,7 +48,7 @@ module type MATRIX = sig
   val partition : int * int -> int * int -> matrix -> matrix 
   val solve : matrix -> matrix -> matrix
   val determinant : matrix -> value
-  (* val null_space : matrix -> matrix array *)
+  val null_space : matrix -> matrix list
 end
 
 module type MATRIX_MAKER = 
