@@ -303,6 +303,12 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     done;
     Hashtbl.fold (fun k v acc -> v :: acc) vectors []
 
+  let format = fun (fmt:Format.formatter) (m:matrix) ->
+    Array.iter (fun row -> 
+      Format.fprintf fmt "[";
+      Array.iter ( fun e -> Format.fprintf fmt " %a " N.format e ) row;
+      Format.fprintf fmt "]";
+    ) m
 
   let eigenvalues = fun (m:matrix) -> failwith "TODO"
   let eigenvectors = fun (m:matrix) -> failwith "TODO"

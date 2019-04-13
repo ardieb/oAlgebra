@@ -32,6 +32,7 @@ module type MATRIX = sig
   exception MatrixError
   type value = N.t
   type matrix
+  include Formattable with type t:= matrix
   val diagonal : int -> int -> matrix
   val make : int -> int -> value -> value list list -> matrix
   val dim : matrix -> int*int
