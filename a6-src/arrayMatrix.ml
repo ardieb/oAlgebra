@@ -305,10 +305,14 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
 
   let format = fun (fmt:Format.formatter) (m:matrix) ->
     Array.iter (fun row -> 
-      Format.fprintf fmt "[";
-      Array.iter ( fun e -> Format.fprintf fmt " %a " N.format e ) row;
-      Format.fprintf fmt "]";
-    ) m
+        Format.fprintf fmt "[";
+        Array.iter ( fun e -> Format.fprintf fmt " %a " N.format e ) row;
+        Format.fprintf fmt "]";
+      ) m
+
+  (** [projection v1 v2] is the projection of v1 onto v2*)
+  let proj = fun (v1:matrix) (v2:matrix) -> 
+    scale (N.div (dot v1 v2) (dot v2 v2)) v2
 
   let eigenvalues = fun (m:matrix) -> failwith "TODO"
   let eigenvectors = fun (m:matrix) -> failwith "TODO"

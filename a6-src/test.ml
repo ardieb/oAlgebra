@@ -1,13 +1,12 @@
-open OUnit2
-open Matrix
-open Rationals
-open Num
+(*open OUnit2
+  open Matrix
+  open Rationals
 
-let cmp_rat = fun x1 x2 -> 
-    match RATIONAL.compare x1 x2 with
-    | EQ -> true
-    | _ -> false
-let make_op_test 
+  let cmp_rat = fun x1 x2 -> 
+  match RATIONAL.compare x1 x2 with
+  | EQ -> true
+  | _ -> false
+  let make_op_test 
     (name: string)
     (op: int*int -> int*int -> int*int)
     (input1: int*int)
@@ -16,12 +15,43 @@ let make_op_test
   name >:: (fun _ -> 
       assert_equal (op input1 input2) expected_output ~cmp:cmp_rat)
 
-let rationals_tests =
+  (*module RationalMatrix = MATRIX_MAKER(RATIONAL)*)
+
+  let make_transpose_test 
+    (name: string)
+    (input: RationalMatrix.matrix)
+    (expected_output: RationalMatrix.matrix) =
+  name >:: (fun _ ->
+      assert_equal (transpose input) expected_output)
+
+  let make_dot_test 
+    (name: string)
+    (input1: RationalMatrix.matrix)
+    (input2: RationalMatrix.matrix)
+    (expected_output: RationalMatrix.value)
+    (raises: bool) = 
+  name >:: (fun _ ->
+      if raises then
+        let f = fun (m1) (m2) -> dot m1 m2 in 
+        assert_raises RationalMatrix.MatrixError (f input1 input2)
+      else 
+        (assert_equal (dot input1 input2) expected_output ~cmp: cmp_rat))
+
+  let make_scale_test 
+    (name: string)
+    (c: RationalMatrix.value)
+    (matrix: RationalMatrix.matrix)
+    (expected_output: RationalMatrix.matrix) =
+  name >:: (fun _ ->
+      assert_equal (scale c matrix) expected_output)
+
+
+  let rationals_tests =
   let add = RATIONAL.add in
   let mul = RATIONAL.mul in
   let div = RATIONAL.div in
   let sub = RATIONAL.sub in
-  
+
   [
     make_op_test "Add - 0 + 0 = 0" add (0,1) (0,1) (0,1);
     make_op_test "Add - x + 0 = x" add (1,1) (0,10) (1,1);
@@ -62,8 +92,16 @@ let rationals_tests =
     make_op_test "Sub - subtracting negative" sub (1,4) (-1,2) (3,4);
   ]
 
-let suite = "test suite for LinAlg" >::: List.flatten [
+  let matrix_tests = 
+  [
+    make_transpose_test "transpose sq. diagonal matrix = same matrix" 
+      (RationalMatrix.diagonal 3 3) (RationalMatrix.diagonal 3 3);
+    make_transpose_test "transpose rect. matrix swaps rows/cols"
+      (RationalMatrix.diagonal 2 3) (RationalMatrix.diagonal 3 2);
+  ]
+
+  let suite = "test suite for LinAlg" >::: List.flatten [
     rationals_tests;
   ]
 
-let _ = run_test_tt_main suite
+  let _ = run_test_tt_main suite*)
