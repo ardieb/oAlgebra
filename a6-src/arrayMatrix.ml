@@ -317,4 +317,4 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   let eigenvalues = fun (m:matrix) -> failwith "TODO"
   let eigenvectors = fun (m:matrix) -> failwith "TODO"
   let solve = fun (m:matrix) (v:matrix) -> failwith "TODO"
-end 
+end

@@ -11,7 +11,7 @@ module type Formattable = sig
 end
 
 module type NUM = sig
-  type t  
+  type t 
   include Comparable with type t := t
   include Formattable with type t := t
   exception ArithmeticError
@@ -32,7 +32,7 @@ module type MATRIX = sig
   exception MatrixError
   type value = N.t
   type matrix
-  include Formattable with type t:= matrix
+  include Formattable with type t := matrix
   val diagonal : int -> int -> matrix
   val make : int -> int -> value -> value list list -> matrix
   val dim : matrix -> int*int

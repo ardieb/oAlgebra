@@ -13,7 +13,11 @@
     (input2: int*int)
     (expected_output: int*int) : test =
   name >:: (fun _ -> 
-      assert_equal (op input1 input2) expected_output ~cmp:cmp_rat)
+      assert_equal (op 
+      (input1) 
+      (input2)) 
+      (expected_output)
+       ~cmp:cmp_rat)
 
   (*module RationalMatrix = MATRIX_MAKER(RATIONAL)*)
 
@@ -51,7 +55,6 @@
   let mul = RATIONAL.mul in
   let div = RATIONAL.div in
   let sub = RATIONAL.sub in
-
   [
     make_op_test "Add - 0 + 0 = 0" add (0,1) (0,1) (0,1);
     make_op_test "Add - x + 0 = x" add (1,1) (0,10) (1,1);
