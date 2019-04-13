@@ -22,7 +22,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   (** [diagonal n r] is the [n] x [r] diagonal matrix with [1]'s on its diagonal *)
   let diagonal = fun (n:int) (r:int) -> 
     let m = make n r N.zero [[]] in
-    for i = 0 to n-1 do
+    for i = 0 to min (n-1) (r-1) do
       m.(i).(i) <- N.one;
     done; m
 
@@ -355,6 +355,15 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let q = qr_fact_q m in
     let r = qr_fact_r m q in
     (q,r)
+
+  let triangular_enough = fun (m:matrix) -> 
+    let (rows, cols) = dim m in 
+    let boolean = ref true in 
+    for col = 0 to cols-1 do
+      for row = col+1 to rows-1 do
+        boolean := !boolean && (N.to_float (m.(row).(col)) < 0.005)
+      done;
+    done; !boolean
 
   let eigenvalues = fun (m:matrix) -> failwith "TODO"
   let eigenvectors = fun (m:matrix) -> failwith "TODO"

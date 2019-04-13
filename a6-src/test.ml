@@ -14,10 +14,10 @@
     (expected_output: int*int) : test =
   name >:: (fun _ -> 
       assert_equal (op 
-      (input1) 
-      (input2)) 
-      (expected_output)
-       ~cmp:cmp_rat)
+                      (input1) 
+                      (input2)) 
+        (expected_output)
+        ~cmp:cmp_rat)
 
   (*module RationalMatrix = MATRIX_MAKER(RATIONAL)*)
 
