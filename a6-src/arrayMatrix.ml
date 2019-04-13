@@ -94,6 +94,10 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
           res.(i).(j) <- N.add m1.(i).(j) m2.(i).(j)
         done; done; res
 
+  (** [sub m1 m2] is the difference of matricies [m1] and [m2] 
+      * Requires: [m1] and [m2] have the same dimensions *)
+  let subtract = fun (m1:matrix) (m2:matrix) -> 
+    add m1 (scale (N.neg N.one) m2)
 
   (* HELPERS-FOR-REDUCE *)
   (* matrix for swapping the ith and jth rows *)
@@ -313,6 +317,30 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   (** [projection v1 v2] is the projection of v1 onto v2*)
   let proj = fun (v1:matrix) (v2:matrix) -> 
     scale (N.div (dot v1 v2) (dot v2 v2)) v2
+
+  (** [col m i] is the [j]th column of matrix m *)
+  let col = fun (m:matrix) (j:int) ->
+    let (rows, _) = dim m in
+    let c = make rows 1 N.zero [[]] in
+    for i = 0 to rows-1 do
+      c.(i).(0) <- m.(i).(j)
+    done; c
+
+  let normalize = fun (v:matrix) -> 
+    scale (N.div N.one (dot v v)) v
+
+  let qr_fact = fun (m:matrix) -> 
+    let (rows, cols) = dim m in
+    (*Base case*)
+    let q = ref (make rows 0 N.zero [[]]) in
+    for curr_col_ind = 0 to cols-1 do 
+      let curr_col = col m curr_col_ind in
+      let curr_u = ref (col m curr_col_ind) in
+      for curr_num = 0 to curr_col_ind - 1 do 
+        curr_u := subtract !curr_u (proj curr_col (col !q curr_num))
+      done;
+      q := augment !q (normalize !curr_u)
+    done; q
 
   let eigenvalues = fun (m:matrix) -> failwith "TODO"
   let eigenvectors = fun (m:matrix) -> failwith "TODO"
