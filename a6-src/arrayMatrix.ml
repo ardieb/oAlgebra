@@ -250,27 +250,27 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       let reduced = reduce augmented in 
       partition (cols, 0) (2*cols-1, rows-1) reduced
 
-  (* let num_pivots = fun (m:matrix) -> 
-     let (rows, cols) = dim m in 
-     let curr_pivots = ref 0 in 
-     let curr_row = ref 0 in
-     while !curr_row < rows do 
+  let num_pivots = fun (m:matrix) -> 
+    let (rows, cols) = dim m in 
+    let vectors = Hashtbl.create cols (make rows 1 N.zero [[]]) in
+    let curr_row = ref 0 in
+    while !curr_row < rows do 
       match pivot m !curr_row with 
-      | Some col -> curr_pivots := !curr_pivots + 1;
+      | Some _ -> curr_pivots := !curr_pivots + 1;
         curr_row := !curr_row + 1
       | None -> curr_pivots := !curr_pivots;
         curr_row := !curr_row + 1
-     done;
-     !curr_pivots
+    done;
+    !curr_pivots
 
-     let null_space = fun (m:matrix) -> 
-     let (rows, cols) = dim m in
-     let rref = reduce m in 
-     let no_pivots = num_pivots rref in 
-     let vectors = Array.make (cols - no_pivots) (make rows 1 N.zero [[]]) in
-     let curr_row = ref 0 in 
-     let curr_free = ref 0 in
-     while !curr_row < rows do 
+  let null_space = fun (m:matrix) -> 
+    let (rows, cols) = dim m in
+    let rref = reduce m in 
+    let no_pivots = num_pivots rref in 
+    let vectors = Array.make (cols - no_pivots) (make rows 1 N.zero [[]]) in
+    let curr_row = ref 0 in 
+    let curr_free = ref 0 in
+    while !curr_row < rows do 
       match pivot m !curr_row with 
       | Some pivot_col ->
         if pivot_col <> !curr_row then (vectors.(!curr_free).(!curr_row).(0) <- 
@@ -285,8 +285,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
           done;
       | None -> curr_row := !curr_row + 1;
         curr_row := !curr_row + 1;
-     done;
-     vectors *)
+    done;
+    vectors 
 
 
   let eigenvalues = fun (m:matrix) -> failwith "TODO"
