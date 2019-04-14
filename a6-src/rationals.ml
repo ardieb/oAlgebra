@@ -1,21 +1,24 @@
 open Matrix
-module RATIONAL : NUM with type t = int * int = struct
+type rational = 
+  | Int of int
+  | Frac of int * int 
+module RATIONAL : NUM with type t = rational = struct
   (** A module for working with t numbers *)
   exception ArithmeticError
 
   (* AF: a value of type [t] is an int * int pair where the first integer
    * represents the numerator and the second integer represents the denominator *)
   (* RI: the denominator of the t may not be equal to zero and the denominator may not be negative *)
-  type t = int * int
+  type t = rational
   (** [zero] is the zero repsentation of a rational number *)
-  let zero = (0, 1)
+  let zero = Int 0
   (** [one] is the one representation of a rational number *)
-  let one = (1, 1)
+  let one = Int 1
   (** [rep_ok r] fails if r is not a valid t number, does nothing otherwise *)
-  let rep_ok = fun ((n,d):t) ->
-    if d = 0 then raise ArithmeticError
-    else if d < 0 then (-n,-d)
-    else (n,d)
+  let rep_ok = function
+    | Int i -> Int i
+    | Frac -> 
+    
   (** [gcd n1 n2] is the largest number that divides n1 and n2 evenly *)
   let rec gcd = fun (n1:int) (n2:int) ->
     if n2 = 0 then n1

@@ -64,10 +64,10 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let p,r = dim m in
     if y1 > p || y2 > p || x1 > r || x2 > r || x1 > x2 || y1 > y2 
     then raise MatrixError else
-      let partition = make (y1-y2+1) (x2-x1+1) N.zero [[]] in
-      for i = 0 to (y1-y2) do
-        for j = 0 to (x1-x2) do
-          partition.(i).(j) <- m.(i+y1).(j+x1)
+      let partition = make (y2-y1+1) (x2-x1+1) N.zero [[]] in
+      for i = y1 to y2 do
+        for j = x1 to x2 do
+          partition.(i-y1).(j-x1) <- m.(i).(j)
         done; done;
       partition
 
@@ -75,7 +75,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     * Requires: the width of [m1] is equal to the height of [m2] *)
   let mul = fun (m1:matrix) (m2:matrix) -> 
     let (m,n),(p,r) = dim m1, dim m2 in
-    if n != p then raise MatrixError else 
+    if n <> p then raise MatrixError else 
       let res = make m r N.zero [[]] in
       let m1 = transpose m1 in
       for i = 0 to m-1 do
@@ -87,7 +87,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     * Requires: [m1] and [m2] have the same dimensions *)
   let add = fun (m1:matrix) (m2:matrix) -> 
     let (m,n), (p,r) = dim m1, dim m2 in
-    if m != p || n != r then raise MatrixError else
+    if m <> p || n <> r then raise MatrixError else
       let res = make m n N.zero [[]] in
       for i = 0 to m-1 do
         for j = 0 to n-1 do
