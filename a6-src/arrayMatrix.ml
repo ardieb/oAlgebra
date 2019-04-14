@@ -33,8 +33,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   (** [transpose m] is the trasnposed matrix of [m] *)
   let transpose = fun (m:matrix) ->
     let rows,cols = dim m in
-    let m' = Array.make_matrix cols rows T.zero in
-    Array.iteri (fun i row -> Array.iteri (fun j e -> m'.(j).(i) <- e) row) m; m
+    let m' = make cols rows N.zero [[]] in
+    Array.iteri (fun i row -> Array.iteri (fun j e -> m'.(j).(i) <- e) row) m; m'
 
   (** [dot u v] is the dot product of two vectors (1d matricies) 
     * Requires: [u] and [v] have the same height and have width of [1] *)
@@ -308,10 +308,11 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     Hashtbl.fold (fun k v acc -> v :: acc) vectors []
 
   let format = fun (fmt:Format.formatter) (m:matrix) ->
+    Format.fprintf fmt "\n";
     Array.iter (fun row -> 
         Format.fprintf fmt "[";
         Array.iter ( fun e -> Format.fprintf fmt " %a " N.format e ) row;
-        Format.fprintf fmt "]";
+        Format.fprintf fmt "]\n";
       ) m
 
   (** [projection v1 v2] is the projection of v1 onto v2*)
