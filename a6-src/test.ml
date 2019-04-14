@@ -54,6 +54,18 @@ name >:: (fun _ ->
     else
       assert_equal expected_output (RM.mul input1 input2))
 
+let make_add_test
+  (name: string)
+  (input1: RM.matrix)
+  (input2: RM.matrix)
+  (expected_output: RM.matrix)
+  (raises: bool) =
+name >:: (fun _ ->
+    if raises then
+      assert_raises RM.MatrixError (fun () -> RM.add input1 input1)
+    else
+      assert_equal expected_output (RM.add input1 input2))
+
 let make_scale_test 
   (name: string)
   (c: RM.value)
@@ -110,10 +122,14 @@ let sub = RATIONAL.sub in
 
 let matrix_tests = 
 [
+
+  (*=========== matrix transpose tests ===========*)
   make_transpose_test "transpose sq. diagonal matrix = same matrix" 
     (RM.diagonal 3 3) (RM.diagonal 3 3);
   make_transpose_test "transpose rect. matrix swaps rows/cols"
     (RM.diagonal 2 3) (RM.diagonal 3 2);
+
+ (*=========== dot product tests ===========*)
   make_dot_test "dot product of two valid vectors"
     (RM.make 5 1 RATIONAL.zero [[1,1];[2,1];[3,1];[4,1];[5,1]]) 
     (RM.make 5 1 RATIONAL.zero [[5,1];[4,1];[3,1];[2,1];[1,1]])
@@ -126,6 +142,8 @@ let matrix_tests =
     (RM.make 2 2 RATIONAL.one [[]])
     (RM.make 2 2 RATIONAL.one [[]])
     (0,0) true;
+
+  (*=========== matrix multiplication tests ===========*)
   make_mul_test "mul fails with invalid matrix sizes"
     (RM.make 2 3 RATIONAL.one [[]])
     (RM.make 2 3 RATIONAL.one [[]])
@@ -159,6 +177,7 @@ let matrix_tests =
       [11,1;0,1;21,1]
       [-1,1;13,1;-9,1]
     )
+    true;
   make_mul_test "mul 2x3 * 3x2"
   (RM.make 2 3 RATIONAL.zero [
     [-1,1; 0,1; 4,1]
@@ -173,6 +192,7 @@ let matrix_tests =
     [9,1; 15,1]
     [-2,1; 2,1]
   ])
+  true;
   make_mul_test "mul 2x2 * 2x4"
   (RM.make 2 3 RATIONAL.zero [
     [-3,1; -2,1]
@@ -186,6 +206,7 @@ let matrix_tests =
     [-9,1; -6,1; -10,1; 14,1]
     [17,1; -2,1; -10,1; -22,1]
   ])
+  true;
   make_mul_test "mul 3x3 * 3x2"
   (RM.make 2 3 RATIONAL.zero [
     [2,1; 4,1; 2,1]
@@ -202,6 +223,7 @@ let matrix_tests =
     [13,1; 9,1]
     [22,1; 14,1]
   ])
+  true;
   make_mul_test "mul 3x3 * 3x3"
   (RM.make 2 3 RATIONAL.zero [
     [2,1; 4,1; 2,1]
@@ -218,6 +240,7 @@ let matrix_tests =
     [1,4; 4,1; 0,1]
     [2,1; 6,1; 0,1]
   ])
+  true;
   make_mul_test "mul 3x2 * 2x2"
   (RM.make 2 3 RATIONAL.zero [
     [5,1; 1,1]
@@ -233,6 +256,62 @@ let matrix_tests =
     [0,1; 0,1]
     [0,1; 0,1]
   ])
+  true;
+
+  (*============= matrix addition tests =============*)
+  make_add_test "mul 2x2 * 2x2"
+  (RM.make 2 3 RATIONAL.zero [
+    [Int 1; Int 4]
+    [Int 5; Int -2]
+  ])
+  (RM.make 3 2 RATIONAL.zero [
+    [Int 7; Int 3]
+    [Int 11; Int 9]
+  ])
+  (RM.make 2 2 RATIONAL.zero [
+    [Int 8; Int 7]
+    [Int 16; Int 7]
+  ])
+  true;
+
+  make_add_test "mul 2x2 * 2x2"
+  (RM.make 2 3 RATIONAL.zero [
+    [Int -3; Int 4]
+    [Int 6; Int 13]
+  ])
+  (RM.make 3 2 RATIONAL.zero [
+    [Int 3; Int -8]
+    [Int -2; Int 2]
+  ])
+  (RM.make 2 2 RATIONAL.zero [
+    [Int 0; Int -4]
+    [Int 4; Int 15]
+  ])
+  true;
+
+  make_add_test "mul 3x3 * 3x3"
+  (RM.make 2 3 RATIONAL.zero [
+    [Int 1; Int 6; Int 4]
+    [Int -3; Int 8; Int 9]
+    [Int -2; Int 7; Int -1]
+  ])
+  (RM.make 3 2 RATIONAL.zero [
+    [Int -2; Int 4; Int -1]
+    [Int 4; Int -17; Int -5]
+    [Int 6; Int 1; Int 8]
+  ])
+  (RM.make 2 2 RATIONAL.zero [
+    [Int -1; Int 10; Int 3]
+    [Int 1; Int -9; Int 4]
+    [Int 4; Int 8; Int 7]
+  ])
+  true;
+
+  make_add_test "add fails with invalid matrix sizes"
+    (RM.make 2 3 RATIONAL.one [[]])
+    (RM.make 3 3 RATIONAL.one [[]])
+    (RM.make 1 1 RATIONAL.zero [[]])
+  true;
 ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [
