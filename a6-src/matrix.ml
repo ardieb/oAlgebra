@@ -51,6 +51,7 @@ module type MATRIX = sig
   val determinant : matrix -> value
   val null_space : matrix -> matrix list
   val equals : matrix -> matrix -> bool
+  val subtract : matrix -> matrix -> matrix
 end
 
 module type MATRIX_MAKER = 
