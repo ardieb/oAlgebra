@@ -327,6 +327,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       c.(i).(0) <- m.(i).(j)
     done; c
 
+(* this is incorrect because it's supposed to divide by the square root of the length,
+which requires irrational numbers *)
   let normalize = fun (v:matrix) -> 
     scale (N.div N.one (dot v v)) v
 
