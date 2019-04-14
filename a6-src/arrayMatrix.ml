@@ -369,4 +369,19 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   let eigenvalues = fun (m:matrix) -> failwith "TODO"
   let eigenvectors = fun (m:matrix) -> failwith "TODO"
   let solve = fun (m:matrix) (v:matrix) -> failwith "TODO"
+
+  let equals = fun (m1:matrix) (m2:matrix) ->
+    let (m,n), (p,r) = dim m1, dim m2 in
+    if m <> p || n <> r then false
+    else 
+    let res = ref true in
+    let i = ref 0 in
+    let j = ref 0 in
+    while !i < m && !res do
+      while !j < n && !res do
+        res := N.compare (m1.(!i).(!j)) (m2.(!i).(!j)) = EQ;
+        j := !j + 1;
+      done;
+      i := !i + 1;
+    done; !res
 end

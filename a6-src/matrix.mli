@@ -50,6 +50,7 @@ module type MATRIX = sig
   val solve : matrix -> matrix -> matrix
   val determinant : matrix -> value
   val null_space : matrix -> matrix list
+  val equals : matrix -> matrix -> bool
 end
 
 module type MATRIX_MAKER = 
