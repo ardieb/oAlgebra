@@ -159,6 +159,80 @@ let matrix_tests =
       [11,1;0,1;21,1]
       [-1,1;13,1;-9,1]
     )
+  make_mul_test "mul 2x3 * 3x2"
+  (RM.make 2 3 RATIONAL.zero [
+    [-1,1; 0,1; 4,1]
+    [2,1; 0,1; 0,1]
+  ])
+  (RM.make 3 2 RATIONAL.zero [
+    [-1,1; 1,1]
+    [-1,1; 3,1]
+    [2,1; 4,1]
+  ])
+  (RM.make 2 2 RATIONAL.zero [
+    [9,1; 15,1]
+    [-2,1; 2,1]
+  ])
+  make_mul_test "mul 2x2 * 2x4"
+  (RM.make 2 3 RATIONAL.zero [
+    [-3,1; -2,1]
+    [-1,1; 6,1]
+  ])
+  (RM.make 3 2 RATIONAL.zero [
+    [1,2; 2,1; 4,1; -2,1]
+    [3,1; 0,1; -1,1; -4,1]
+  ])
+  (RM.make 2 2 RATIONAL.zero [
+    [-9,1; -6,1; -10,1; 14,1]
+    [17,1; -2,1; -10,1; -22,1]
+  ])
+  make_mul_test "mul 3x3 * 3x2"
+  (RM.make 2 3 RATIONAL.zero [
+    [2,1; 4,1; 2,1]
+    [1,4; 4,1; 0,1]
+    [2,1; 6,1; 0,1]
+  ])
+  (RM.make 3 2 RATIONAL.zero [
+    [5,1; 1,1]
+    [2,1; 2,1]
+    [4,1; 1,1]
+  ])
+  (RM.make 2 2 RATIONAL.zero [
+    [26,1; 12,1]
+    [13,1; 9,1]
+    [22,1; 14,1]
+  ])
+  make_mul_test "mul 3x3 * 3x3"
+  (RM.make 2 3 RATIONAL.zero [
+    [2,1; 4,1; 2,1]
+    [1,4; 4,1; 0,1]
+    [2,1; 6,1; 0,1]
+  ])
+  (RM.make 3 2 RATIONAL.zero [
+    [1,1; 0,1; 0,1]
+    [0,1; 1,1; 0,1]
+    [0,0; 0,0; 1,1]
+  ])
+  (RM.make 2 2 RATIONAL.zero [
+    [2,1; 4,1; 2,1]
+    [1,4; 4,1; 0,1]
+    [2,1; 6,1; 0,1]
+  ])
+  make_mul_test "mul 3x2 * 2x2"
+  (RM.make 2 3 RATIONAL.zero [
+    [5,1; 1,1]
+    [2,1; 2,1]
+    [4,1; 1,1]
+  ])
+  (RM.make 3 2 RATIONAL.zero [
+    [0,1; 0,1]
+    [0,1; 0,1]
+  ])
+  (RM.make 2 2 RATIONAL.zero [
+    [0,1; 0,1]
+    [0,1; 0,1]
+    [0,1; 0,1]
+  ])
 ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [
