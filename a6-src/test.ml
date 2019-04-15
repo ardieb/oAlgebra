@@ -361,12 +361,23 @@ let matrix_tests =
       [Int 1; Int 6; Int 0; Int 3; Int 0; Int 0];
       [Int 0; Int 0; Int 1; Int (-4); Int 0; Int 5];
       [Int 0; Int 0; Int 0; Int 0; Int 1; Int 7]
+    ]);
+  make_reduce_test "reduce #3"
+    (RM.make 3 3 RATIONAL.zero [
+      [Int 1; Int 2; Int 7];
+      [Int (-2); Int 5; Int 4];
+      [Int (-5); Int 6; Int (-3)]
+    ])
+    (RM.make 3 3 RATIONAL.zero [
+      [Int 1; Int 0; Int 3];
+      [Int 0; Int 1; Int 2];
+      [Int 0; Int 0; Int 0]
     ])
 ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [
   rationals_tests;
-  matrix_tests;
+  matrix_tests; 
 ]
 
 let _ = run_test_tt_main suite
