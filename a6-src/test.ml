@@ -1,17 +1,115 @@
 open OUnit2
 open Matrix
 open Rationals
-open Num
+open ArrayMatrix
+
+let cmp_rat = fun x1 x2 -> 
+  match RATIONAL.compare x1 x2 with
+  | EQ -> true
+  | _ -> false
 
 let make_op_test 
     (name: string)
-    (op: int*int -> int*int -> int*int)
-    (input1: int*int)
-    (input2: int*int)
-    (expected_output: int*int) : test =
+    (op: rational -> rational -> rational)
+    (input1: rational)
+    (input2: rational)
+    (expected_output: rational) : test =
   name >:: (fun _ -> 
-      assert_equal (op input1 input2) expected_output)
+      assert_equal (op 
+                      (input1) 
+                      (input2)) 
+        (expected_output)
+        ~cmp:cmp_rat)
 
+module RM = MAKE_MATRIX(RATIONAL)
+
+let make_transpose_test 
+    (name: string)
+    (input: RM.matrix)
+    (expected_output: RM.matrix) =
+  name >:: (fun _ ->
+      assert_equal (RM.transpose input) expected_output ~cmp: RM.equals)
+
+let make_dot_test 
+    (name: string)
+    (input1: RM.matrix)
+    (input2: RM.matrix)
+    (expected_output: RM.value)
+    (raises: bool) = 
+  name >:: (fun _ ->
+      if raises then
+        assert_raises RM.MatrixError (fun () -> RM.dot input1 input2)
+      else 
+        (assert_equal (RM.dot input1 input2) expected_output ~cmp: cmp_rat))
+
+let make_mul_test
+    (name: string)
+    (input1: RM.matrix)
+    (input2: RM.matrix)
+    (expected_output: RM.matrix)
+    (raises: bool) =
+  name >:: (fun _ ->
+      if raises then
+        assert_raises RM.MatrixError (fun () -> RM.mul input1 input1)
+      else
+        assert_equal expected_output (RM.mul input1 input2) ~cmp: RM.equals)
+
+let make_add_test
+    (name: string)
+    (input1: RM.matrix)
+    (input2: RM.matrix)
+    (expected_output: RM.matrix)
+    (raises: bool) =
+  name >:: (fun _ ->
+      if raises then
+        assert_raises RM.MatrixError (fun () -> RM.add input1 input2)
+      else
+        assert_equal expected_output (RM.add input1 input2))
+
+let make_subtract_test
+    (name: string)
+    (input1: RM.matrix)
+    (input2: RM.matrix)
+    (expected_output: RM.matrix)
+    (raises: bool) =
+  name >:: (fun _ ->
+      if raises then
+        assert_raises RM.MatrixError (fun () -> RM.subtract input1 input2)
+      else
+        assert_equal expected_output (RM.subtract input1 input2))
+
+let make_scale_test 
+    (name: string)
+    (c: RM.value)
+    (matrix: RM.matrix)
+    (expected_output: RM.matrix) =
+  name >:: (fun _ ->
+      assert_equal (RM.scale c matrix) expected_output ~cmp: RM.equals)
+
+let make_augment_test
+    (name: string)
+    (m1: RM.matrix)
+    (m2: RM.matrix)
+    (expected_output: RM.matrix)
+    (ex: bool) =
+  name >:: (fun _ ->
+      if ex then assert_raises RM.MatrixError (fun () -> RM.augment m1 m2)
+      else assert_equal expected_output (RM.augment m1 m2)
+    )
+
+let make_reduce_test
+    (name: string)
+    (matrix: RM.matrix)
+    (expected_output: RM.matrix) =
+  name >:: (fun _ -> 
+      assert_equal (RM.reduce matrix) expected_output ~cmp: RM.equals)
+
+let make_determinant_test
+    (name: string)
+    (matrix: RM.matrix)
+    (expected_output: RM.value) =
+  name >:: (fun _ ->  
+      assert_equal (RM.determinant matrix) expected_output ~cmp:cmp_rat)
 
 let rationals_tests =
   let add = RATIONAL.add in
@@ -19,47 +117,272 @@ let rationals_tests =
   let div = RATIONAL.div in
   let sub = RATIONAL.sub in
   [
-    make_op_test "Add - 0 + 0 = 0" add (0,1) (0,1) (0,1);
-    make_op_test "Add - x + 0 = x" add (1,1) (0,10) (1,1);
-    make_op_test "Add - fractions add up to 1" add (1, 2) (1,2) (1,1);
-    make_op_test "Add - fractions add up to whole number > 1" add (1, 2)
-      (3, 2) (2, 1);
-    make_op_test "Add - sum fraction in simplest form" add (1, 2) (1, 4) (3, 4);
-    make_op_test "Add - sum needs to be simplified" add (3, 8) (3, 8) (3, 4);
-    make_op_test "Add - sum a fraction > 1" add (1, 2) (2, 2) (3, 2);
-    make_op_test "Add - adding fractions > 1" add (42, 5) (21, 5) (63, 5);
-    make_op_test "Add - +/-, sum positive" add (1, 2) (-1, 4) (1, 4);
-    make_op_test "Add - +/-, sum negative" add (1,4) (-1,2) (-1,4);
-    make_op_test "Add - sum of negatives" add (-1,4) (-1,3) (-7,12);
-    make_op_test "Add - negative whole num" add (-1,4) (-3,4) (-1,1);
-    make_op_test "Add - negative wohle num < -1" add (-3,2) (-1,2) (-2,1);
+    make_op_test "Add - 0 + 0 = 0" add (Int (0)) (Int (0)) (Int (0));
+    make_op_test "Add - x + 0 = x" add (Int (1)) (Frac ((0,10))) (Int (1));
+    make_op_test "Add - fractions add up to 1" add (Frac ((1, 2))) (Frac ((1,2))) (Int (1));
+    make_op_test "Add - fractions add up to whole number > 1" add (Frac ((1, 2)))
+      (Frac ((3, 2))) (Int (2));
+    make_op_test "Add - sum fraction in simplest form" add (Frac ((1, 2))) (Frac ((1, 4))) (Frac ((3, 4)));
+    make_op_test "Add - sum needs to be simplified" add (Frac ((3, 8))) (Frac ((3, 8))) (Frac ((3, 4)));
+    make_op_test "Add - sum a fraction > 1" add (Frac ((1, 2))) (Frac ((2, 2))) (Frac ((3, 2)));
+    make_op_test "Add - adding fractions > 1" add (Frac ((42, 5))) (Frac ((21, 5))) (Frac ((63, 5)));
+    make_op_test "Add - +/-, sum positive" add (Frac ((1, 2))) (Frac ((-1, 4))) (Frac ((1, 4)));
+    make_op_test "Add - +/-, sum negative" add (Frac ((1,4))) (Frac ((-1,2))) (Frac ((-1,4)));
+    make_op_test "Add - sum of negatives" add (Frac ((-1,4))) (Frac ((-1,3))) (Frac ((-7,12)));
+    make_op_test "Add - negative whole num" add (Frac ((-1,4))) (Frac ((-3,4))) (Int (-1));
+    make_op_test "Add - negative wohle num < -1" add (Frac ((-3,2))) (Frac ((-1,2))) (Int (-2));
 
-    make_op_test "Mul - 0 * 0 = 0" mul (0,1) (0,2) (0,1);
-    make_op_test "Mul - x * 0 = 0" mul (1,1) (0,1) (0,1);
-    make_op_test "Mul - x * 1 = x" mul (1,1) (3,5) (3,5);
-    make_op_test "Mul - fractions" mul (1,2) (1,4) (1,8);
-    make_op_test "Mul - fractions > 1" mul (3,2) (5,2) (15,4);
-    make_op_test "Mul - whole numbers" mul (4,2) (3,1) (6,1);
-    make_op_test "Mul - +/- numerators" mul (-1,2) (1,4) (-1,8);
-    make_op_test "Mul - +/- denominators" mul (1,2) (-1,2) (-1,4);
-    make_op_test "Mul - -/- -> +" mul (-1,2) (-1,2) (1,4);
+    make_op_test "Mul - 0 * 0 = 0" mul (Int (0)) (Int (0)) (Int (0));
+    make_op_test "Mul - x * 0 = 0" mul (Int (1)) (Int (0)) (Int (0));
+    make_op_test "Mul - x * 1 = x" mul (Int (1)) (Frac ((3,5))) (Frac ((3,5)));
+    make_op_test "Mul - fractions" mul (Frac ((1,2))) (Frac ((1,4))) (Frac ((1,8)));
+    make_op_test "Mul - fractions > 1" mul (Frac ((3,2))) (Frac ((5,2))) (Frac ((15,4)));
+    make_op_test "Mul - whole numbers" mul (Frac ((4,2))) (Int (3)) (Int (6));
+    make_op_test "Mul - +/- numerators" mul (Frac ((-1,2))) (Frac ((1,4))) (Frac ((-1,8)));
+    make_op_test "Mul - +/- denominators" mul (Frac ((1,2))) (Frac ((-1,2))) (Frac ((-1,4)));
+    make_op_test "Mul - -/- -> +" mul (Frac ((-1,2))) (Frac ((-1,2))) (Frac ((1,4)));
 
-    make_op_test "Div - x / x = 1" div (1,2) (1,2) (1,1);
-    make_op_test "Div - x / 1 = x" div (1,2) (1,1) (1,2);
-    make_op_test "Div - whole #s" div (4,1) (2,1) (2,1);
-    make_op_test "Div - +/+ fractions" div (1,4) (1,2) (1,2);
-    make_op_test "Div - +/- -> -" div (1,4) (-1,2) (-1,2);
-    make_op_test "Div - -/- -> +" div (-1,4) (-1,2) (1,2);
+    make_op_test "Div - x / x = 1" div (Frac ((1,2))) (Frac ((1,2))) (Int (1));
+    make_op_test "Div - x / 1 = x" div (Frac ((1,2))) (Int (1)) (Frac ((1,2)));
+    make_op_test "Div - whole #s" div (Int (4)) (Int (2)) (Int (2));
+    make_op_test "Div - +/+ fractions" div (Frac ((1,4))) (Frac ((1,2))) (Frac ((1,2)));
+    make_op_test "Div - +/- -> -" div (Frac ((1,4))) (Frac ((-1,2))) (Frac ((-1,2)));
+    make_op_test "Div - -/- -> +" div (Frac ((-1,4))) (Frac ((-1,2))) (Frac ((1,2)));
 
-    make_op_test "Sub - x - 0 = x" sub (1,2) (0,1) (1,2);
-    make_op_test "Sub - x - y > 0" sub (1,2) (1,4) (1,4);
-    make_op_test "Sub - x - y < 0" sub (1,4) (1,2) (-1,4);
-    make_op_test "Sub --x - y < 0" sub (-1,4) (1,2) (-3,4);
-    make_op_test "Sub - subtracting negative" sub (1,4) (-1,2) (3,4);
+    make_op_test "Sub - x - 0 = x" sub (Frac ((1,2))) (Int (0)) (Frac ((1,2)));
+    make_op_test "Sub - x - y > 0" sub (Frac ((1,2))) (Frac ((1,4))) (Frac ((1,4)));
+    make_op_test "Sub - x - y < 0" sub (Frac ((1,4))) (Frac ((1,2))) (Frac ((-1,4)));
+    make_op_test "Sub --x - y < 0" sub (Frac ((-1,4))) (Frac ((1,2))) (Frac ((-3,4)));
+    make_op_test "Sub - subtracting negative" sub (Frac ((1,4))) (Frac ((-1,2))) (Frac ((3,4)));
+  ]
+
+let matrix_tests = 
+  [
+
+    (*=========== matrix transpose tests ===========*)
+    make_transpose_test "transpose sq. diagonal matrix = same matrix" 
+      (RM.diagonal 3 3) (RM.diagonal 3 3);
+    make_transpose_test "transpose rect. matrix swaps rows/cols"
+      (RM.diagonal 2 3) (RM.diagonal 3 2);
+
+    (*=========== dot product tests ===========*)
+    make_dot_test "dot product of two valid vectors"
+      (RM.make 5 1 RATIONAL.zero [[Frac (1,1)];[Frac (2,1)];[Frac (3,1)];[Frac (4,1)];[Frac (5,1)]]) 
+      (RM.make 5 1 RATIONAL.zero [[Frac (5,1)];[Frac (4,1)];[Frac (3,1)];[Frac (2,1)];[Frac (1,1)]])
+      (Int (35)) false; 
+    make_dot_test "dot product fails with vectors of different lengths"
+      (RM.make 6 1 RATIONAL.zero [[]])
+      (RM.make 3 1 RATIONAL.zero [[]])
+      (Int 0) true;
+    make_dot_test "dot product fails with non-vectors"
+      (RM.make 2 2 RATIONAL.one [[]])
+      (RM.make 2 2 RATIONAL.one [[]])
+      (Int 0) true;
+    make_mul_test "mul fails with invalid matrix sizes"
+      (RM.make 2 3 RATIONAL.one [[]])
+      (RM.make 2 3 RATIONAL.one [[]])
+      (RM.make 1 1 RATIONAL.one [[]]) true;
+    make_mul_test "mul identity on 2x2 matricies"
+      (RM.diagonal 2 2)
+      (RM.make 2 2 RATIONAL.zero [[Int 5;Int 5];[Int 0;Int 0]])
+      (RM.make 2 2 RATIONAL.zero [[Int 5;Int 5];[Int 0;Int 0]])
+      false;
+    make_mul_test "mul 3x3 matricies"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 5;Frac (6,7);Frac (2,3)];
+          [Frac (1,3);Frac (4,5);Frac (6,8)];
+          [Frac (1,4);Frac (8,8);Frac (5,4)]])
+      (RM.make 3 3 RATIONAL.one [[]])
+      (RM.make 3 3 RATIONAL.zero [
+          [Frac (137,21);Frac (137,21);Frac (137,21)];
+          [Frac (113,60);Frac (113,60);Frac (113,60)];
+          [Frac (5,2);Frac (5,2);Frac (5,2)]])
+      false;
+    make_mul_test "mul 2x2 * 2x3"
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 2;Int 3];
+          [Int 1;Int (-5)]
+        ])
+      (RM.make 2 3 RATIONAL.zero [
+          [Int 4; Int 3; Int 6];
+          [Int 1; Int (-2); Int 3]
+        ])
+      (RM.make 2 3 RATIONAL.zero [
+          [Int 11; Int 0; Int 21];
+          [Int (-1); Int 13; Int (-9)]
+        ]) false;
+    make_mul_test "mul 3x3 * 3x3"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 2; Int 4; Int 2];
+          [Int 1; Int 4; Int 0];
+          [Int 2; Int 6; Int 0]
+        ])
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 1; Int 0; Int 0];
+          [Int 0; Int 1; Int 0];
+          [Int 0; Int 0; Int 1]
+        ])
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 2; Int 4; Int 2];
+          [Frac (1,4); Int 4; Int 0];
+          [Int 2; Int 6; Int 0]
+        ])
+      false;
+    make_mul_test "mul 3x2 * 2x2"
+      (RM.make 3 2 RATIONAL.zero [
+          [Int 5; Int 1];
+          [Int 2; Int 2];
+          [Int 4; Int 1]
+        ])
+      (RM.make 2 2 RATIONAL.zero [[]])
+      (RM.make 3 2 RATIONAL.zero [[]])
+      false;
+
+    (*============= matrix addition tests =============*)
+    make_add_test "add 2x2 * 2x2"
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 1; Int 4];
+          [Int 5; Int (-2)]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 7; Int 3];
+          [Int 11; Int 9]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 8; Int 7];
+          [Int 16; Int 7]
+        ])
+      false;
+
+    make_add_test "add 2x2 * 2x2"
+      (RM.make 2 2 RATIONAL.zero [
+          [Int (-3); Int 4];
+          [Int 6; Int 13]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 3; Int (-8)];
+          [Int (-2); Int 2]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 0; Int (-4)];
+          [Int 4; Int 15]
+        ])
+      false;
+
+    make_add_test "add 3x3 * 3x3"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 1; Int 6; Int 4];
+          [Int (-3); Int 8; Int 9];
+          [Int (-2); Int 7; Int (-1)]
+        ])
+      (RM.make 3 3 RATIONAL.zero [
+          [Int (-2); Int 4; Int (-1)];
+          [Int 4; Int (-17); Int (-5)];
+          [Int 6; Int 1; Int 8]
+        ])
+      (RM.make 3 3 RATIONAL.zero [
+          [Int (-1); Int 10; Int 3];
+          [Int 1; Int (-9); Int 4];
+          [Int 4; Int 8; Int 7]
+        ])
+      false;
+
+    make_add_test "add fails with invalid matrix sizes"
+      (RM.make 2 3 RATIONAL.one [[]])
+      (RM.make 3 3 RATIONAL.one [[]])
+      (RM.make 1 1 RATIONAL.one [[]])
+      true;
+
+    (*============= matrix subtraction tests =============*)
+    make_subtract_test "subtract 2x3 * 2x3"
+      (RM.make 2 3 RATIONAL.zero [
+          [Int (-1); Int 2; Int 0];
+          [Int 0; Int 3; Int 6]
+        ])
+      (RM.make 2 3 RATIONAL.zero [
+          [Int 0; Int (-4); Int 3];
+          [Int 9; Int (-4); Int (-3)]
+        ])
+      (RM.make 2 3 RATIONAL.zero [
+          [Int (-1); Int 6; Int (-3)];
+          [Int (-9); Int 7; Int 9]
+        ])
+      false;
+
+    make_subtract_test "subtract 2x2 * 2x2"
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 2; Int (-1)];
+          [Int 1; Int 2]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 3; Int 3];
+          [Int 3; Int 1]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int (-1); Int (-4)];
+          [Int (-2); Int 1]
+        ])
+      false;
+
+    make_subtract_test "subtract fails with invalid matrix sizes"
+      (RM.make 2 3 RATIONAL.one [[]])
+      (RM.make 2 2 RATIONAL.one [[]])
+      (RM.make 1 1 RATIONAL.one [[]])
+      true;
+
+    (*################## SCALE TEST #################*)
+    make_scale_test "basic scaling"
+      (Frac (1,2))
+      (RM.make 3 4 (Int 5) [[]])
+      (RM.make 3 4 (Frac (5,2)) [[]]);
+
+    (*############### AUGMENT TEST ##################*)
+    make_augment_test "basic augment"
+      (RM.make 3 4 (Int 4) [[]])
+      (RM.make 3 4 (Int 4) [[]])
+      (RM.make 3 8 (Int 4) [[]])
+      false;
+    make_augment_test "augment fails"
+      (RM.make 2 2 (Int 4) [[]])
+      (RM.make 3 3 (Int 2) [[]])
+      (RM.diagonal 3 3)
+      true;
+    (* ################## REDUCE TEST ##############*)
+    make_reduce_test "reduce #1"
+      (RM.make 3 6 RATIONAL.zero [
+          [Int 0;Int 3;Int (-6);Int 6;Int 4;Int (-5)];
+          [Int 3;Int (-7);Int 8;Int (-5);Int 8;Int 9];
+          [Int 3;Int (-9);Int 12;Int (-9);Int 6;Int 15]])
+      (RM.make 3 6 RATIONAL.zero [
+          [Int 1; Int 0; Int (-2);Int 3; Int 0;Int (-24)];
+          [Int 0; Int 1; Int (-2);Int 2; Int 0;Int (-7)];
+          [Int 0; Int 0; Int 0; Int 0; Int 1; Int 4]
+        ]);
+
+    make_determinant_test "det - 1x1 matrix"
+      (RM.make 1 1 RATIONAL.zero [[Int 1]]) (Int 1);
+    make_determinant_test "det - 2x2 matrix"
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 4; Int 6];
+          [Int 3; Int 8]])
+      (Int 14);
+    make_determinant_test "det - 3x3 matrix #1"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 0; Int 3; Int 5];
+          [Int 5; Int 5; Int 2];
+          [Int 3; Int 4; Int 3]])
+      (Int (-2));
+    make_determinant_test "det - 3x3 matrix #2"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 10; Int 0; Int (-3)];
+          [Int (-2); Int (-4); Int 1];
+          [Int 3; Int 0; Int 2]])
+      (Int (-116))
   ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [
     rationals_tests;
+    matrix_tests;
   ]
 
 let _ = run_test_tt_main suite
