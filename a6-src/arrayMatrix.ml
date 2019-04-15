@@ -129,7 +129,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   (** [addrows m i,j c] is the matrix [m] with row [i] multiplied by [c] added 
     * to row [j] in [m] 
     * Requries: i, j < height of m - 1 *)
-  let addrows = fun (m:matrix) (i,j:int*int) (c:value) ->
+  let addrows = fun (m:matrix) (i:int) (j:int) (c:value) ->
     let e = fun (i:int) (j:int) (c:value) (n:int) -> 
       let res = (diagonal n n) in
       res.(j).(i) <- c;
@@ -144,18 +144,14 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   let pivot_col = fun (m:matrix) (i:int) ->
     let p,r = dim m in
     let x = ref 0 in
-    while N.compare m.(i).(!x) N.zero = EQ && !x < r do
-      x := !x + 1;
-    done;
+    while !x < r && N.compare m.(i).(!x) N.zero = EQ do x := !x + 1 done;
     if !x >= r then None else Some !x
 
   
-  let pivot_row= fun (m:matrix) (i:int) (j:int) ->
+  let pivot_row = fun (m:matrix) (row:int) (col:int) ->
     let p,r = dim m in
-    let y = ref i in
-    while N.compare m.(!y).(j) N.zero = EQ && !y < p do
-      y := !y + 1;
-    done;
+    let y = ref row in
+    while !y < p && N.compare m.(!y).(col) N.zero = EQ do y := !y + 1 done;
     if !y >= p then None else Some !y
 
   (** [reduce m] is the reduced row echelon matrix formed from [m] *)
@@ -171,12 +167,12 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         let () = memo := swaprows (!memo) (row,pivot) in
         let () = for i = row + 1 to p - 1 do
           let const = N.neg (N.div (!memo).(i).(col) (!memo).(row).(col)) in
-          memo := addrows (!memo) (row,i) const 
+          memo := addrows (!memo) row i const 
         done in
         forward (row + 1) (col + 1);
         end in 
     let rec backward (row:int) =
-      if row < 0 then ()else
+      if row < 0 then () else
       match pivot_col (!memo) row with
       | None -> 
         backward (row -1);
@@ -186,7 +182,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       | Some col -> begin
         let () = memo := mulrows !memo row (N.div N.one (!memo).(row).(col)) in 
         for i = row - 1 downto 0 do
-           memo := addrows !memo (row,i) (N.neg (!memo).(i).(col))
+           memo := addrows !memo row i (N.neg (!memo).(i).(col))
         done; backward (row - 1)
         end in 
     forward 0 0; backward (p - 1); !memo
@@ -239,11 +235,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   (** [determinant m] is the determinant of matrix [m] *)
   let rec determinant = fun (m:matrix) -> 
     let (row,col) = dim m in if row<>col || row<2 then raise MatrixError else 
-    if row=2 then let (a,b,c,d) = 
-                    (m.(0).(0),
-                     m.(0).(1),
-                     m.(1).(0),
-                     m.(1).(1)) in 
+    if row=2 then let (a,b,c,d) = (m.(0).(0), m.(0).(1), m.(1).(0), m.(1).(1)) in 
       N.sub (N.mul a d) (N.mul b c) else 
       let sum = ref N.zero in 
       for counter = 0 to (row-1) do

@@ -350,6 +350,17 @@ let matrix_tests =
       [Int 1; Int 0; Int (-2);Int 3; Int 0;Int (-24)];
       [Int 0; Int 1; Int (-2);Int 2; Int 0;Int (-7)];
       [Int 0; Int 0; Int 0; Int 0; Int 1; Int 4]
+    ]);
+  make_reduce_test "reduce #2"
+    (RM.make 3 6 RATIONAL.zero [
+      [Int 1; Int 6; Int 2; Int (-5); Int (-2); Int (-4)];
+      [Int 0; Int 0; Int 2; Int (-8); Int (-1); Int 3];
+      [Int 0; Int 0; Int 0; Int 0; Int 1; Int 7]
+    ])
+    (RM.make 3 6 RATIONAL.zero [
+      [Int 1; Int 6; Int 0; Int 3; Int 0; Int 0];
+      [Int 0; Int 0; Int 1; Int (-4); Int 0; Int 5];
+      [Int 0; Int 0; Int 0; Int 0; Int 1; Int 7]
     ])
 ]
 
