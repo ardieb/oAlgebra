@@ -104,77 +104,92 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   (** [swaprows m i,j] is the matrix [m] with rows [i] and [j] interchanged 
     * Requires: i,j < height of m - 1 *)
   let swaprows = fun (m:matrix) (i,j:int*int) -> 
-    let e = fun (i:int) (j:int) (p,r:int*int) ->
-      let res = (diagonal p r) in
+    let e = fun (i:int) (j:int) (n:int) ->
+      let res = (diagonal n n) in
       res.(i).(i) <- N.zero;
       res.(j).(j) <- N.zero;
       res.(i).(j) <- N.one;
       res.(j).(i) <- N.one;
       res in
-    mul (e i j (dim m)) m
+    let (n,_) = dim m in
+    mul (e i j n) m
 
   (* matrix for multiplying a row *)
   (** [mulrows m i c] is dthe matrix [m] with row [i] multiplied by [c]
     * Requires: [i] < height of m - 1 *)
   let mulrows = fun (m:matrix) (i:int) (c:value) ->
-    let e = fun (i:int) (c:value) (p,r:int*int) ->
-      let res = (diagonal p r) in
+    let e = fun (i:int) (c:value) (n:int) ->
+      let res = (diagonal n n) in
       res.(i).(i) <- c;
       res in
-    mul (e i c (dim m)) m
+    let (n,_) = dim m in
+    mul (e i c n) m
 
   (* matrix for adding one row to another *)
   (** [addrows m i,j c] is the matrix [m] with row [i] multiplied by [c] added 
     * to row [j] in [m] 
     * Requries: i, j < height of m - 1 *)
   let addrows = fun (m:matrix) (i,j:int*int) (c:value) ->
-    let e = fun (i:int) (j:int) (c:value) (p,r:int*int) -> 
-      let res = (diagonal p r) in
-      res.(i).(j) <- c;
+    let e = fun (i:int) (j:int) (c:value) (n:int) -> 
+      let res = (diagonal n n) in
+      res.(j).(i) <- c;
       res in
-    mul (e i j c (dim m)) m
+    let (n,_) = dim m in
+    mul (e i j c n) m
 
   (* finds the left most pivot in row i *)
-  (** [pivot m i] is [Some x] where x is the column of the pivot in row [i] or
+  (** [pivot_col m i] is [Some x] where x is the column of the pivot in row [i] or
     * [None] if there is not pivot in i
     * Requires: i < height of the matrix - 1 *)
-  let pivot = fun (m:matrix) (i:int) ->
+  let pivot_col = fun (m:matrix) (i:int) ->
     let p,r = dim m in
-    let x = ref (r-1) in
-    while N.compare m.(i).(!x) N.zero = EQ && !x > -1 do
-      x := !x - 1;
+    let x = ref 0 in
+    while N.compare m.(i).(!x) N.zero = EQ && !x < r do
+      x := !x + 1;
     done;
-    if !x < 0 then None else Some !x
+    if !x >= r then None else Some !x
+
+  
+  let pivot_row= fun (m:matrix) (i:int) (j:int) ->
+    let p,r = dim m in
+    let y = ref i in
+    while N.compare m.(!y).(j) N.zero = EQ && !y < p do
+      y := !y + 1;
+    done;
+    if !y >= p then None else Some !y
 
   (** [reduce m] is the reduced row echelon matrix formed from [m] *)
   let reduce = fun (m:matrix) -> 
     let p,r = dim m in
     let memo = ref m in
     (* Gets matrix in upper triangular form *)
-    let rec forward = fun (i:int) ->
-      if i >= p - 1 then () else
-        match pivot (!memo) i with
-        | Some x -> begin (* Reduces all values below the pivot to zero *)
-            for y=i+1 to p - 1 do
-              let c = N.neg (N.div (!memo).(y).(x) (!memo).(i).(x)) in 
-              memo := addrows (!memo) (i,y) c
-            done; forward (i + 1)
-          end
-        | None -> (* Swaps this row with the row below it and tries forward again *)
-          if i = p - 1 then () else
-            memo := swaprows (!memo) (i,i+1);
-          forward i in
-    let rec backward = fun (i:int) ->
-      if i <= 0 then () else 
-        match pivot (!memo) i with
-        | Some x -> begin
-            for y=i-1 downto 0 do
-              let c = N.neg ((N.div) (!memo).(y).(x) (!memo).(i).(x)) in
-              memo := addrows (!memo) (i,y) c
-            done; backward (i - 1)
-          end
-        | None -> backward (i - 1) in
-    forward 0; backward (p - 1); !memo
+    let rec forward (row:int) (col:int) =
+      if row >= p - 1 || col >= r - 1 then () else 
+      match pivot_row (!memo) row col with
+      | None -> forward (row) (col + 1);
+      | Some pivot -> begin
+        let () = memo := swaprows (!memo) (row,pivot) in
+        let () = for i = row + 1 to p - 1 do
+          let const = N.neg (N.div (!memo).(i).(col) (!memo).(row).(col)) in
+          memo := addrows (!memo) (row,i) const 
+        done in
+        forward (row + 1) (col + 1);
+        end in 
+    let rec backward (row:int) =
+      if row < 0 then ()else
+      match pivot_col (!memo) row with
+      | None -> 
+        backward (row -1);
+      | Some col when row = 0 -> begin
+        memo := mulrows !memo row (N.div N.one (!memo).(row).(col))
+        end
+      | Some col -> begin
+        let () = memo := mulrows !memo row (N.div N.one (!memo).(row).(col)) in 
+        for i = row - 1 downto 0 do
+           memo := addrows !memo (row,i) (N.neg (!memo).(i).(col))
+        done; backward (row - 1)
+        end in 
+    forward 0 0; backward (p - 1); !memo
 
   (** [augment m1 m2] is the matrix obtained by appending 
       * the columns of [m2] to [m1] 
@@ -273,7 +288,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
 
     let curr_row = ref 0 in
     while !curr_row < rows do 
-      (match pivot m !curr_row with 
+      (match pivot_col m !curr_row with 
        | Some position -> Hashtbl.remove vectors position
        | None -> ());
       curr_row := !curr_row + 1
@@ -288,7 +303,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let curr_row = ref 0 in 
     while !curr_row < rows do 
 
-      (match pivot m !curr_row with 
+      (match pivot_col m !curr_row with 
        | Some piv_col -> 
          let curr_col = ref (piv_col+1) in 
          while !curr_col < cols do 

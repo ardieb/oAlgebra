@@ -86,6 +86,23 @@ let make_scale_test
 name >:: (fun _ ->
     assert_equal (RM.scale c matrix) expected_output ~cmp: RM.equals)
 
+let make_augment_test
+  (name: string)
+  (m1: RM.matrix)
+  (m2: RM.matrix)
+  (expected_output: RM.matrix)
+  (ex: bool) =
+  name >:: (fun _ ->
+    if ex then assert_raises RM.MatrixError (fun () -> RM.augment m1 m2)
+    else assert_equal expected_output (RM.augment m1 m2)
+  )
+
+let make_reduce_test
+  (name: string)
+  (matrix: RM.matrix)
+  (expected_output: RM.matrix) =
+  name >:: (fun _ -> 
+    assert_equal (RM.reduce matrix) expected_output ~cmp: RM.equals)
 
 let rationals_tests =
 let add = RATIONAL.add in
@@ -305,6 +322,35 @@ let matrix_tests =
     (RM.make 2 2 RATIONAL.one [[]])
     (RM.make 1 1 RATIONAL.one [[]])
   true;
+
+  (*################## SCALE TEST #################*)
+  make_scale_test "basic scaling"
+    (Frac (1,2))
+    (RM.make 3 4 (Int 5) [[]])
+    (RM.make 3 4 (Frac (5,2)) [[]]);
+
+  (*############### AUGMENT TEST ##################*)
+  make_augment_test "basic augment"
+    (RM.make 3 4 (Int 4) [[]])
+    (RM.make 3 4 (Int 4) [[]])
+    (RM.make 3 8 (Int 4) [[]])
+    false;
+  make_augment_test "augment fails"
+    (RM.make 2 2 (Int 4) [[]])
+    (RM.make 3 3 (Int 2) [[]])
+    (RM.diagonal 3 3)
+    true;
+  (* ################## REDUCE TEST ##############*)
+  make_reduce_test "reduce #1"
+    (RM.make 3 6 RATIONAL.zero [
+      [Int 0;Int 3;Int (-6);Int 6;Int 4;Int (-5)];
+      [Int 3;Int (-7);Int 8;Int (-5);Int 8;Int 9];
+      [Int 3;Int (-9);Int 12;Int (-9);Int 6;Int 15]])
+    (RM.make 3 6 RATIONAL.zero [
+      [Int 1; Int 0; Int (-2);Int 3; Int 0;Int (-24)];
+      [Int 0; Int 1; Int (-2);Int 2; Int 0;Int (-7)];
+      [Int 0; Int 0; Int 0; Int 0; Int 1; Int 4]
+    ])
 ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [
