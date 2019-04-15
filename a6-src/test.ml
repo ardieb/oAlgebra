@@ -111,6 +111,13 @@ let make_determinant_test
   name >:: (fun _ ->  
       assert_equal (RM.determinant matrix) expected_output ~cmp:cmp_rat)
 
+let make_null_space_test 
+    (name: string)
+    (matrix: RM.matrix)
+    (expected_output: RM.matrix list) =
+  name >:: (fun _ ->
+      assert_equal (RM.null_space matrix) expected_output)
+
 let rationals_tests =
   let add = RATIONAL.add in
   let mul = RATIONAL.mul in
@@ -357,6 +364,17 @@ let matrix_tests =
           [Int 1; Int 0; Int (-2);Int 3; Int 0;Int (-24)];
           [Int 0; Int 1; Int (-2);Int 2; Int 0;Int (-7)];
           [Int 0; Int 0; Int 0; Int 0; Int 1; Int 4]
+        ]);
+    make_reduce_test "reduce #2"
+      (RM.make 3 6 RATIONAL.zero [
+          [Int 1; Int 6; Int 2; Int (-5); Int (-2); Int (-4)];
+          [Int 0; Int 0; Int 2; Int (-8); Int (-1); Int 3];
+          [Int 0; Int 0; Int 0; Int 0; Int 1; Int 7]
+        ])
+      (RM.make 3 6 RATIONAL.zero [
+          [Int 1; Int 6; Int 0; Int 3; Int 0; Int 0];
+          [Int 0; Int 0; Int 1; Int (-4); Int 0; Int 5];
+          [Int 0; Int 0; Int 0; Int 0; Int 1; Int 7]
         ]);
 
     make_determinant_test "det - 1x1 matrix"
