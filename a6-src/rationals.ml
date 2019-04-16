@@ -133,7 +133,9 @@ module RATIONAL : NUM with type t = rational = struct
         else EQ
       end
     | Float f1, Float f2 ->
-      if f1 < f2 then LT
+      let tolerance = 10.0**(-.1000000.0) in (* accurate to the millionth *)
+      if f1 <= f2 +. tolerance && f1 >= f2 -. tolerance then EQ
+      else if f1 < f2 then LT
       else if f1 > f2 then GT
       else EQ
     | Float f, b -> compare (Float f) (Float (to_float b))
