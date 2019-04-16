@@ -4,6 +4,7 @@ type rational =
   | Frac of int * int  
   | Float of float
 module RATIONAL : NUM with type t = rational = struct
+  let tolerance = 10.0 ** 100000.0
   (** A module for working with t rationalbers *)
   exception ArithmeticError
   (* AF: A value of type t is a Int of type int, a Frac of type int * int,
@@ -48,6 +49,13 @@ module RATIONAL : NUM with type t = rational = struct
     | Int i -> float_of_int i
     | Float f -> f
     | Frac (n,d) -> (float_of_int n) /. (float_of_int d)
+  (** [to_exact f] is the exact value representation of a rational number *)
+  let to_exact = function
+    | Int i -> Int i
+    | Frac (n,d) -> Frac (n,d)
+    | Float f -> begin
+      simplify (Frac (int_of_float (f *. tolerance), int_of_float tolerance))
+      end
   (** [add (n1,d1) (n2,d2)] is the sum of two rational numbers *)
   let rec add = fun (r1:t) (r2:t) ->
     match rep_ok r1, rep_ok r2 with
@@ -95,13 +103,10 @@ module RATIONAL : NUM with type t = rational = struct
     | Float f, b -> sub (Float f) (Float (to_float b))
     | a, Float f -> sub (Float (to_float a)) (Float f)
   (** [to_string (n,d)] is the string repsentation of a t rationalber *)
-  let to_string = function
+  let rec to_string = function
     | Int i -> string_of_int i
-    | Float f -> begin
-      let d,n = modf f in
-      string_of_float (n +. floor (d *. 1000.0))
-    end
     | Frac (n,d) -> (string_of_int n)^"/"^(string_of_int d)
+    | Float f -> to_string (to_exact (Float f))
   (** [compare r1 r2] is the order of the rational numbers [r1] and [r2]
     * If [r1] is less than [r2], is LT
     * If [r1] is greater than [r2], is GT
@@ -133,8 +138,8 @@ module RATIONAL : NUM with type t = rational = struct
         else EQ
       end
     | Float f1, Float f2 ->
-      let tolerance = 10.0**(-.1000000.0) in (* accurate to the millionth *)
-      if f1 <= f2 +. tolerance && f1 >= f2 -. tolerance then EQ
+      let acc = 1.0 /. tolerance in (* accurate to the millionth *)
+      if f1 <= f2 +. acc && f1 >= f2 -. acc then EQ
       else if f1 < f2 then LT
       else if f1 > f2 then GT
       else EQ
