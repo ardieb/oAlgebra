@@ -18,9 +18,9 @@ module RATIONAL : NUM with type t = rational = struct
   let rep_ok = function
     | Int i -> Int i
     | Frac (n,d) -> begin
-      if d = 0 then raise ArithmeticError
-      else if d < 0 then Frac (-n, -d)
-      else Frac (n,d)
+        if d = 0 then raise ArithmeticError
+        else if d < 0 then Frac (-n, -d)
+        else Frac (n,d)
       end
   (** [gcd n1 n2] is the largest number that divides n1 and n2 evenly *)
   let rec gcd = fun (n1:int) (n2:int) ->
@@ -31,25 +31,25 @@ module RATIONAL : NUM with type t = rational = struct
   let simplify = function
     | Int i -> Int i
     | Frac (n,d) -> begin
-      if d = 0 then raise ArithmeticError else
-      let d' = gcd n d in
-      let n,d = n/d',d/d' in
-      if d = 1 then Int n 
-      else if d = -1 then Int (-n)
-      else if d < 0 then Frac (-n, -d)
-      else Frac (n,d)
+        if d = 0 then raise ArithmeticError else
+          let d' = gcd n d in
+          let n,d = n/d',d/d' in
+          if d = 1 then Int n 
+          else if d = -1 then Int (-n)
+          else if d < 0 then Frac (-n, -d)
+          else Frac (n,d)
       end
   (** [add (n1,d1) (n2,d2)] is the sum of two t numbers *)
   let rec add = fun (r1:t) (r2:t) ->
     match rep_ok r1, rep_ok r2 with
     | Int i1, Int i2 -> Int (i1 + i2)
     | Int i, Frac (n,d) -> begin
-      let i1 = i * d in
-      simplify (Frac ((n + i1),d))
+        let i1 = i * d in
+        simplify (Frac ((n + i1),d))
       end
     | Frac (n,d), Int i -> begin
-      let i1 = i * d in
-      simplify (Frac ((n + i1),d))
+        let i1 = i * d in
+        simplify (Frac ((n + i1),d))
       end
     | Frac (n1,d1), Frac (n2,d2) -> simplify (Frac (((n1*d2) + (n2*d1)),(d1*d2)))
   (** [mul (n1,d1) (n2,d2)] is the product of two t numbers *)
@@ -88,28 +88,28 @@ module RATIONAL : NUM with type t = rational = struct
   let compare = fun (r1:t) (r2:t) -> 
     match rep_ok r1, rep_ok r2 with
     | Int i1, Int i2 -> begin
-      if i1 > i2 then GT
-      else if i1 < i2 then LT
-      else EQ
+        if i1 > i2 then GT
+        else if i1 < i2 then LT
+        else EQ
       end
     | Int i, Frac (n,d) -> begin
-      if i > (n/d) then GT
-      else if i < (n/d) then LT
-      else if (n mod d) > 0 then LT
-      else EQ
+        if i > (n/d) then GT
+        else if i < (n/d) then LT
+        else if (n mod d) > 0 then LT
+        else EQ
       end
     | Frac (n,d), Int i -> begin
-      if (n/d) > i then GT
-      else if (n/d) < i then LT
-      else if (n mod d) > 0 then GT
-      else EQ
+        if (n/d) > i then GT
+        else if (n/d) < i then LT
+        else if (n mod d) > 0 then GT
+        else EQ
       end
     | Frac (n1,d1), Frac (n2,d2) -> begin
-      if (n1/d1) < (n2/d2) then LT
-      else if (n1/d1) > (n2/d2) then GT
-      else if (n1 mod d1) < (n2 mod d2) then LT
-      else if (n1 mod d1) > (n2 mod d2) then GT
-      else EQ
+        if (n1/d1) < (n2/d2) then LT
+        else if (n1/d1) > (n2/d2) then GT
+        else if (n1 mod d1) < (n2 mod d2) then LT
+        else if (n1 mod d1) > (n2 mod d2) then GT
+        else EQ
       end
   (** [abs f] is the absolute value of the rational number [f] *)
   let abs = function
