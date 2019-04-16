@@ -47,7 +47,7 @@ module type MATRIX = sig
   val reduce : matrix -> matrix
   val augment : matrix -> matrix -> matrix
   val partition : int * int -> int * int -> matrix -> matrix 
-  val solve : matrix -> matrix -> matrix
+  val solve : matrix -> matrix -> matrix list
   val determinant : matrix -> value
   val null_space : matrix -> matrix list
   val equals : matrix -> matrix -> bool
