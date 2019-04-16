@@ -167,6 +167,30 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     while !y < p && N.compare m.(!y).(col) N.zero = EQ do y := !y + 1 done;
     if !y >= p then None else Some !y
 
+  let all_zero = fun (m:matrix) (row:int) -> 
+    let (_,cols) = dim m in 
+    let boolean = ref true in
+    for curr_col = 0 to (cols-1) do 
+      (* TODO: do I use <> here for rationals? *)
+      if m.(row).(curr_col) <> N.zero then 
+        boolean := false;
+    done; 
+    !boolean
+
+  (** [bottom_zeros m] makes all the zero rows of [m]atrix go to the bottom] *)
+  let bottom_zeros = fun (m:matrix) ->
+    let (rows, cols) = dim m in
+    let top_bottom = ref 0 in 
+    let bottom_top = ref (rows - 1) in 
+    let m = ref m in
+    while (!top_bottom < !bottom_top) do 
+      if (all_zero !m !top_bottom) then 
+        (m := (swaprows !m (!top_bottom,!bottom_top));
+         bottom_top := !bottom_top - 1)
+      else top_bottom := !top_bottom + 1
+    done;
+    !m
+
   (** [reduce m] is the reduced row echelon matrix formed from [m] *)
   let reduce = fun (m:matrix) -> 
     let p,r = dim m in
@@ -198,7 +222,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
               memo := addrows !memo row i (N.neg (!memo).(i).(col))
             done; backward (row - 1)
           end in 
-    forward 0 0; backward (p - 1); !memo
+    forward 0 0; backward (p - 1); bottom_zeros !memo
 
   (** [pivots m] are the positions *)
   let pivots = fun (m:matrix) ->
