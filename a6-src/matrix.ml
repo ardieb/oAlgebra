@@ -54,7 +54,9 @@ module type MATRIX = sig
   val equals : matrix -> matrix -> bool
   val subtract : matrix -> matrix -> matrix
 
+  (* TODO: remove these after testing *)
   val supp_matrix : matrix -> int -> int -> matrix
+  val pivots : matrix -> (int * int) list
 end
 
 module type MATRIX_MAKER = 

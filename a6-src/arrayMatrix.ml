@@ -167,24 +167,6 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     while !y < p && N.compare m.(!y).(col) N.zero = EQ do y := !y + 1 done;
     if !y >= p then None else Some !y
 
-  (** [pivots m] are the positions *)
-  let pivots = fun (m:matrix) ->
-    let p,r = dim m in
-    let i,j = ref 0, ref 0 in
-    let memo = ref [] in
-    while !i < p do
-      while !j < r && N.compare m.(!i).(!j) N.zero = EQ do
-        j := !j + 1
-      done;
-      if !j = r then 
-        let () = i := !i + 1 in 
-        j := 0
-      else 
-        let () = memo := (!i,!j)::(!memo) in
-        let () = i := !i + 1 in
-        j := !j + 1
-    done; !memo
-
   (** [reduce m] is the reduced row echelon matrix formed from [m] *)
   let reduce = fun (m:matrix) -> 
     let p,r = dim m in
@@ -218,6 +200,25 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
           end in 
     forward 0 0; backward (p - 1); !memo
 
+  (** [pivots m] are the positions *)
+  let pivots = fun (m:matrix) ->
+    let p,r = dim m in
+    let m = reduce m in
+    let i,j = ref 0, ref 0 in
+    let memo = ref [] in
+    while !i < p do
+      while !j < r && N.compare m.(!i).(!j) N.zero = EQ do
+        j := !j + 1
+      done;
+      if !j = r then 
+        let () = i := !i + 1 in 
+        j := 0
+      else 
+        let () = memo := (!i,!j)::(!memo) in
+        let () = i := !i + 1 in
+        j := !j + 1
+    done; !memo
+
   (** [augment m1 m2] is the matrix obtained by appending 
       * the columns of [m2] to [m1] 
       * Requires: [m1] and [m2] have the same number of rows*)
@@ -236,16 +237,16 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let (m,n), (p,r) = dim m1, dim m2 in
     if m <> p || n <> r then false
     else 
-    let res = ref true in
-    let i = ref 0 in
-    let j = ref 0 in
-    while !i < m && !res do
-      while !j < n && !res do
-        res := N.compare (m1.(!i).(!j)) (m2.(!i).(!j)) = EQ;
-        j := !j + 1;
-      done;
-      i := !i + 1;
-    done; !res
+      let res = ref true in
+      let i = ref 0 in
+      let j = ref 0 in
+      while !i < m && !res do
+        while !j < n && !res do
+          res := N.compare (m1.(!i).(!j)) (m2.(!i).(!j)) = EQ;
+          j := !j + 1;
+        done;
+        i := !i + 1;
+      done; !res
 
   (** [null_space m] is is the list of vectors that solve the equation
     * [m] x-vector = 0-vector *)
@@ -269,11 +270,11 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   let solve = fun (m:matrix) (v:matrix) -> 
     let (p,r), (s,t) = dim m, dim v in
     if t <> 1 then failwith "This is linear system of equations" else
-    let aug = augment m v |> reduce in
-    let vec = partition (r,0) (r,p-1) aug in
-    let pvs = pivots aug in 
-    let () = List.iter (fun (_,j) -> if j = r then failwith "No solution" else ()) pvs in
-    vec::(null_space m)
+      let aug = augment m v |> reduce in
+      let vec = partition (r,0) (r,p-1) aug in
+      let pvs = pivots aug in 
+      let () = List.iter (fun (_,j) -> if j = r then failwith "No solution" else ()) pvs in
+      vec::(null_space m)
 
   (** [supp_matrix m i j] is the matrix [m] without values from row [i] or 
     * column [j] *)
