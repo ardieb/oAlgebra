@@ -17,6 +17,7 @@ module type NUM = sig
   exception ArithmeticError
   val zero : t
   val one : t
+  val error : t
   val add : t -> t -> t
   val mul : t -> t -> t
   val div : t -> t -> t

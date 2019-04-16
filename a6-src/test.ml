@@ -320,7 +320,7 @@ let matrix_tests =
     make_add_test "add fails with invalid matrix sizes"
       (RM.make 2 3 RATIONAL.one [[]])
       (RM.make 3 3 RATIONAL.one [[]])
-      (RM.make 1 1 RATIONAL.one [[]])
+      (RM.make 1 1 RATIONAL.error [[]])
       true;
 
     (*============= matrix subtraction tests =============*)
@@ -357,7 +357,7 @@ let matrix_tests =
     make_subtract_test "subtract fails with invalid matrix sizes"
       (RM.make 2 3 RATIONAL.one [[]])
       (RM.make 2 2 RATIONAL.one [[]])
-      (RM.make 1 1 RATIONAL.one [[]])
+      (RM.make 1 1 RATIONAL.error [[]])
       true;
 
     (*################## SCALE TEST #################*)
@@ -375,7 +375,7 @@ let matrix_tests =
     make_augment_test "augment fails"
       (RM.make 2 2 (Int 4) [[]])
       (RM.make 3 3 (Int 2) [[]])
-      (RM.diagonal 3 3)
+      (RM.make 1 1 RATIONAL.error [[]])
       true;
     (* ################## REDUCE TEST ##############*)
     make_reduce_test "reduce #1"
@@ -458,7 +458,63 @@ let matrix_tests =
           [Int 56; Int 19; Int 0; Int 338; Int 2];
           [Int 76; Int 5; Int (-4); Int 3; Int 23]
         ])
-      (Int 0)
+      (RATIONAL.error)
+      true;
+
+    (*=================== matrix inverse tests ===============*)
+    make_inverse_test "inverse - 2x2"
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 3; Int 2];
+          [Int 8; Int 10]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [(Frac (5,7)); (Frac ((-1),7))];
+          [(Frac ((-4),7)); (Frac (3,14))]
+        ]
+      )
+      false;
+
+    make_inverse_test "inverse - 3x3"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 4; Int (-3); (Frac (1,2))];
+          [Int 2; Int 0; Int 14];
+          [(Frac ((-1),2)); Int 0; Int 6]
+        ])
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 0; (Frac (6,19)); (Frac ((-14),19))];
+          [(Frac ((-1),3)); (Frac (97,228)); (Frac ((-55),57))];
+          [Int 0; (Frac (1,38)); (Frac(2,19))]
+        ])
+      false;
+
+    make_inverse_test "inverse fails - 4x5 matrix #2"
+      (RM.make 4 5 RATIONAL.zero [
+          [Int 6; Int 9; Int 29; Int 38; Int 298];
+          [Int 6; Int 2; Int (-29); Int 8; Int 28];
+          [Int 56; Int 19; Int 0; Int 338; Int 2];
+          [Int 76; Int 5; Int (-4); Int 3; Int 23]
+        ])
+      (RM.make 1 1 RATIONAL.error [[]])
+      true;    
+
+    make_inverse_test "inverse fails - 3x3 linearly dependent"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 1; Int 2; Int 3];
+          [Int 4; Int 5; Int 6];
+          [Int 7; Int 8; Int 9];
+        ])
+      (RM.make 1 1 RATIONAL.error [[]])
+      true;
+
+    make_inverse_test "inverse fails - 5x5 linearly dependent"
+      (RM.make 5 5 RATIONAL.zero [
+          [Int 1; Int 2; Int 3; Int 4; Int 5];
+          [Int 6; Int 7; Int 8; Int 9; Int 10];
+          [Int 11; Int 12; Int 13; Int 14; Int 15];
+          [Int 16; Int 17; Int 18; Int 19; Int 20];
+          [Int 21; Int 22; Int 23; Int 24; Int 25]
+        ])
+      (RM.make 1 1 RATIONAL.error [[]])
       true;
   ]
 
