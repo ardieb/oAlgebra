@@ -127,7 +127,7 @@ let make_null_space_test
     (matrix: RM.matrix)
     (expected_output: RM.matrix list) =
   name >:: (fun _ ->
-      assert_equal (RM.null_space matrix) expected_output)
+      assert_equal (RM.null_space matrix) expected_output ~cmp:cmp_set_like_lists)
 
 let make_inverse_test
     (name: string)
@@ -516,6 +516,42 @@ let matrix_tests =
         ])
       (RM.make 1 1 RATIONAL.error [[]])
       true;
+
+    (*============= null space tests ===============*)
+    make_null_space_test "null space - 3x3"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 3; Int 3; Int 0];
+          [Int 2; Int 5; Int 1];
+          [Int 3; Int 6; Int 1]
+        ])
+      ([
+        RM.make 3 1 RATIONAL.zero [
+          [(Frac (1,3))];
+          [(Frac ((-1),3))];
+          [Int 1]
+        ]
+      ]);
+
+    make_null_space_test "null space 2x3"
+      (RM.make 2 3 RATIONAL.zero [
+          [Int 3; Int 5; Int 10];
+          [Int 4; Int 6; Int 6]
+        ])
+      ([
+        RM.make 3 1 RATIONAL.zero [
+          [Int 15];
+          [Int (-11)];
+          [Int 1]
+        ]
+      ]);
+
+    make_null_space_test "null space 3x3"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 1; Int 4; Int 8];
+          [Int 0; Int 2; Int 1];
+          [Int 4; Int 10; Int 8]
+        ])
+      ([RM.make 3 1 RATIONAL.zero [[]]])
   ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [
