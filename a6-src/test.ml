@@ -8,6 +8,15 @@ let cmp_rat = fun x1 x2 ->
   | EQ -> true
   | _ -> false
 
+let cmp_set_like_lists lst1 lst2 =
+  let uniq1 = List.sort_uniq compare lst1 in
+  let uniq2 = List.sort_uniq compare lst2 in
+  List.length lst1 = List.length uniq1
+  &&
+  List.length lst2 = List.length uniq2
+  &&
+  uniq1 = uniq2
+
 let make_op_test 
     (name: string)
     (op: rational -> rational -> rational)
@@ -117,6 +126,18 @@ let make_null_space_test
     (expected_output: RM.matrix list) =
   name >:: (fun _ ->
       assert_equal (RM.null_space matrix) expected_output)
+
+let make_inverse_test
+    (name: string)
+    (input: RM.matrix)
+    (expected_output: RM.matrix)
+    (raises: bool) =
+  name >:: (fun _ ->
+      if raises then
+        assert_raises RM.MatrixError (fun () -> RM.inverse input)
+      else
+        assert_equal expected_output (RM.inverse input) ~cmp:RM.equals
+    )
 
 let rationals_tests =
   let add = RATIONAL.add in
@@ -405,6 +426,19 @@ let matrix_tests =
           [Int 5; Int 2; Int 0; Int 9]
         ])
       (Int (-376));
+
+    (* =========== matrix inverse tests ============= *)
+    make_inverse_test "inverse - 3x3 matrix #1"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 0; Int 3; Int 5];
+          [Int 5; Int 5; Int 2];
+          [Int 3; Int 4; Int 3]])
+      (RM.make 3 3 RATIONAL.zero [
+          [Frac ((-7),2); Frac ((-11),2); Frac((19),2)];
+          [Frac (9,2); Frac (15,2); Frac ((-25),2)];
+          [Frac ((-5),2); Frac((-9),2); Frac (15,2)]
+        ])
+      false;
   ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [
