@@ -87,6 +87,14 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
           res.(i).(j) <- dot (partition (i,0) (i,n-1) m1) (partition (j,0) (j,p-1) m2)
         done; done; res
 
+  (** [identity n] is an [n] by [n] identity matrix*)
+  let identity = fun (n:int) -> 
+    let empty = make n n N.zero [[]] in 
+    for i = 0 to (n-1) do 
+      empty.(i).(i) <- N.one
+    done;
+    empty
+
   (** [add m1 m2] is the sum of matricies [m1] and [m2] 
     * Requires: [m1] and [m2] have the same dimensions *)
   let add = fun (m1:matrix) (m2:matrix) -> 
@@ -151,13 +159,15 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     while !x < r && N.compare m.(i).(!x) N.zero = EQ do x := !x + 1 done;
     if !x >= r then None else Some !x
 
-
+  (** [pivot_row m row col] is Some left most pivot starting from position
+    * [row], [col] in [m]. If there is no pivot, the value is None *)
   let pivot_row = fun (m:matrix) (row:int) (col:int) ->
     let p,r = dim m in
     let y = ref row in
     while !y < p && N.compare m.(!y).(col) N.zero = EQ do y := !y + 1 done;
     if !y >= p then None else Some !y
 
+  (** [pivots m] are the positions *)
   let pivots = fun (m:matrix) ->
     let p,r = dim m in
     let i,j = ref 0, ref 0 in
@@ -174,7 +184,6 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         let () = i := !i + 1 in
         j := !j + 1
     done; !memo
-    
 
   (** [reduce m] is the reduced row echelon matrix formed from [m] *)
   let reduce = fun (m:matrix) -> 
@@ -222,6 +231,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
             else m2.(i).(j-n)
         done; done; res
 
+  (** [equals m1 m2] is true if m1 is structurally equal to m2 and false otherwise *)
   let equals = fun (m1:matrix) (m2:matrix) ->
     let (m,n), (p,r) = dim m1, dim m2 in
     if m <> p || n <> r then false
@@ -237,6 +247,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       i := !i + 1;
     done; !res
 
+  (** [null_space m] is is the list of vectors that solve the equation
+    * [m] x-vector = 0-vector *)
   let null_space = fun (m:matrix) ->
     let p,r = dim m in
     let pvs = pivots (reduce m) in
@@ -251,6 +263,9 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       else ()
     done; !memo 
 
+  (** [solve m v] is the list of vectors that solves the linear equation
+    * [m] x-vector = [v]. The first vector is the particular solution to the 
+    * equation. Fails if the equation cannot be exactly solved for *)
   let solve = fun (m:matrix) (v:matrix) -> 
     let (p,r), (s,t) = dim m, dim v in
     if t <> 1 then failwith "This is linear system of equations" else
@@ -308,14 +323,9 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
                (determinant (supp_matrix_1st_row m counter)))
       done; !sum
 
-  (** [identity n] is an [n] by [n] identity matrix*)
-  let identity = fun (n:int) -> 
-    let empty = make n n N.zero [[]] in 
-    for i = 0 to (n-1) do 
-      empty.(i).(i) <- N.one
-    done;
-    empty
-
+  (** [inverse m] is the inverse of matrix [m], 
+    * Raises [MatrixError] if the matrix [m] is not square or if the
+    * determinant of [m] is zero *)
   let inverse = fun (m:matrix) -> 
     let (rows, cols) = dim m in 
     if rows<>cols || (determinant m)=N.zero then raise MatrixError 
@@ -324,6 +334,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       let reduced = reduce augmented in 
       partition (cols, 0) (2*cols-1, rows-1) reduced
 
+  (** [format fmt m] is the formatted matrix [m] *)
   let format = fun (fmt:Format.formatter) (m:matrix) ->
     Format.fprintf fmt "\n";
     Array.iter (fun row -> 
@@ -387,23 +398,4 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
 
   let eigenvalues = fun (m:matrix) -> failwith "TODO"
   let eigenvectors = fun (m:matrix) -> failwith "TODO"
-<<<<<<< HEAD
-=======
-  let solve = fun (m:matrix) (v:matrix) -> failwith "TODO"
-
-  let equals = fun (m1:matrix) (m2:matrix) ->
-    let (m,n), (p,r) = dim m1, dim m2 in
-    if m <> p || n <> r then false
-    else 
-      let res = ref true in
-      let i = ref 0 in
-      let j = ref 0 in
-      while !i < m && !res do
-        while !j < n && !res do
-          res := N.compare (m1.(!i).(!j)) (m2.(!i).(!j)) = EQ;
-          j := !j + 1;
-        done;
-        i := !i + 1;
-      done; !res
->>>>>>> cc569e9f12383d5b7ee34363eff1abf388af17a8
 end
