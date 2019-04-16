@@ -206,15 +206,15 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let p,r = dim m in
     let m' = make (p-1) (r-1) N.zero [[]] in
     let i, j = ref 0, ref 0 in
-    while !i != row do 
-      while !j != col do
+    while !i <> row do 
+      while !j <> col do
         m'.(!i).(!j) <- m.(!i).(!j);
         j := !j + 1;
       done;
       i := !i + 1;
     done;
-    while !i < p - 1 do
-      while !j < r - 1 do
+    while !i <= p - 1 do
+      while !j <= r - 1 do
         m'.(!i).(!j) <- m.(!i + 1).(!j + 1);
         j := !j + 1;
       done;
@@ -222,28 +222,30 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     done;
     m'
 
-  (** [supp_matrix_1st_row m col]*)
   let supp_matrix_1st_row = fun (m:matrix) (col:int) -> 
     let (rows,cols) = dim m in
     let new_mat = make (rows-1) (rows-1) N.zero [[]] in
-    for i = 1 to (rows-1) do 
-      for j = 0 to (rows-1) do 
+    for i = 1 to rows-1 do 
+      for j = 0 to rows-1 do 
         if (j < col) then new_mat.(i-1).(j) <- m.(i).(j)
         else if (j > col) then new_mat.(i-1).(j-1) <- m.(i).(j)
-      done; done; new_mat
+      done;
+    done;
+    new_mat
 
   (** [determinant m] is the determinant of matrix [m] *)
   let rec determinant = fun (m:matrix) -> 
     let (row,col) = dim m in if row<>col || row<1 then raise MatrixError else 
     if row=1 then m.(0).(0) else
     if row=2 then let (a,b,c,d) = (m.(0).(0), m.(0).(1), m.(1).(0), m.(1).(1)) in 
-      N.sub (N.mul a d) (N.mul b c) else 
+      N.sub (N.mul a d) (N.mul b c) 
+    else 
       let sum = ref N.zero in 
-      for counter = 0 to (row-1) do
+      for counter = 0 to (col-1) do
         let neg_or_pos = if (counter mod 2)=0 then N.one else N.neg N.one in 
         sum := N.add (!sum) 
             (neg_or_pos |> N.mul m.(0).(counter) |> N.mul 
-               (determinant (supp_matrix m 1 counter)))
+               (determinant (supp_matrix_1st_row m counter)))
       done; !sum
 
   (** [identity n] is an [n] by [n] identity matrix*)
