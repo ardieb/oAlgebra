@@ -151,7 +151,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     while !x < r && N.compare m.(i).(!x) N.zero = EQ do x := !x + 1 done;
     if !x >= r then None else Some !x
 
-  
+
   let pivot_row = fun (m:matrix) (row:int) (col:int) ->
     let p,r = dim m in
     let y = ref row in
@@ -183,30 +183,30 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     (* Gets matrix in upper triangular form *)
     let rec forward (row:int) (col:int) =
       if row >= p - 1 || col >= r - 1 then () else 
-      match pivot_row (!memo) row col with
-      | None -> forward (row) (col + 1);
-      | Some pivot -> begin
-        let () = memo := swaprows (!memo) (row,pivot) in
-        let () = for i = row + 1 to p - 1 do
-          let const = N.neg (N.div (!memo).(i).(col) (!memo).(row).(col)) in
-          memo := addrows (!memo) row i const 
-        done in
-        forward (row + 1) (col + 1);
-        end in 
+        match pivot_row (!memo) row col with
+        | None -> forward (row) (col + 1);
+        | Some pivot -> begin
+            let () = memo := swaprows (!memo) (row,pivot) in
+            let () = for i = row + 1 to p - 1 do
+                let const = N.neg (N.div (!memo).(i).(col) (!memo).(row).(col)) in
+                memo := addrows (!memo) row i const 
+              done in
+            forward (row + 1) (col + 1);
+          end in 
     let rec backward (row:int) =
       if row < 0 then () else
-      match pivot_col (!memo) row with
-      | None -> 
-        backward (row -1);
-      | Some col when row = 0 -> begin
-        memo := mulrows !memo row (N.div N.one (!memo).(row).(col))
-        end
-      | Some col -> begin
-        let () = memo := mulrows !memo row (N.div N.one (!memo).(row).(col)) in 
-        for i = row - 1 downto 0 do
-           memo := addrows !memo row i (N.neg (!memo).(i).(col))
-        done; backward (row - 1)
-        end in 
+        match pivot_col (!memo) row with
+        | None -> 
+          backward (row -1);
+        | Some col when row = 0 -> begin
+            memo := mulrows !memo row (N.div N.one (!memo).(row).(col))
+          end
+        | Some col -> begin
+            let () = memo := mulrows !memo row (N.div N.one (!memo).(row).(col)) in 
+            for i = row - 1 downto 0 do
+              memo := addrows !memo row i (N.neg (!memo).(i).(col))
+            done; backward (row - 1)
+          end in 
     forward 0 0; backward (p - 1); !memo
 
   (** [augment m1 m2] is the matrix obtained by appending 
@@ -266,15 +266,15 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let p,r = dim m in
     let m' = make (p-1) (r-1) N.zero [[]] in
     let i, j = ref 0, ref 0 in
-    while !i != row do 
-      while !j != col do
+    while !i <> row do 
+      while !j <> col do
         m'.(!i).(!j) <- m.(!i).(!j);
         j := !j + 1;
       done;
       i := !i + 1;
     done;
-    while !i < p - 1 do
-      while !j < r - 1 do
+    while !i <= p - 1 do
+      while !j <= r - 1 do
         m'.(!i).(!j) <- m.(!i + 1).(!j + 1);
         j := !j + 1;
       done;
@@ -282,27 +282,30 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     done;
     m'
 
-  (** [supp_matrix_1st_row m col]*)
   let supp_matrix_1st_row = fun (m:matrix) (col:int) -> 
     let (rows,cols) = dim m in
     let new_mat = make (rows-1) (rows-1) N.zero [[]] in
-    for i = 1 to (rows-1) do 
-      for j = 0 to (rows-1) do 
+    for i = 1 to rows-1 do 
+      for j = 0 to rows-1 do 
         if (j < col) then new_mat.(i-1).(j) <- m.(i).(j)
         else if (j > col) then new_mat.(i-1).(j-1) <- m.(i).(j)
-      done; done; new_mat
+      done;
+    done;
+    new_mat
 
   (** [determinant m] is the determinant of matrix [m] *)
   let rec determinant = fun (m:matrix) -> 
-    let (row,col) = dim m in if row<>col || row<2 then raise MatrixError else 
+    let (row,col) = dim m in if row<>col || row<1 then raise MatrixError else 
+    if row=1 then m.(0).(0) else
     if row=2 then let (a,b,c,d) = (m.(0).(0), m.(0).(1), m.(1).(0), m.(1).(1)) in 
-      N.sub (N.mul a d) (N.mul b c) else 
+      N.sub (N.mul a d) (N.mul b c) 
+    else 
       let sum = ref N.zero in 
-      for counter = 0 to (row-1) do
+      for counter = 0 to (col-1) do
         let neg_or_pos = if (counter mod 2)=0 then N.one else N.neg N.one in 
         sum := N.add (!sum) 
             (neg_or_pos |> N.mul m.(0).(counter) |> N.mul 
-               (determinant (supp_matrix m 1 counter)))
+               (determinant (supp_matrix_1st_row m counter)))
       done; !sum
 
   (** [identity n] is an [n] by [n] identity matrix*)
@@ -341,8 +344,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       c.(i).(0) <- m.(i).(j)
     done; c
 
-(* this is incorrect because it's supposed to divide by the square root of the length,
-which requires irrational numbers *)
+  (* this is incorrect because it's supposed to divide by the square root of the length,
+     which requires irrational numbers *)
   let normalize = fun (v:matrix) -> 
     scale (N.div N.one (dot v v)) v
 
@@ -384,4 +387,23 @@ which requires irrational numbers *)
 
   let eigenvalues = fun (m:matrix) -> failwith "TODO"
   let eigenvectors = fun (m:matrix) -> failwith "TODO"
+<<<<<<< HEAD
+=======
+  let solve = fun (m:matrix) (v:matrix) -> failwith "TODO"
+
+  let equals = fun (m1:matrix) (m2:matrix) ->
+    let (m,n), (p,r) = dim m1, dim m2 in
+    if m <> p || n <> r then false
+    else 
+      let res = ref true in
+      let i = ref 0 in
+      let j = ref 0 in
+      while !i < m && !res do
+        while !j < n && !res do
+          res := N.compare (m1.(!i).(!j)) (m2.(!i).(!j)) = EQ;
+          j := !j + 1;
+        done;
+        i := !i + 1;
+      done; !res
+>>>>>>> cc569e9f12383d5b7ee34363eff1abf388af17a8
 end
