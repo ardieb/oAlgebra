@@ -395,7 +395,16 @@ let matrix_tests =
           [Int 10; Int 0; Int (-3)];
           [Int (-2); Int (-4); Int 1];
           [Int 3; Int 0; Int 2]])
-      (Int (-116))
+      (Int (-116));
+
+    make_determinant_test "det - 4x4 matrix #1"
+      (RM.make 4 4 RATIONAL.zero [
+          [Int 1; Int 3; Int 5; Int 9];
+          [Int 1; Int 3; Int 1; Int 7];
+          [Int 4; Int 3; Int 9; Int 7];
+          [Int 5; Int 2; Int 0; Int 9]
+        ])
+      (Int (-376));
   ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [
