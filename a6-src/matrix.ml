@@ -50,9 +50,9 @@ module type MATRIX = sig
   val solve : matrix -> matrix -> matrix list
   val determinant : matrix -> value
   val null_space : matrix -> matrix list
+  val col_space : matrix -> matrix list
   val equals : matrix -> matrix -> bool
   val subtract : matrix -> matrix -> matrix
-
   val supp_matrix : matrix -> int -> int -> matrix
 end
 

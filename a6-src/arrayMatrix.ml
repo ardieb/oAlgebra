@@ -115,7 +115,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   (* matrix for swapping the ith and jth rows *)
   (** [swaprows m i,j] is the matrix [m] with rows [i] and [j] interchanged 
     * Requires: i,j < height of m - 1 *)
-  let swaprows = fun (m:matrix) (i,j:int*int) -> 
+  let swaprows = fun (m:matrix) (i:int) (j:int) -> 
     let e = fun (i:int) (j:int) (n:int) ->
       let res = (diagonal n n) in
       res.(i).(i) <- N.zero;
@@ -195,11 +195,11 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         match pivot_row (!memo) row col with
         | None -> forward (row) (col + 1);
         | Some pivot -> begin
-            let () = memo := swaprows (!memo) (row,pivot) in
-            let () = for i = row + 1 to p - 1 do
-                let const = N.neg (N.div (!memo).(i).(col) (!memo).(row).(col)) in
-                memo := addrows (!memo) row i const 
-              done in
+            memo := swaprows (!memo) row pivot;
+            for i = row + 1 to p - 1 do
+              let const = N.neg (N.div (!memo).(i).(col) (!memo).(row).(col)) in
+              memo := addrows (!memo) row i const 
+            done;
             forward (row + 1) (col + 1);
           end in 
     let rec backward (row:int) =
@@ -207,15 +207,17 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         match pivot_col (!memo) row with
         | None -> 
           backward (row -1);
-        | Some col when row = 0 -> begin
-            memo := mulrows !memo row (N.div N.one (!memo).(row).(col))
-          end
+        | Some col when row = 0 ->
+          memo := mulrows !memo row (N.div N.one (!memo).(row).(col))
         | Some col -> begin
-            let () = memo := mulrows !memo row (N.div N.one (!memo).(row).(col)) in 
-            for i = row - 1 downto 0 do
-              memo := addrows !memo row i (N.neg (!memo).(i).(col))
-            done; backward (row - 1)
-          end in 
+          memo := mulrows !memo row (N.div N.one (!memo).(row).(col));
+          memo := addrows !memo row (row - 1) (N.neg (!memo).(row - 1).(col));
+          match pivot_col (!memo) (row - 1) with
+          | None -> 
+            memo := swaprows !memo row (row - 1); 
+            backward (row - 1);
+          | Some _ -> backward (row - 1);
+        end in 
     forward 0 0; backward (p - 1); !memo
 
   (** [augment m1 m2] is the matrix obtained by appending 
@@ -254,11 +256,26 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let pvs = pivots (reduce m) in
     let memo = ref [] in
     let is_pivot_col = fun (j:int) ->
-      let member = ref false in 
-      let () = List.iter (fun (_,j') -> if j = j' then member := true else ()) pvs in 
-      !member in
+      let is_piv = ref false in 
+      let () = List.iter (fun (_,j') -> if j = j' then is_piv := true else ()) pvs in 
+      !is_piv in
     for j = 0 to r - 1 do
-      if is_pivot_col j then 
+      if not (is_pivot_col j) then 
+        memo := (partition (j,0) (j,p - 1) m)::(!memo)
+      else ()
+    done; !memo 
+
+  (** [col_space m] is the list of vectors that form the column space of [m] *)
+  let col_space = fun (m:matrix) -> 
+    let p,r = dim m in
+    let pvs = pivots (reduce m) in
+    let memo = ref [] in
+    let is_pivot_col = fun (j:int) ->
+      let is_piv = ref false in 
+      let () = List.iter (fun (_,j') -> if j = j' then is_piv := true else ()) pvs in 
+      !is_piv in
+    for j = 0 to r - 1 do
+      if (is_pivot_col j) then 
         memo := (partition (j,0) (j,p - 1) m)::(!memo)
       else ()
     done; !memo 
@@ -288,8 +305,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       done;
       i := !i + 1;
     done;
-    while !i <= p - 1 do
-      while !j <= r - 1 do
+    while !i < p - 1 do
+      while !j < r - 1 do
         m'.(!i).(!j) <- m.(!i + 1).(!j + 1);
         j := !j + 1;
       done;
@@ -297,7 +314,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     done;
     m'
 
-  let supp_matrix_1st_row = fun (m:matrix) (col:int) -> 
+  (*let supp_matrix_1st_row = fun (m:matrix) (col:int) -> 
     let (rows,cols) = dim m in
     let new_mat = make (rows-1) (rows-1) N.zero [[]] in
     for i = 1 to rows-1 do 
@@ -306,7 +323,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         else if (j > col) then new_mat.(i-1).(j-1) <- m.(i).(j)
       done;
     done;
-    new_mat
+    new_mat*)
 
   (** [determinant m] is the determinant of matrix [m] *)
   let rec determinant = fun (m:matrix) -> 
@@ -320,7 +337,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         let neg_or_pos = if (counter mod 2)=0 then N.one else N.neg N.one in 
         sum := N.add (!sum) 
             (neg_or_pos |> N.mul m.(0).(counter) |> N.mul 
-               (determinant (supp_matrix_1st_row m counter)))
+               (determinant (supp_matrix m 1 counter)))
       done; !sum
 
   (** [inverse m] is the inverse of matrix [m], 
