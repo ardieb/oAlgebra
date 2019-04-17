@@ -116,16 +116,18 @@ let make_reduce_test
 let make_determinant_test
     (name: string)
     (matrix: RM.matrix)
-    (expected_output: RM.value) =
+    (expected_output: RM.value)
+    (ex: bool) = 
   name >:: (fun _ ->  
-      assert_equal (RM.determinant matrix) expected_output ~cmp:cmp_rat)
+      if ex then assert_raises RM.MatrixError (fun () -> RM.determinant matrix)
+      else assert_equal (RM.determinant matrix) expected_output ~cmp:cmp_rat)
 
 let make_null_space_test 
     (name: string)
     (matrix: RM.matrix)
     (expected_output: RM.matrix list) =
   name >:: (fun _ ->
-      assert_equal (RM.null_space matrix) expected_output)
+      assert_equal (RM.null_space matrix) expected_output ~cmp:cmp_set_like_lists)
 
 let make_inverse_test
     (name: string)
@@ -240,123 +242,123 @@ let matrix_tests =
           [Int (-1); Int 13; Int (-9)]
         ]) false;
     make_mul_test "mul 3x3 * 3x3"
-    (RM.make 3 3 RATIONAL.zero [
-      [Int 2; Int 4; Int 2];
-      [Int 1; Int 4; Int 0];
-      [Int 2; Int 6; Int 0]
-    ])
-    (RM.make 3 3 RATIONAL.zero [
-      [Int 1; Int 0; Int 0];
-      [Int 0; Int 1; Int 0];
-      [Int 0; Int 0; Int 1]
-    ])
-    (RM.make 3 3 RATIONAL.zero [
-      [Int 2; Int 4; Int 2];
-      [Frac (1,4); Int 4; Int 0];
-      [Int 2; Int 6; Int 0]
-    ])
-    false;
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 2; Int 4; Int 2];
+          [Int 1; Int 4; Int 0];
+          [Int 2; Int 6; Int 0]
+        ])
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 1; Int 0; Int 0];
+          [Int 0; Int 1; Int 0];
+          [Int 0; Int 0; Int 1]
+        ])
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 2; Int 4; Int 2];
+          [Frac (1,4); Int 4; Int 0];
+          [Int 2; Int 6; Int 0]
+        ])
+      false;
     make_mul_test "mul 3x2 * 2x2"
-    (RM.make 3 2 RATIONAL.zero [
-      [Int 5; Int 1];
-      [Int 2; Int 2];
-      [Int 4; Int 1]
-    ])
-    (RM.make 2 2 RATIONAL.zero [[]])
-    (RM.make 3 2 RATIONAL.zero [[]])
-    false;
+      (RM.make 3 2 RATIONAL.zero [
+          [Int 5; Int 1];
+          [Int 2; Int 2];
+          [Int 4; Int 1]
+        ])
+      (RM.make 2 2 RATIONAL.zero [[]])
+      (RM.make 3 2 RATIONAL.zero [[]])
+      false;
 
     (*============= matrix addition tests =============*)
     make_add_test "add 2x2 * 2x2"
-    (RM.make 2 2 RATIONAL.zero [
-      [Int 1; Int 4];
-      [Int 5; Int (-2)]
-    ])
-    (RM.make 2 2 RATIONAL.zero [
-      [Int 7; Int 3];
-      [Int 11; Int 9]
-    ])
-    (RM.make 2 2 RATIONAL.zero [
-      [Int 8; Int 7];
-      [Int 16; Int 7]
-    ])
-    false;
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 1; Int 4];
+          [Int 5; Int (-2)]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 7; Int 3];
+          [Int 11; Int 9]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 8; Int 7];
+          [Int 16; Int 7]
+        ])
+      false;
 
     make_add_test "add 2x2 * 2x2"
-    (RM.make 2 2 RATIONAL.zero [
-      [Int (-3); Int 4];
-      [Int 6; Int 13]
-    ])
-    (RM.make 2 2 RATIONAL.zero [
-      [Int 3; Int (-8)];
-      [Int (-2); Int 2]
-    ])
-    (RM.make 2 2 RATIONAL.zero [
-      [Int 0; Int (-4)];
-      [Int 4; Int 15]
-    ])
-    false;
+      (RM.make 2 2 RATIONAL.zero [
+          [Int (-3); Int 4];
+          [Int 6; Int 13]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 3; Int (-8)];
+          [Int (-2); Int 2]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 0; Int (-4)];
+          [Int 4; Int 15]
+        ])
+      false;
 
     make_add_test "add 3x3 * 3x3"
-    (RM.make 3 3 RATIONAL.zero [
-      [Int 1; Int 6; Int 4];
-      [Int (-3); Int 8; Int 9];
-      [Int (-2); Int 7; Int (-1)]
-    ])
-    (RM.make 3 3 RATIONAL.zero [
-      [Int (-2); Int 4; Int (-1)];
-      [Int 4; Int (-17); Int (-5)];
-      [Int 6; Int 1; Int 8]
-    ])
-    (RM.make 3 3 RATIONAL.zero [
-      [Int (-1); Int 10; Int 3];
-      [Int 1; Int (-9); Int 4];
-      [Int 4; Int 8; Int 7]
-    ])
-    false;
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 1; Int 6; Int 4];
+          [Int (-3); Int 8; Int 9];
+          [Int (-2); Int 7; Int (-1)]
+        ])
+      (RM.make 3 3 RATIONAL.zero [
+          [Int (-2); Int 4; Int (-1)];
+          [Int 4; Int (-17); Int (-5)];
+          [Int 6; Int 1; Int 8]
+        ])
+      (RM.make 3 3 RATIONAL.zero [
+          [Int (-1); Int 10; Int 3];
+          [Int 1; Int (-9); Int 4];
+          [Int 4; Int 8; Int 7]
+        ])
+      false;
 
     make_add_test "add fails with invalid matrix sizes"
       (RM.make 2 3 RATIONAL.one [[]])
       (RM.make 3 3 RATIONAL.one [[]])
-      (RM.make 1 1 RATIONAL.one [[]])
-    true;
+      (RM.make 1 1 RATIONAL.error [[]])
+      true;
 
     (*============= matrix subtraction tests =============*)
     make_subtract_test "subtract 2x3 * 2x3"
-    (RM.make 2 3 RATIONAL.zero [
-      [Int (-1); Int 2; Int 0];
-      [Int 0; Int 3; Int 6]
-    ])
-    (RM.make 2 3 RATIONAL.zero [
-      [Int 0; Int (-4); Int 3];
-      [Int 9; Int (-4); Int (-3)]
-    ])
-    (RM.make 2 3 RATIONAL.zero [
-      [Int (-1); Int 6; Int (-3)];
-      [Int (-9); Int 7; Int 9]
-    ])
-    false;
+      (RM.make 2 3 RATIONAL.zero [
+          [Int (-1); Int 2; Int 0];
+          [Int 0; Int 3; Int 6]
+        ])
+      (RM.make 2 3 RATIONAL.zero [
+          [Int 0; Int (-4); Int 3];
+          [Int 9; Int (-4); Int (-3)]
+        ])
+      (RM.make 2 3 RATIONAL.zero [
+          [Int (-1); Int 6; Int (-3)];
+          [Int (-9); Int 7; Int 9]
+        ])
+      false;
 
     make_subtract_test "subtract 2x2 * 2x2"
-    (RM.make 2 2 RATIONAL.zero [
-      [Int 2; Int (-1)];
-      [Int 1; Int 2]
-    ])
-    (RM.make 2 2 RATIONAL.zero [
-      [Int 3; Int 3];
-      [Int 3; Int 1]
-    ])
-    (RM.make 2 2 RATIONAL.zero [
-      [Int (-1); Int (-4)];
-      [Int (-2); Int 1]
-    ])
-    false;
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 2; Int (-1)];
+          [Int 1; Int 2]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 3; Int 3];
+          [Int 3; Int 1]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int (-1); Int (-4)];
+          [Int (-2); Int 1]
+        ])
+      false;
 
     make_subtract_test "subtract fails with invalid matrix sizes"
       (RM.make 2 3 RATIONAL.one [[]])
       (RM.make 2 2 RATIONAL.one [[]])
-      (RM.make 1 1 RATIONAL.one [[]])
-    true;
+      (RM.make 1 1 RATIONAL.error [[]])
+      true;
 
     (*################## SCALE TEST #################*)
     make_scale_test "basic scaling"
@@ -373,60 +375,182 @@ let matrix_tests =
     make_augment_test "augment fails"
       (RM.make 2 2 (Int 4) [[]])
       (RM.make 3 3 (Int 2) [[]])
-      (RM.diagonal 3 3)
+      (RM.make 1 1 RATIONAL.error [[]])
       true;
     (* ################## REDUCE TEST ##############*)
     make_reduce_test "reduce #1"
       (RM.make 3 6 RATIONAL.zero [
-        [Int 0;Int 3;Int (-6);Int 6;Int 4;Int (-5)];
-        [Int 3;Int (-7);Int 8;Int (-5);Int 8;Int 9];
-        [Int 3;Int (-9);Int 12;Int (-9);Int 6;Int 15]])
+          [Int 0;Int 3;Int (-6);Int 6;Int 4;Int (-5)];
+          [Int 3;Int (-7);Int 8;Int (-5);Int 8;Int 9];
+          [Int 3;Int (-9);Int 12;Int (-9);Int 6;Int 15]])
       (RM.make 3 6 RATIONAL.zero [
-        [Int 1; Int 0; Int (-2);Int 3; Int 0;Int (-24)];
-        [Int 0; Int 1; Int (-2);Int 2; Int 0;Int (-7)];
-        [Int 0; Int 0; Int 0; Int 0; Int 1; Int 4]
-      ]);
+          [Int 1; Int 0; Int (-2);Int 3; Int 0;Int (-24)];
+          [Int 0; Int 1; Int (-2);Int 2; Int 0;Int (-7)];
+          [Int 0; Int 0; Int 0; Int 0; Int 1; Int 4]
+        ]);
     make_reduce_test "reduce #2"
       (RM.make 3 6 RATIONAL.zero [
-        [Int 1; Int 6; Int 2; Int (-5); Int (-2); Int (-4)];
-        [Int 0; Int 0; Int 2; Int (-8); Int (-1); Int 3];
-        [Int 0; Int 0; Int 0; Int 0; Int 1; Int 7]
-      ])
+          [Int 1; Int 6; Int 2; Int (-5); Int (-2); Int (-4)];
+          [Int 0; Int 0; Int 2; Int (-8); Int (-1); Int 3];
+          [Int 0; Int 0; Int 0; Int 0; Int 1; Int 7]
+        ])
       (RM.make 3 6 RATIONAL.zero [
-        [Int 1; Int 6; Int 0; Int 3; Int 0; Int 0];
-        [Int 0; Int 0; Int 1; Int (-4); Int 0; Int 5];
-        [Int 0; Int 0; Int 0; Int 0; Int 1; Int 7]
-      ]);
+          [Int 1; Int 6; Int 0; Int 3; Int 0; Int 0];
+          [Int 0; Int 0; Int 1; Int (-4); Int 0; Int 5];
+          [Int 0; Int 0; Int 0; Int 0; Int 1; Int 7]
+        ]);
     make_reduce_test "reduce #3"
       (RM.make 3 3 RATIONAL.zero [
-        [Int 1; Int 2; Int 7];
-        [Int (-2); Int 5; Int 4];
-        [Int (-5); Int 6; Int (-3)]
-      ])
+          [Int 1; Int 2; Int 7];
+          [Int (-2); Int 5; Int 4];
+          [Int (-5); Int 6; Int (-3)]
+        ])
       (RM.make 3 3 RATIONAL.zero [
-        [Int 1; Int 0; Int 3];
-        [Int 0; Int 1; Int 2];
-        [Int 0; Int 0; Int 0]
-      ]);
+          [Int 1; Int 0; Int 3];
+          [Int 0; Int 1; Int 2];
+          [Int 0; Int 0; Int 0]
+        ]);
+
+    (*============ determinant tests ==============*)
     make_determinant_test "det - 1x1 matrix"
-      (RM.make 1 1 RATIONAL.zero [[Int 1]]) (Int 1);
+      (RM.make 1 1 RATIONAL.zero [[Int 1]]) 
+      (Int 1)
+      false;
+
     make_determinant_test "det - 2x2 matrix"
       (RM.make 2 2 RATIONAL.zero [
           [Int 4; Int 6];
           [Int 3; Int 8]])
-      (Int 14);
+      (Int 14)
+      false;
+
     make_determinant_test "det - 3x3 matrix #1"
       (RM.make 3 3 RATIONAL.zero [
           [Int 0; Int 3; Int 5];
           [Int 5; Int 5; Int 2];
           [Int 3; Int 4; Int 3]])
-      (Int (-2));
+      (Int (-2))
+      false;
+
     make_determinant_test "det - 3x3 matrix #2"
       (RM.make 3 3 RATIONAL.zero [
           [Int 10; Int 0; Int (-3)];
           [Int (-2); Int (-4); Int 1];
           [Int 3; Int 0; Int 2]])
       (Int (-116))
+      false; 
+
+    make_determinant_test "det - 5x5 matrix #2"
+      (RM.make 5 5 RATIONAL.zero [
+          [Int 6; Int 9; Int 29; Int 38; Int 298];
+          [Int 6; Int 2; Int (-29); Int 8; Int 28];
+          [Int 56; Int 19; Int 0; Int 338; Int 2];
+          [Int 76; Int 5; Int (-4); Int 3; Int 23];
+          [Int 69; Int 19; Int 59; Int 28; Int (-46)];
+        ])
+      (Int (-3865372704))
+      false;
+
+    make_determinant_test "det fails - 4x5 matrix #2"
+      (RM.make 4 5 RATIONAL.zero [
+          [Int 6; Int 9; Int 29; Int 38; Int 298];
+          [Int 6; Int 2; Int (-29); Int 8; Int 28];
+          [Int 56; Int 19; Int 0; Int 338; Int 2];
+          [Int 76; Int 5; Int (-4); Int 3; Int 23]
+        ])
+      (RATIONAL.error)
+      true;
+
+    (*=================== matrix inverse tests ===============*)
+    make_inverse_test "inverse - 2x2"
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 3; Int 2];
+          [Int 8; Int 10]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [(Frac (5,7)); (Frac ((-1),7))];
+          [(Frac ((-4),7)); (Frac (3,14))]
+        ]
+      )
+      false;
+
+    make_inverse_test "inverse - 3x3"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 4; Int (-3); (Frac (1,2))];
+          [Int 2; Int 0; Int 14];
+          [(Frac ((-1),2)); Int 0; Int 6]
+        ])
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 0; (Frac (6,19)); (Frac ((-14),19))];
+          [(Frac ((-1),3)); (Frac (97,228)); (Frac ((-55),57))];
+          [Int 0; (Frac (1,38)); (Frac(2,19))]
+        ])
+      false;
+
+    make_inverse_test "inverse fails - 4x5 matrix #2"
+      (RM.make 4 5 RATIONAL.zero [
+          [Int 6; Int 9; Int 29; Int 38; Int 298];
+          [Int 6; Int 2; Int (-29); Int 8; Int 28];
+          [Int 56; Int 19; Int 0; Int 338; Int 2];
+          [Int 76; Int 5; Int (-4); Int 3; Int 23]
+        ])
+      (RM.make 1 1 RATIONAL.error [[]])
+      true;    
+
+    make_inverse_test "inverse fails - 3x3 linearly dependent"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 1; Int 2; Int 3];
+          [Int 4; Int 5; Int 6];
+          [Int 7; Int 8; Int 9];
+        ])
+      (RM.make 1 1 RATIONAL.error [[]])
+      true;
+
+    make_inverse_test "inverse fails - 5x5 linearly dependent"
+      (RM.make 5 5 RATIONAL.zero [
+          [Int 1; Int 2; Int 3; Int 4; Int 5];
+          [Int 6; Int 7; Int 8; Int 9; Int 10];
+          [Int 11; Int 12; Int 13; Int 14; Int 15];
+          [Int 16; Int 17; Int 18; Int 19; Int 20];
+          [Int 21; Int 22; Int 23; Int 24; Int 25]
+        ])
+      (RM.make 1 1 RATIONAL.error [[]])
+      true;
+
+    (*============= null space tests ===============*)
+    make_null_space_test "null space - 3x3"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 3; Int 3; Int 0];
+          [Int 2; Int 5; Int 1];
+          [Int 3; Int 6; Int 1]
+        ])
+      ([
+        RM.make 3 1 RATIONAL.zero [
+          [Int 0];
+          [Int 1];
+          [Int 1]
+        ]
+      ]);
+
+    make_null_space_test "null space 2x3"
+      (RM.make 2 3 RATIONAL.zero [
+          [Int 3; Int 5; Int 10];
+          [Int 4; Int 6; Int 6]
+        ])
+      ([
+        RM.make 2 1 RATIONAL.zero [
+          [Int 10];
+          [Int 6]
+        ]
+      ]);
+
+    make_null_space_test "null space 3x3"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 1; Int 4; Int 8];
+          [Int 0; Int 2; Int 1];
+          [Int 4; Int 10; Int 8]
+        ])
+      ([])
   ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [

@@ -17,6 +17,7 @@ module type NUM = sig
   exception ArithmeticError
   val zero : t
   val one : t
+  val error : t
   val add : t -> t -> t
   val mul : t -> t -> t
   val div : t -> t -> t
@@ -54,6 +55,7 @@ module type MATRIX = sig
   val equals : matrix -> matrix -> bool
   val subtract : matrix -> matrix -> matrix
   val supp_matrix : matrix -> int -> int -> matrix
+  val pivots : matrix -> (int * int) list
 end
 
 module type MATRIX_MAKER = 

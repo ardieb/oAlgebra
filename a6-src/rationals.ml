@@ -16,6 +16,8 @@ module RATIONAL : NUM with type t = rational = struct
   let zero = Int 0
   (** [one] is [Int 1] *)
   let one = Int 1
+  let error = Int (-1)
+
   (** [rep_ok r] is the rational number if the reprsentation meets the R.I. and
     * fails otherwise *)
   let rep_ok = function
@@ -54,8 +56,8 @@ module RATIONAL : NUM with type t = rational = struct
     | Int i -> Int i
     | Frac (n,d) -> Frac (n,d)
     | Float f -> begin
-      print_endline (string_of_float tolerance);
-      simplify (Frac (int_of_float (f *. tolerance), int_of_float tolerance))
+        print_endline (string_of_float tolerance);
+        simplify (Frac (int_of_float (f *. tolerance), int_of_float tolerance))
       end
   (** [add (n1,d1) (n2,d2)] is the sum of two rational numbers *)
   let rec add = fun (r1:t) (r2:t) ->

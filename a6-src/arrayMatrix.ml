@@ -211,12 +211,13 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
           memo := mulrows !memo row (N.div N.one (!memo).(row).(col))
         | Some col -> begin
           memo := mulrows !memo row (N.div N.one (!memo).(row).(col));
-          memo := addrows !memo row (row - 1) (N.neg (!memo).(row - 1).(col));
-          match pivot_col (!memo) (row - 1) with
-          | None -> 
-            memo := swaprows !memo row (row - 1); 
-            backward (row - 1);
-          | Some _ -> backward (row - 1);
+          for i = row - 1 downto 0 do
+            memo := addrows !memo row (i) (N.neg (!memo).(i).(col));
+          done; let row' = ref row in
+          while !row' > 0 && pivot_col (!memo) (!row' - 1) = None do
+            memo := swaprows !memo !row' (!row' - 1);
+            row' := !row' - 1;
+          done; backward (!row' - 1)
         end in 
     forward 0 0; backward (p - 1); !memo
 
@@ -238,16 +239,16 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let (m,n), (p,r) = dim m1, dim m2 in
     if m <> p || n <> r then false
     else 
-    let res = ref true in
-    let i = ref 0 in
-    let j = ref 0 in
-    while !i < m && !res do
-      while !j < n && !res do
-        res := N.compare (m1.(!i).(!j)) (m2.(!i).(!j)) = EQ;
-        j := !j + 1;
-      done;
-      i := !i + 1;
-    done; !res
+      let res = ref true in
+      let i = ref 0 in
+      let j = ref 0 in
+      while !i < m && !res do
+        while !j < n && !res do
+          res := N.compare (m1.(!i).(!j)) (m2.(!i).(!j)) = EQ;
+          j := !j + 1;
+        done;
+        i := !i + 1;
+      done; !res
 
   (** [null_space m] is is the list of vectors that solve the equation
     * [m] x-vector = 0-vector *)
@@ -286,11 +287,11 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   let solve = fun (m:matrix) (v:matrix) -> 
     let (p,r), (s,t) = dim m, dim v in
     if t <> 1 then failwith "This is linear system of equations" else
-    let aug = augment m v |> reduce in
-    let vec = partition (r,0) (r,p-1) aug in
-    let pvs = pivots aug in 
-    let () = List.iter (fun (_,j) -> if j = r then failwith "No solution" else ()) pvs in
-    vec::(null_space m)
+      let aug = augment m v |> reduce in
+      let vec = partition (r,0) (r,p-1) aug in
+      let pvs = pivots aug in 
+      let () = List.iter (fun (_,j) -> if j = r then failwith "No solution" else ()) pvs in
+      vec::(null_space m)
 
   (** [supp_matrix m i j] is the matrix [m] without values from row [i] or 
     * column [j] *)
@@ -303,16 +304,25 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         m'.(!i).(!j) <- m.(!i).(!j);
         j := !j + 1;
       done;
+      while !j < r - 1 do
+        m'.(!i).(!j) <- m.(!i).(!j + 1);
+        j := !j + 1;
+      done;
       i := !i + 1;
+      j := 0;
     done;
-    while !i < p - 1 do
+    while !i < p - 1 do 
+      while !j <> col do
+        m'.(!i).(!j) <- m.(!i + 1).(!j);
+        j := !j + 1;
+      done;
       while !j < r - 1 do
         m'.(!i).(!j) <- m.(!i + 1).(!j + 1);
         j := !j + 1;
       done;
       i := !i + 1;
-    done;
-    m'
+      j := 0;
+    done; m'
 
   (*let supp_matrix_1st_row = fun (m:matrix) (col:int) -> 
     let (rows,cols) = dim m in
@@ -337,7 +347,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         let neg_or_pos = if (counter mod 2)=0 then N.one else N.neg N.one in 
         sum := N.add (!sum) 
             (neg_or_pos |> N.mul m.(0).(counter) |> N.mul 
-               (determinant (supp_matrix m 1 counter)))
+               (determinant (supp_matrix m 0 counter)))
       done; !sum
 
   (** [inverse m] is the inverse of matrix [m], 
