@@ -4,7 +4,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   (* AF: A ['a matrix] is constructed from a list of lists with elements of type
    * ['a]. The size of the matrix is denouted by a int*int pair *)
   (* RI: The length of the rows of the matrix must all be equal and the elements 
-   * of the matrix must be numeric *)
+   * o the matrix must be numeric *)
   module N = T
   type value = N.t
   type matrix = value array array
