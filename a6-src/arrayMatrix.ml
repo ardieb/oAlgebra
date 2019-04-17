@@ -3,8 +3,8 @@ open Matrix
 module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct 
   (* AF: A ['a matrix] is constructed from a list of lists with elements of type
    * ['a]. The size of the matrix is denouted by a int*int pair *)
-  (* RI: The length of the rows of the matrix must all be equal and the elements of
-   * the matrix must be numeric *)
+  (* RI: The length of the rows of the matrix must all be equal and the elements 
+   * of the matrix must be numeric *)
   module N = T
   type value = N.t
   type matrix = value array array
@@ -19,7 +19,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     (m : matrix)
 
   (* TODO: what if n>r? that would give index out of bounds error *)
-  (** [diagonal n r] is the [n] x [r] diagonal matrix with [1]'s on its diagonal *)
+  (** [diagonal n r] is the [n] x [r] diagonal matrix with 
+    * [1]'s on its diagonal *)
   let diagonal = fun (n:int) (r:int) -> 
     let m = make n r N.zero [[]] in
     for i = 0 to min (n-1) (r-1) do
@@ -38,7 +39,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   let transpose = fun (m:matrix) ->
     let rows,cols = dim m in
     let m' = make cols rows N.zero [[]] in
-    Array.iteri (fun i row -> Array.iteri (fun j e -> m'.(j).(i) <- e) row) m; m'
+    Array.iteri (fun i row -> Array.iteri (fun j e -> m'.(j).(i) <- e) row) m;m'
 
   (** [dot u v] is the dot product of two vectors (1d matricies) 
     * Requires: [u] and [v] have the same height and have width of [1] *)
@@ -84,7 +85,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       let m1 = transpose m1 in
       for i = 0 to m-1 do
         for j = 0 to r-1 do
-          res.(i).(j) <- dot (partition (i,0) (i,n-1) m1) (partition (j,0) (j,p-1) m2)
+          let u,v = (partition (i,0) (i,n-1) m1),(partition (j,0) (j,p-1) m2) in
+          res.(i).(j) <- dot u v
         done; done; res
 
   (** [identity n] is an [n] by [n] identity matrix*)
@@ -150,8 +152,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     mul (e i j c n) m
 
   (* finds the left most pivot in row i *)
-  (** [pivot_col m i] is [Some x] where x is the column of the pivot in row [i] or
-    * [None] if there is not pivot in i
+  (** [pivot_col m i] is [Some x] where x is the column of the pivot in row [i] 
+    * or [None] if there is not pivot in i
     * Requires: i < height of the matrix - 1 *)
   let pivot_col = fun (m:matrix) (i:int) ->
     let p,r = dim m in
@@ -234,7 +236,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
             else m2.(i).(j-n)
         done; done; res
 
-  (** [equals m1 m2] is true if m1 is structurally equal to m2 and false otherwise *)
+  (** [equals m1 m2] is true if m1 is structurally equal to m2 and false 
+    * otherwise *)
   let equals = fun (m1:matrix) (m2:matrix) ->
     let (m,n), (p,r) = dim m1, dim m2 in
     if m <> p || n <> r then false
@@ -258,7 +261,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let memo = ref [] in
     let is_pivot_col = fun (j:int) ->
       let is_piv = ref false in 
-      let () = List.iter (fun (_,j') -> if j = j' then is_piv := true else ()) pvs in 
+      List.iter (fun (_,j') -> if j = j' then is_piv := true else ()) pvs;
       !is_piv in
     for j = 0 to r - 1 do
       if not (is_pivot_col j) then 
@@ -273,7 +276,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let memo = ref [] in
     let is_pivot_col = fun (j:int) ->
       let is_piv = ref false in 
-      let () = List.iter (fun (_,j') -> if j = j' then is_piv := true else ()) pvs in 
+      List.iter (fun (_,j') -> if j = j' then is_piv := true else ()) pvs; 
       !is_piv in
     for j = 0 to r - 1 do
       if (is_pivot_col j) then 
@@ -286,11 +289,11 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     * equation. Fails if the equation cannot be exactly solved for *)
   let solve = fun (m:matrix) (v:matrix) -> 
     let (p,r), (s,t) = dim m, dim v in
-    if t <> 1 then failwith "This is linear system of equations" else
+    if t <> 1 then failwith "This is not a linear system of equations" else
       let aug = augment m v |> reduce in
       let vec = partition (r,0) (r,p-1) aug in
       let pvs = pivots aug in 
-      let () = List.iter (fun (_,j) -> if j = r then failwith "No solution" else ()) pvs in
+      List.iter (fun (_,j) -> if j = r then failwith "No solution" else ()) pvs;
       vec::(null_space m)
 
   (** [supp_matrix m i j] is the matrix [m] without values from row [i] or 
@@ -339,7 +342,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   let rec determinant = fun (m:matrix) -> 
     let (row,col) = dim m in if row<>col || row<1 then raise MatrixError else 
     if row=1 then m.(0).(0) else
-    if row=2 then let (a,b,c,d) = (m.(0).(0), m.(0).(1), m.(1).(0), m.(1).(1)) in 
+    if row=2 then let a,b,c,d = (m.(0).(0), m.(0).(1), m.(1).(0), m.(1).(1)) in 
       N.sub (N.mul a d) (N.mul b c) 
     else 
       let sum = ref N.zero in 
