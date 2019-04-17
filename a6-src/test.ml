@@ -537,7 +537,10 @@ let matrix_tests =
           [Int 0];
           [Int 1];
           [Int 1]
-        ]
+        ];
+        (RM.make 3 1 RATIONAL.zero [
+          []
+        ])
       ]);
 
     make_null_space_test "null space 2x3"
@@ -549,7 +552,10 @@ let matrix_tests =
         RM.make 2 1 RATIONAL.zero [
           [Int 10];
           [Int 6]
-        ]
+        ];
+        (RM.make 2 1 RATIONAL.zero [
+          []
+        ])
       ]);
 
     make_null_space_test "null space 3x3"
@@ -558,7 +564,11 @@ let matrix_tests =
           [Int 0; Int 2; Int 1];
           [Int 4; Int 10; Int 8]
         ])
-      ([]);
+      ([
+        (RM.make 3 1 RATIONAL.zero [
+          []
+        ])
+      ]);
 
     (*============= null space tests ===============*)
     make_solve_test "solve 3x3"
@@ -573,7 +583,10 @@ let matrix_tests =
           [Frac ((-123),25)];
           [Int (-24)];
           [Frac (307,25)]
-        ]
+        ];
+        (RM.make 3 1 RATIONAL.zero [
+          []
+        ])
       ]);
 
     make_solve_test "solve 5x5"
@@ -592,7 +605,10 @@ let matrix_tests =
           [Frac ((-770639),144081)];
           [Frac (542644,144081)];
           [Frac (945580,144081)]
-        ]
+        ];
+        (RM.make 5 1 RATIONAL.zero [
+          []
+        ])
       ]);
   ]
 
