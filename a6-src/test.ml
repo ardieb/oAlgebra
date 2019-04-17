@@ -129,6 +129,14 @@ let make_null_space_test
   name >:: (fun _ ->
       assert_equal (RM.null_space matrix) expected_output ~cmp:cmp_set_like_lists)
 
+let make_solve_test
+    (name: string)
+    (matrix: RM.matrix)
+    (vector: RM.matrix)
+    (expected_output: RM.matrix list) =
+  name >:: (fun _ -> 
+      assert_equal (RM.solve matrix vector) expected_output ~cmp: cmp_set_like_lists)
+
 let make_inverse_test
     (name: string)
     (input: RM.matrix)
@@ -550,7 +558,42 @@ let matrix_tests =
           [Int 0; Int 2; Int 1];
           [Int 4; Int 10; Int 8]
         ])
-      ([])
+      ([]);
+
+    (*============= null space tests ===============*)
+    make_solve_test "solve 3x3"
+      (RM.make 3 3 RATIONAL.zero [
+          [Frac (4,3); Frac (3,4); Int 2];
+          [Int 2; Int 1; Int 3];
+          [Int 9; Frac ((-4),3); Int 1]
+        ])
+      (RM.make 3 1 RATIONAL.zero [[Int 0]; [Int 3]; [Int 0]])
+      ([
+        RM.make 3 1 RATIONAL.zero [
+          [Frac ((-123),25)];
+          [Int (-24)];
+          [Frac (307,25)]
+        ]
+      ]);
+
+    make_solve_test "solve 5x5"
+      (RM.make 5 5 RATIONAL.zero [
+          [Int 2; Int 3; Int 3; Int 4; Int 5];
+          [Int 2; Int 1; Int 3; Int 3; Int 9];
+          [Int 101; Int (-200); Int 3; Int 4; Int 5];
+          [Int 34; Int 2; Int 3; Int 2; Int 1];
+          [Int 2; Int 2; Int 1; Int 3; Int 2]
+        ])
+      (RM.make 5 1 RATIONAL.zero [[Int 34]; [Int 56]; [Int 56]; [Int 23]; [Int 21]])
+      ([
+        RM.make 5 1 RATIONAL.zero [
+          [Frac (4937,6861)];
+          [Frac (3883,16009)];
+          [Frac ((-770639),144081)];
+          [Frac (542644,144081)];
+          [Frac (945580,144081)]
+        ]
+      ]);
   ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [
