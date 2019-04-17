@@ -267,7 +267,9 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       if not (is_pivot_col j) then 
         memo := (partition (j,0) (j,p - 1) m)::(!memo)
       else ()
-    done; !memo 
+    done; 
+    memo := (make p 1 N.zero [[]])::(!memo);
+    !memo 
 
   (** [col_space m] is the list of vectors that form the column space of [m] *)
   let col_space = fun (m:matrix) -> 

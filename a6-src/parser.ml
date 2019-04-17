@@ -10,18 +10,18 @@ open RM
 let strnum = "\([-]?[0-9]+\\?[0-9]*\)"
 let strrow = "\(\[\([ ]+"^strnum^"[ ]+\)*\]\)"
 let strmatrix = "\["^strrow^"*\]"
-let srradd = "[ ]+add[ ]+"
-let straddM = "[ ]+add[ ]+"^strmatrix^"[ ]+"^strmatrix
-let strsubM = "[ ]+sub[ ]+"^strmatrix^"[ ]+"^strmatrix
-let strmulM = "[ ]+mul[ ]+"^strmatrix^"[ ]+"^strmatrix
-let strtranspose = "[ ]+transpose[ ]+"^strmatrix
-let strinverse = "[ ]+inverse[ ]+"^strmatrix
-let strdeterminant = "[ ]+determinant[ ]+"^strmatrix
-let strrowspace = "[ ]+rowspace[ ]+"^strmatrix
-let strnullspace = "[ ]+nullspace[ ]+"^strmatrix
-let strcolspace = "[ ]+colspace[ ]+"^strmatrix
-let strdot = "[ ]+dot[ ]+"^strmatrix
-let strsolve = "[ ]+solve[ ]+"^strmatrix^"[ ]+"^strmatrix
+let stradd = "[ ]+add[ ]+"
+let strsub = "[ ]+sub[ ]+" 
+let strtranspose = "[ ]+transpose[ ]+"
+let strinverse = "[ ]+inverse[ ]+"
+let strdeterminant = "[ ]+determinant[ ]+"
+let strrowspace = "[ ]+rowspace[ ]+"
+let strnullspace = "[ ]+nullspace[ ]+"
+let strcolspace = "[ ]+colspace[ ]+"
+let strdot = "[ ]+dot[ ]+"
+let strsolve = "[ ]+solve[ ]+"
+let strlet = "[ ]+let[ ]+"
+let strin = "[ ]+in[ ]+"
 
 type typ =
   | TMatrix
@@ -35,6 +35,8 @@ type expr =
   | Var of string
   | Let of (string * expr * expr)
   | Add of (expr * expr)
+  | Sub of (expr * expr)
+  | Dot of (expr * expr)
   | Mul of (expr * expr)
   | Div of (expr * expr)
   | Scale of (expr * expr)
@@ -72,9 +74,19 @@ let rec typecheck = fun (e:expr) ->
     if te1 <> te2 then 
       failwith ("The type of e1: "^(string_of_typ te1)^" does not match "^(string_of_typ te2))
     else te1
+  | Sub (e1,e2) -> 
+    let te1, te2 = typecheck e1, typecheck e2 in
+    if te1 <> te2 then 
+      failwith ("The type of e1: "^(string_of_typ te1)^" does not match "^(string_of_typ te2))
+    else te1
   | Mul (e1,e2) ->
     let te1, te2 = typecheck e1, typecheck e2 in
     if te1 <> te2 then 
+      failwith ("The type of e1: "^(string_of_typ te1)^" does not match "^(string_of_typ te2))
+    else te1
+  | Dot (e1, e2) ->
+    let te1, te2 = typecheck e1, typecheck e2 in
+    if te1 <> te2 || te1 <> TMatrix then 
       failwith ("The type of e1: "^(string_of_typ te1)^" does not match "^(string_of_typ te2))
     else te1
   | Div (e1,e2) ->
@@ -151,6 +163,8 @@ let rec subst = fun (context:string * expr) (e:expr) ->
     if x = fst context then snd context else failwith (x^" is unbound")
   | Let (x,y,z) -> subst context (subst (x,y) z)
   | Add (e1, e2) -> Add ((subst context e1), (subst context e2))
+  | Sub (e1, e2) -> Add ((subst context e1), (subst context e2))
+  | Dot (e1, e2) -> Dot ((subst context e1), (subst context e2))
   | Mul (e1, e2) -> Mul ((subst context e1), (subst context e2))
   | Div (e1, e2) -> Div ((subst context e1), (subst context e2))
   | Scale (e1, e2) -> Scale ((subst context e1), (subst context e2))
@@ -169,16 +183,7 @@ let rec subst = fun (context:string * expr) (e:expr) ->
       memo := (subst context e)::(!memo)) l;
     List (List.rev (!memo))
     end
-  | Lookup (l,idx) -> begin
-    let memo = ref None in
-    List.iteri (fun i e -> 
-      if i = idx then memo := Some e
-      else ()
-    ) l;
-    match !memo with
-    | None -> failwith "Index out of bounds"
-    | Some e -> subst context e
-    end
+  | Lookup (l,idx) -> Lookup (subst context l,idx)
 
 let rec eval = fun (e:expr) -> 
   ignore (typecheck e);
@@ -191,6 +196,17 @@ let rec eval = fun (e:expr) ->
     match eval e1, eval e2 with
     | Matrix m1, Matrix m2 -> Matrix (add m1 m2)
     | Value v1, Value v2 -> Value (RATIONAL.add v1 v2)
+    | _, _ -> failwith "type mismatch"
+    end
+  | Sub (e1, e2) -> begin
+    match eval e1, eval e2 with
+    | Matrix m1, Matrix m2 -> Matrix (subtract m1 m2)
+    | Value v1, Value v2 -> Value (RATIONAL.sub v1 v2)
+    | _, _ -> failwith "type mismatch"
+    end
+  | Dot (e1, e2) -> begin
+    match eval e1, eval e2 with
+    | Matrix m1, Matrix m2 -> Value (dot m1 m2)
     | _, _ -> failwith "type mismatch"
     end
   | Mul (e1, e2) -> begin
@@ -293,5 +309,8 @@ let rec eval = fun (e:expr) ->
     | Some e -> eval e
     end
 
-let token_of_string = fun (s:string) -> failwith "TODO"
+let rec expr_of_string = fun (s:string) -> 
+
+  failwith "TODO"
+
 
