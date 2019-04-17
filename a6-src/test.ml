@@ -141,6 +141,14 @@ let make_inverse_test
         assert_equal expected_output (RM.inverse input) ~cmp:RM.equals
     )
 
+let make_solve_test 
+    (name: string)
+    (matrix: RM.matrix)
+    (vector: RM.matrix)
+    (expected_output: RM.matrix list) =
+  name >:: (fun _ ->
+      assert_equal expected_output (RM.solve matrix vector))
+
 let rationals_tests =
   let add = RATIONAL.add in
   let mul = RATIONAL.mul in
@@ -550,8 +558,31 @@ let matrix_tests =
           [Int 0; Int 2; Int 1];
           [Int 4; Int 10; Int 8]
         ])
-      ([])
-  ]
+      ([]);
+
+    make_solve_test "solve 5x5"
+      (RM.make 5 5 RATIONAL.zero [
+          [Int 3; Int 4; Int 5; Int 2; Int 0];
+          [Int 5; Int 2; Int (-1); Frac (3,2); Int 0];
+          [Frac (2,5); Int 2; Int 9; Int 5; Int 0];
+          [Int 3; Int 1; Int 10; Int 1; Int 2];
+          [Frac (30,2); Int 3; Int 2; Frac (3,2); Int 0]
+        ])
+      (RM.make 5 1 RATIONAL.zero [
+          [Int 2];
+          [Int 3];
+          [Int 1];
+          [Int 5];
+          [Int 6];
+        ])
+      [RM.make 5 1 RATIONAL.zero [
+          [Frac (2545, 7779)];
+          [Frac (2270, 7779)];
+          [Frac (-487, 2593)];
+          [Frac (3074, 7779)];
+          [Frac (20263,7779)];
+        ]
+      ]]
 
 let suite = "test suite for LinAlg" >::: List.flatten [
     rationals_tests;
