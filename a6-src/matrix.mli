@@ -33,6 +33,7 @@ module type MATRIX = sig
   exception MatrixError
   type value = N.t
   type matrix
+  type solution = matrix * matrix list
   include Formattable with type t := matrix
   val diagonal : int -> int -> matrix
   val make : int -> int -> value -> value list list -> matrix
@@ -48,7 +49,7 @@ module type MATRIX = sig
   val reduce : matrix -> matrix
   val augment : matrix -> matrix -> matrix
   val partition : int * int -> int * int -> matrix -> matrix 
-  val solve : matrix -> matrix -> matrix list
+  val solve : matrix -> matrix -> solution
   val determinant : matrix -> value
   val null_space : matrix -> matrix list
   val col_space : matrix -> matrix list

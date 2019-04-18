@@ -122,12 +122,22 @@ let make_determinant_test
       if ex then assert_raises RM.MatrixError (fun () -> RM.determinant matrix)
       else assert_equal (RM.determinant matrix) expected_output ~cmp:cmp_rat)
 
-let make_null_space_test 
+let make_null_space_test
     (name: string)
     (matrix: RM.matrix)
     (expected_output: RM.matrix list) =
   name >:: (fun _ ->
       assert_equal (RM.null_space matrix) expected_output ~cmp:cmp_set_like_lists)
+
+let make_solve_test
+    (name: string)
+    (matrix: RM.matrix)
+    (vector: RM.matrix)
+    (expected_output: RM.matrix list) 
+    (ex: bool) =
+  name >:: (fun _ ->
+      if ex then assert_raises RM.MatrixError (fun () -> RM.solve matrix vector)
+      else assert_equal (RM.solve matrix vector) expected_output ~cmp: cmp_set_like_lists)
 
 let make_inverse_test
     (name: string)
@@ -534,10 +544,13 @@ let matrix_tests =
         ])
       ([
         RM.make 3 1 RATIONAL.zero [
-          [Int 0];
-          [Int 1];
+          [Frac (1,3)];
+          [Frac (-1,3)];
           [Int 1]
-        ]
+        ];
+        (RM.make 3 1 RATIONAL.zero [
+            []
+          ])
       ]);
 
     make_null_space_test "null space 2x3"
@@ -546,10 +559,14 @@ let matrix_tests =
           [Int 4; Int 6; Int 6]
         ])
       ([
-        RM.make 2 1 RATIONAL.zero [
-          [Int 10];
-          [Int 6]
-        ]
+        RM.make 3 1 RATIONAL.zero [
+          [Int 15];
+          [Int (-11)];
+          [Int 1]
+        ];
+        (RM.make 3 1 RATIONAL.zero [
+            []
+          ])
       ]);
 
     make_null_space_test "null space 3x3"
@@ -558,31 +575,49 @@ let matrix_tests =
           [Int 0; Int 2; Int 1];
           [Int 4; Int 10; Int 8]
         ])
-      ([]);
+      ([
+        (RM.make 3 1 RATIONAL.zero [
+            []
+          ])
+      ]);
 
-    make_solve_test "solve 5x5"
-      (RM.make 5 5 RATIONAL.zero [
-          [Int 3; Int 4; Int 5; Int 2; Int 0];
-          [Int 5; Int 2; Int (-1); Frac (3,2); Int 0];
-          [Frac (2,5); Int 2; Int 9; Int 5; Int 0];
-          [Int 3; Int 1; Int 10; Int 1; Int 2];
-          [Frac (30,2); Int 3; Int 2; Frac (3,2); Int 0]
-        ])
-      (RM.make 5 1 RATIONAL.zero [
-          [Int 2];
-          [Int 3];
-          [Int 1];
-          [Int 5];
-          [Int 6];
-        ])
-      [RM.make 5 1 RATIONAL.zero [
-          [Frac (2545, 7779)];
-          [Frac (2270, 7779)];
-          [Frac (-487, 2593)];
-          [Frac (3074, 7779)];
-          [Frac (20263,7779)];
-        ]
-      ]]
+    (*============= null space tests ===============*)
+    (* make_solve_test "solve 3x3"
+       (RM.make 3 3 RATIONAL.zero [
+           [Frac (4,3); Frac (3,4); Int 2];
+           [Int 2; Int 1; Int 3];
+           [Int 9; Frac ((-4),3); Int 1]
+         ])
+       (RM.make 3 1 RATIONAL.zero [[Int 0]; [Int 3]; [Int 0]])
+       (RM.make 3 1 RATIONAL.zero [
+           [Frac ((-123),25)];
+           [Int (-24)];
+           [Frac (307,25)]
+         ],
+        [RM.make 3 1 RATIONAL.zero [
+            []
+          ]]);
+
+       make_solve_test "solve 5x5"
+       (RM.make 5 5 RATIONAL.zero [
+           [Int 2; Int 3; Int 3; Int 4; Int 5];
+           [Int 2; Int 1; Int 3; Int 3; Int 9];
+           [Int 101; Int (-200); Int 3; Int 4; Int 5];
+           [Int 34; Int 2; Int 3; Int 2; Int 1];
+           [Int 2; Int 2; Int 1; Int 3; Int 2]
+         ])
+       (RM.make 5 1 RATIONAL.zero [[Int 34]; [Int 56]; [Int 56]; [Int 23]; [Int 21]])
+       (RM.make 5 1 RATIONAL.zero [
+           [Frac (4937,6861)];
+           [Frac (3883,16009)];
+           [Frac ((-770639),144081)];
+           [Frac (542644,144081)];
+           [Frac (945580,144081)]
+         ],
+        [RM.make 5 1 RATIONAL.zero [
+            []
+          ]]);*)
+  ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [
     rationals_tests;

@@ -8,6 +8,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   module N = T
   type value = N.t
   type matrix = value array array
+  type solution = matrix * matrix list
   exception MatrixError
 
   (** [make rows cols init l] creates a new matrix with [rows] rows and [cols]
@@ -187,6 +188,15 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         j := !j + 1
     done; !memo
 
+  (** [free m pvs] are the positions of the missing pivots *)
+  let free = fun (m:matrix) (pvs:(int*int) list) ->
+    let p,r = dim m in
+    let res = ref [] in
+    List.iter (fun (i,j) ->
+      if List.mem (i+1,j+1) pvs |> not then
+      res := (i+1,j+1)::(!res)
+    ) pvs;!res
+
   (** [reduce m] is the reduced row echelon matrix formed from [m] *)
   let reduce = fun (m:matrix) -> 
     let p,r = dim m in
@@ -256,18 +266,37 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   (** [null_space m] is is the list of vectors that solve the equation
     * [m] x-vector = 0-vector *)
   let null_space = fun (m:matrix) ->
+    let ins_zero_row = fun (m:matrix) (row:int) ->
+      let p,r = dim m in
+      let m' = Array.make_matrix (p + 1) r N.zero in
+      let i = ref 0 in
+      while !i < row do
+        m'.(!i) <- m.(!i);
+        i := !i + 1
+      done;
+      m'.(row) <- Array.make r N.zero;
+      i := !i + 1;
+      while !i < p + 1 do
+        m'.(!i) <- m.(!i - 1);
+        i := !i + 1
+      done; m' in
     let p,r = dim m in
-    let pvs = pivots (reduce m) in
+    let red = reduce m in
+    let pvs = pivots red in
+    let not_pvs = free red pvs in
     let memo = ref [] in
-    let is_pivot_col = fun (j:int) ->
-      let is_piv = ref false in 
-      List.iter (fun (_,j') -> if j = j' then is_piv := true else ()) pvs;
-      !is_piv in
-    for j = 0 to r - 1 do
-      if not (is_pivot_col j) then 
-        memo := (partition (j,0) (j,p - 1) m)::(!memo)
-      else ()
-    done; !memo 
+    let tmp = ref red in
+    List.iter (
+      fun (i,j) -> if i != 0 then tmp := ins_zero_row (!tmp) (i - 1)
+    ) not_pvs;
+    tmp := partition (0,0) (r-1,r-1) (!tmp);
+    for i=0 to r - 1 do
+      if N.compare (!tmp).(i).(i) N.zero = EQ then
+        let vec = partition (i,0) (i,r - 1) (!tmp) in
+        vec.(i).(0) <- N.neg N.one;
+        memo := vec::(!memo)
+    done;
+    !memo
 
   (** [col_space m] is the list of vectors that form the column space of [m] *)
   let col_space = fun (m:matrix) -> 
@@ -289,12 +318,12 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     * equation. Fails if the equation cannot be exactly solved for *)
   let solve = fun (m:matrix) (v:matrix) -> 
     let (p,r), (s,t) = dim m, dim v in
-    if t <> 1 then failwith "This is not a linear system of equations" else
+    if t <> 1 then raise MatrixError else
       let aug = augment m v |> reduce in
       let vec = partition (r,0) (r,p-1) aug in
       let pvs = pivots aug in 
       List.iter (fun (_,j) -> if j = r then failwith "No solution" else ()) pvs;
-      vec::(null_space m)
+      (vec,(null_space m))
 
   (** [supp_matrix m i j] is the matrix [m] without values from row [i] or 
     * column [j] *)
@@ -372,6 +401,13 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         Array.iter ( fun e -> Format.fprintf fmt " %a " N.format e ) row;
         Format.fprintf fmt "]\n";
       ) m
+
+  (** [format_solution fmt sol] is the formatted solution to a matrix eq *)
+  let format_solution = fun (fmt:Format.formatter) (sol:solution) ->
+    Format.fprintf fmt "\n";
+    format fmt (fst sol);
+    List.iteri (fun i m -> Format.fprintf fmt "t%d*%a" i format m) (snd sol);
+    Format.fprintf fmt "\n"
 
   (** [projection v1 v2] is the projection of v1 onto v2*)
   let proj = fun (v1:matrix) (v2:matrix) -> 
