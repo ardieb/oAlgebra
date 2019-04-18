@@ -35,6 +35,7 @@ module type MATRIX = sig
   type matrix
   type solution = matrix * matrix list
   include Formattable with type t := matrix
+  val format_solution : Format.formatter -> solution -> unit
   val diagonal : int -> int -> matrix
   val make : int -> int -> value -> value list list -> matrix
   val dim : matrix -> int*int

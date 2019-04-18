@@ -417,7 +417,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   let format_solution = fun (fmt:Format.formatter) (sol:solution) ->
     Format.fprintf fmt "\n";
     format fmt (fst sol);
-    List.iteri (fun i m -> Format.fprintf fmt "t%d*%a" i format m) (snd sol);
+    List.iteri (fun i m -> Format.fprintf fmt "+t%d*%a " i format m) (snd sol);
     Format.fprintf fmt "\n"
 
   (** [projection v1 v2] is the projection of v1 onto v2*)
