@@ -582,7 +582,7 @@ let matrix_tests =
         ])
       ]);
 
-    (*============= null space tests ===============*)
+    (*============= solve tests ===============*)
     make_solve_test "solve 3x3"
       (RM.make 3 3 RATIONAL.zero [
           [Frac (4,3); Frac (3,4); Int 2];
