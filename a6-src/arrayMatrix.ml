@@ -190,7 +190,6 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
 
   (** [free m pvs] are the positions of the missing pivots *)
   let free = fun (m:matrix) (pvs:(int*int) list) ->
-    let p,r = dim m in
     let res = ref [] in
     List.iter (fun (i,j) ->
       if List.mem (i+1,j+1) pvs |> not then
