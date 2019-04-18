@@ -156,10 +156,12 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   (** [pivot_col m i] is [Some x] where x is the column of the pivot in row [i] 
     * or [None] if there is not pivot in i
     * Requires: i < height of the matrix - 1 *)
-  let pivot_col = fun (m:matrix) (i:int) ->
+  let pivot_col = fun (m:matrix) (row:int) ->
     let p,r = dim m in
     let x = ref 0 in
-    while !x < r && N.compare m.(i).(!x) N.zero = EQ do x := !x + 1 done;
+    while !x < r && (N.compare m.(row).(!x) N.zero = EQ) do
+      x := !x + 1 
+    done;
     if !x >= r then None else Some !x
 
   (** [pivot_row m row col] is Some left most pivot starting from position
@@ -174,27 +176,25 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   let pivots = fun (m:matrix) ->
     let p,r = dim m in
     let i,j = ref 0, ref 0 in
-    let memo = ref [] in
+    let memo = Hashtbl.create (p*r) in
     while !i < p do
       while !j < r && N.compare m.(!i).(!j) N.zero = EQ do
+        let () = Hashtbl.add memo (!i,!j) false in 
         j := !j + 1
       done;
       if !j = r then 
         let () = i := !i + 1 in 
         j := 0
       else 
-        let () = memo := (!i,!j)::(!memo) in
+        let () = Hashtbl.add memo (!i,!j) true in
+        j := !j + 1;
+        while !j < r do
+          let () = Hashtbl.add memo (!i,!j) false in 
+          j := !j + 1
+        done; 
         let () = i := !i + 1 in
-        j := !j + 1
-    done; !memo
-
-  (** [free m pvs] are the positions of the missing pivots *)
-  let free = fun (m:matrix) (pvs:(int*int) list) ->
-    let res = ref [] in
-    List.iter (fun (i,j) ->
-      if List.mem (i+1,j+1) pvs |> not then
-      res := (i+1,j+1)::(!res)
-    ) pvs;!res
+        j := 0
+    done; memo
 
   (** [reduce m] is the reduced row echelon matrix formed from [m] *)
   let reduce = fun (m:matrix) -> 
@@ -265,12 +265,11 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   (** [null_space m] is is the list of vectors that solve the equation
     * [m] x-vector = 0-vector *)
   let null_space = fun (m:matrix) ->
-    let rec ins_zero_row = fun (m:matrix) (row:int) ->
+    let ins_row = fun (m:matrix) (row:int) ->
       let p,r = dim m in
-      if row = p then ins_zero_row m (row - 2) else
       let m' = Array.make_matrix (p + 1) r N.zero in
       let i = ref 0 in
-      while !i <= row do
+      while !i < row do
         m'.(!i) <- m.(!i);
         i := !i + 1
       done;
@@ -281,37 +280,41 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         i := !i + 1
       done; m' in
     let p,r = dim m in
-    let red = reduce m in
-    let memo = ref [] in
-    if equals red (diagonal r r) |> not then 
-    let pvs = pivots red in
-    let not_pvs = free red pvs in
-    let tmp = ref red in
-    List.iter (
-      fun (i,j) -> 
-      print_endline (string_of_int i);
-      tmp := ins_zero_row (!tmp) i
-    ) not_pvs;
-    tmp := partition (0,0) (r-1,r-1) (!tmp);
-    for i=0 to r - 1 do
-      if N.compare (!tmp).(i).(i) N.zero = EQ then
-        let vec = partition (i,0) (i,r - 1) (!tmp) in
-        vec.(i).(0) <- N.neg N.one;
-        memo := vec::(!memo)
-    done; else ();
-    (make r 1 N.zero [[]])::(!memo)
+    let reduced = reduce m in
+    let pvts = pivots reduced in
+    let tmp = ref reduced in
+    let res = ref [make r 1 N.zero [[]]] in
+    let is_piv_col = fun (col:int) -> 
+      let res = ref false in
+      for i=0 to p - 1 do
+        res := Hashtbl.find pvts (i,col) || !res;
+      done; !res in
+    for j=0 to r - 1 do
+      if is_piv_col j |> not then
+        tmp := ins_row (!tmp) j
+      else ()
+    done; 
+    tmp := (partition (0,0) (r-1, r-1) (!tmp));
+    for j=0 to r - 1 do
+      if N.compare (!tmp).(j).(j) N.zero = EQ then
+        let vec = (partition (j,0) (j,r - 1) (!tmp)) in
+        vec.(j).(0) <- N.neg N.one;
+        res := vec::(!res)
+      else ()
+    done; !res
 
   (** [col_space m] is the list of vectors that form the column space of [m] *)
   let col_space = fun (m:matrix) -> 
     let p,r = dim m in
-    let pvs = pivots (reduce m) in
+    let pvts = pivots (reduce m) in
     let memo = ref [] in
-    let is_pivot_col = fun (j:int) ->
-      let is_piv = ref false in 
-      List.iter (fun (_,j') -> if j = j' then is_piv := true else ()) pvs; 
-      !is_piv in
+    let is_piv_col = fun (col:int) -> 
+      let res = ref false in
+      for i=0 to p - 1 do
+        res := Hashtbl.find pvts (i,col) || !res
+      done; !res in
     for j = 0 to r - 1 do
-      if (is_pivot_col j) then 
+      if (is_piv_col j) then 
         memo := (partition (j,0) (j,p - 1) m)::(!memo)
       else ()
     done; !memo 
@@ -324,8 +327,13 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     if t <> 1 then raise MatrixError else
       let aug = augment m v |> reduce in
       let vec = partition (r,0) (r,p-1) aug in
-      let pvs = pivots aug in 
-      List.iter (fun (_,j) -> if j = r then failwith "No solution" else ()) pvs;
+      let pvts = pivots aug in 
+      let is_piv_col = fun (col:int) -> 
+      let res = ref false in
+      for i=0 to p - 1 do
+        res := Hashtbl.find pvts (i,col) || !res
+      done; !res in
+      if is_piv_col r then raise MatrixError else
       (vec,(null_space m))
 
   (** [supp_matrix m i j] is the matrix [m] without values from row [i] or 

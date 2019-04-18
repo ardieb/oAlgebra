@@ -125,12 +125,14 @@ module RATIONAL : NUM with type t = rational = struct
         if i > (n/d) then GT
         else if i < (n/d) then LT
         else if (n mod d) > 0 then LT
+        else if (n mod d) < 0 then GT
         else EQ
       end
     | Frac (n,d), Int i -> begin
         if (n/d) > i then GT
         else if (n/d) < i then LT
         else if (n mod d) > 0 then GT
+        else if (n mod d) < 0 then LT
         else EQ
       end
     | Frac (n1,d1), Frac (n2,d2) -> begin
