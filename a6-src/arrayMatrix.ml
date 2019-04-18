@@ -117,7 +117,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   (* HELPERS-FOR-REDUCE *)
   (* matrix for swapping the ith and jth rows *)
   (** [swaprows m i,j] is the matrix [m] with rows [i] and [j] interchanged 
-    * Requires: i,j < height of m - 1 *)
+    * Requires: i,j < height of m - 1 
+    * ALGORITHM: Create an elementary swap matrix and multiply [m] by [e] *)
   let swaprows = fun (m:matrix) (i:int) (j:int) -> 
     let e = fun (i:int) (j:int) (n:int) ->
       let res = (diagonal n n) in
@@ -131,7 +132,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
 
   (* matrix for multiplying a row *)
   (** [mulrows m i c] is dthe matrix [m] with row [i] multiplied by [c]
-    * Requires: [i] < height of m - 1 *)
+    * Requires: [i] < height of m - 1 
+    * ALGORITHM: Create an elementary row scale matrix and multiply [m] by [e] *)
   let mulrows = fun (m:matrix) (i:int) (c:value) ->
     let e = fun (i:int) (c:value) (n:int) ->
       let res = (diagonal n n) in
@@ -143,7 +145,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   (* matrix for adding one row to another *)
   (** [addrows m i,j c] is the matrix [m] with row [i] multiplied by [c] added 
     * to row [j] in [m] 
-    * Requries: i, j < height of m - 1 *)
+    * Requries: i, j < height of m - 1 
+    * ALGORITHM: Create an elementary row addition matrix and multiply [m] by [e]*)
   let addrows = fun (m:matrix) (i:int) (j:int) (c:value) ->
     let e = fun (i:int) (j:int) (c:value) (n:int) -> 
       let res = (diagonal n n) in
@@ -152,10 +155,12 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let (n,_) = dim m in
     mul (e i j c n) m
 
-  (* finds the left most pivot in row i *)
-  (** [pivot_col m i] is [Some x] where x is the column of the pivot in row [i] 
-    * or [None] if there is not pivot in i
-    * Requires: i < height of the matrix - 1 *)
+  (* finds the left most pivot in [row] *)
+  (** [pivot_col m row] is [Some x] where x is the column of the pivot in row [i] 
+    * or [None] if there is not pivot in [row]
+    * Requires: [row] < height of the matrix - 1 
+    * ALGORITHM: Compare the elements from left to right in [row] to zero
+    * and return the column of the first non-zero element *)
   let pivot_col = fun (m:matrix) (row:int) ->
     let p,r = dim m in
     let x = ref 0 in
@@ -165,14 +170,21 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     if !x >= r then None else Some !x
 
   (** [pivot_row m row col] is Some left most pivot starting from position
-    * [row], [col] in [m]. If there is no pivot, the value is None *)
+    * [row], [col] in [m]. If there is no pivot, the value is None
+    * ALGORITHM: Compare the elements from [row] to [p] to zero and 
+    * return the first non-zero element *)
   let pivot_row = fun (m:matrix) (row:int) (col:int) ->
     let p,r = dim m in
     let y = ref row in
     while !y < p && N.compare m.(!y).(col) N.zero = EQ do y := !y + 1 done;
     if !y >= p then None else Some !y
 
-  (** [pivots m] are the positions *)
+  (** [pivots m] is a Hashtbl of all indexes in [m] paired with whether they are
+    * pivots or not
+    * Requires: [m] is a reduced-echecolon form matrix 
+    * ALGORITHM: Start from top to bottom, and then from left to right,
+    * compare the indexes in m to zero and add to the Hashtbl the indexes that 
+    * are the first non-zero occurances in their row *)
   let pivots = fun (m:matrix) ->
     let p,r = dim m in
     let i,j = ref 0, ref 0 in
@@ -196,7 +208,10 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         j := 0
     done; memo
 
-  (** [reduce m] is the reduced row echelon matrix formed from [m] *)
+  (** [reduce m] is the reduced row echelon matrix formed from [m] 
+    * ALGORITHM: first reduce [m] to an upper triangular matrix using forward.
+    * Then working from the bottom-left pivot up to the top add multiples of the
+    * pivot rows to the above rows until no further reductions can be made *)
   let reduce = fun (m:matrix) -> 
     let p,r = dim m in
     let memo = ref m in
@@ -234,7 +249,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
 
   (** [augment m1 m2] is the matrix obtained by appending 
       * the columns of [m2] to [m1] 
-      * Requires: [m1] and [m2] have the same number of rows*)
+      * Requires: [m1] and [m2] have the same number of rows *)
   let augment = fun (m1:matrix) (m2:matrix) -> 
     let (m,n), (p,r) = dim m1, dim m2 in
     if m != p then raise MatrixError else
@@ -263,7 +278,13 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       done; !res
 
   (** [null_space m] is is the list of vectors that solve the equation
-    * [m] x-vector = 0-vector *)
+    * [m] x-vector = 0-vector 
+    * ALGORITHM: Find the pivots in the reduced row echelon form of [m]
+    * Then fill in the "gaps" between pivots with rows of zeros and remove any
+    * zero-rows from the bottom of the matrix. Then reading along the diagonal 
+    * of the reduced and squared matrix, if a zero is encountered, append
+    * that column to the null-basis and replace the position in the vector
+    * that matches the index of the column with -1 *)
   let null_space = fun (m:matrix) ->
     let ins_row = fun (m:matrix) (row:int) ->
       let p,r = dim m in
@@ -303,7 +324,9 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       else ()
     done; !res
 
-  (** [col_space m] is the list of vectors that form the column space of [m] *)
+  (** [col_space m] is the list of vectors that form the column space of [m] 
+    * ALGORITHM: Find all the pivots in the reduced echecolon form matrix of [m]
+    * and return the pivot columns *)
   let col_space = fun (m:matrix) -> 
     let p,r = dim m in
     let pvts = pivots (reduce m) in
@@ -321,7 +344,13 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
 
   (** [solve m v] is the list of vectors that solves the linear equation
     * [m] x-vector = [v]. The first vector is the particular solution to the 
-    * equation. Fails if the equation cannot be exactly solved for *)
+    * equation. Fails if the equation cannot be exactly solved for
+    * ALGORITHM: Augment [m] with [v]. Then reduced the augmented matrix to
+    *  row echelon form and then read off the pivots of the matrix. If there is 
+    * a pivot in the rightmost column, there is no particular solution and fails
+    * If there is a solution, the solution is a linear combination of the 
+    * null-space of [m] and the particular solution to [m]x = [v], which is the
+    * right most column of the reduced-row-echolon augmented matrix *)
   let solve = fun (m:matrix) (v:matrix) -> 
     let (p,r), (s,t) = dim m, dim v in
     if t <> 1 then raise MatrixError else
@@ -337,7 +366,9 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       (vec,(null_space m))
 
   (** [supp_matrix m i j] is the matrix [m] without values from row [i] or 
-    * column [j] *)
+    * column [j] 
+    * ALGORITHM: Add the elements of [m] to a new matrix, excluding elements
+    * from [row] or [col] *)
   let supp_matrix = fun (m:matrix) (row:int) (col:int) -> 
     let p,r = dim m in
     let m' = make (p-1) (r-1) N.zero [[]] in
@@ -378,7 +409,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     done;
     new_mat*)
 
-  (** [determinant m] is the determinant of matrix [m] *)
+  (** [determinant m] is the determinant of matrix [m] 
+    * ALGORITHM: Cauchy expansion *)
   let rec determinant = fun (m:matrix) -> 
     let (row,col) = dim m in if row<>col || row<1 then raise MatrixError else 
     if row=1 then m.(0).(0) else
@@ -395,7 +427,9 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
 
   (** [inverse m] is the inverse of matrix [m], 
     * Raises [MatrixError] if the matrix [m] is not square or if the
-    * determinant of [m] is zero *)
+    * determinant of [m] is zero 
+    * ALGORITHM: Augment the identity matrix to [m] and reduce to row echelon 
+    * form. The inverse of [m] can be read off from the reduced augmented matrix *)
   let inverse = fun (m:matrix) -> 
     let (rows, cols) = dim m in 
     if rows<>cols || (determinant m)=N.zero then raise MatrixError 
@@ -415,9 +449,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
 
   (** [format_solution fmt sol] is the formatted solution to a matrix eq *)
   let format_solution = fun (fmt:Format.formatter) (sol:solution) ->
-    Format.fprintf fmt "\n";
     format fmt (fst sol);
-    List.iteri (fun i m -> Format.fprintf fmt "+t%d*%a " i format m) (snd sol);
+    List.iteri (fun i m -> Format.fprintf fmt "\n+ t%d x %a\n" i format m) (snd sol);
     Format.fprintf fmt "\n"
 
   (** [projection v1 v2] is the projection of v1 onto v2*)
@@ -432,6 +465,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       c.(i).(0) <- m.(i).(j)
     done; c
 
+  (* SPRINT WEEK 2 *)
   (* this is incorrect because it's supposed to divide by the square root of the length,
      which requires irrational numbers *)
   let normalize = fun (v:matrix) -> 
