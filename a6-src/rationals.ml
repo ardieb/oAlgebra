@@ -16,7 +16,6 @@ module RATIONAL : NUM with type t = rational = struct
   let zero = Int 0
   (** [one] is [Int 1] *)
   let one = Int 1
-  let error = Int (-1)
 
   (** [rep_ok r] is the rational number if the reprsentation meets the R.I. and
     * fails otherwise *)

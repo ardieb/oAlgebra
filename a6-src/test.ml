@@ -336,7 +336,7 @@ let matrix_tests =
     make_add_test "add fails with invalid matrix sizes"
       (RM.make 2 3 RATIONAL.one [[]])
       (RM.make 3 3 RATIONAL.one [[]])
-      (RM.make 1 1 RATIONAL.error [[]])
+      (RM.make 1 1 (Int (-1)) [[]])
       true;
 
     (*============= matrix subtraction tests =============*)
@@ -373,7 +373,7 @@ let matrix_tests =
     make_subtract_test "subtract fails with invalid matrix sizes"
       (RM.make 2 3 RATIONAL.one [[]])
       (RM.make 2 2 RATIONAL.one [[]])
-      (RM.make 1 1 RATIONAL.error [[]])
+      (RM.make 1 1 (Int (-1)) [[]])
       true;
 
     (*################## SCALE TEST #################*)
@@ -391,7 +391,7 @@ let matrix_tests =
     make_augment_test "augment fails"
       (RM.make 2 2 (Int 4) [[]])
       (RM.make 3 3 (Int 2) [[]])
-      (RM.make 1 1 RATIONAL.error [[]])
+      (RM.make 1 1 (Int (-1)) [[]])
       true;
     (* ################## REDUCE TEST ##############*)
     make_reduce_test "reduce #1"
@@ -474,7 +474,7 @@ let matrix_tests =
           [Int 56; Int 19; Int 0; Int 338; Int 2];
           [Int 76; Int 5; Int (-4); Int 3; Int 23]
         ])
-      (RATIONAL.error)
+      (Int (-1))
       true;
 
     (*=================== matrix inverse tests ===============*)
@@ -510,7 +510,7 @@ let matrix_tests =
           [Int 56; Int 19; Int 0; Int 338; Int 2];
           [Int 76; Int 5; Int (-4); Int 3; Int 23]
         ])
-      (RM.make 1 1 RATIONAL.error [[]])
+      (RM.make 1 1 (Int (-1)) [[]])
       true;    
 
     make_inverse_test "inverse fails - 3x3 linearly dependent"
@@ -519,7 +519,7 @@ let matrix_tests =
           [Int 4; Int 5; Int 6];
           [Int 7; Int 8; Int 9];
         ])
-      (RM.make 1 1 RATIONAL.error [[]])
+      (RM.make 1 1 (Int (-1)) [[]])
       true;
 
     make_inverse_test "inverse fails - 5x5 linearly dependent"
@@ -530,7 +530,7 @@ let matrix_tests =
           [Int 16; Int 17; Int 18; Int 19; Int 20];
           [Int 21; Int 22; Int 23; Int 24; Int 25]
         ])
-      (RM.make 1 1 RATIONAL.error [[]])
+      (RM.make 1 1 (Int (-1)) [[]])
       true;
 
     (*============= null space tests ===============*)
