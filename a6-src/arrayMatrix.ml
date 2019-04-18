@@ -257,17 +257,20 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     * [m] x-vector = 0-vector *)
   let null_space = fun (m:matrix) ->
     let p,r = dim m in
-    let pvs = pivots (reduce m) in
+    let red = reduce m in
+    let pvs = pivots red in
     let memo = ref [] in
     let is_pivot_col = fun (j:int) ->
       let is_piv = ref false in 
-      List.iter (fun (_,j') -> if j = j' then is_piv := true else ()) pvs;
+      List.iter (fun (i,j') -> if j = j' then is_piv := true else ()) pvs;
       !is_piv in
     for j = 0 to r - 1 do
       if not (is_pivot_col j) then 
-        memo := (partition (j,0) (j,p - 1) m)::(!memo)
+        let vec = (scale (N.neg N.one) (partition (j,0) (j,p - 1) red)) in
+        let vec = set vec j 0 N.one in 
+        memo := vec::(!memo);
       else ()
-    done; 
+    done;
     memo := (make p 1 N.zero [[]])::(!memo);
     !memo 
 

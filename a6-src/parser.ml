@@ -11,7 +11,8 @@ let strnum = "\([-]?[0-9]+\\?[0-9]*\)"
 let strrow = "\(\[\([ ]+"^strnum^"[ ]+\)*\]\)"
 let strmatrix = "\["^strrow^"*\]"
 let stradd = "[ ]+add[ ]+"
-let strsub = "[ ]+sub[ ]+" 
+let strsub = "[ ]+sub[ ]+"
+let strdiv = "[ ]+div[ ]+"
 let strtranspose = "[ ]+transpose[ ]+"
 let strinverse = "[ ]+inverse[ ]+"
 let strdeterminant = "[ ]+determinant[ ]+"
@@ -22,6 +23,21 @@ let strdot = "[ ]+dot[ ]+"
 let strsolve = "[ ]+solve[ ]+"
 let strlet = "[ ]+let[ ]+"
 let strin = "[ ]+in[ ]+"
+
+let rules = Hashtbl.create 20
+let rule1 = Hashtbl.add rules "num" (Str.regexp strnum)
+let rule2 = Hashtbl.add rules "row" (Str.regexp strrow)
+let rule3 = Hashtbl.add rules "matrix" (Str.regexp strmatrix)
+let rule4 = Hashtbl.add rules "add" (Str.regexp stradd)
+let rule5 = Hashtbl.add rules "sub" (Str.regexp strsub)
+let rule6 = Hashtbl.add rules "div" (Str.regexp strdiv)
+let rule7 = Hashtbl.add rules "transpose" (Str.regexp strtranspose)
+let rule8 = Hashtbl.add rules "inverse" (Str.regexp strinverse)
+let rule9 = Hashtbl.add rules "determinant" (Str.regexp strdeterminant)
+let rule10 = Hashtbl.add rules "rowspace" (Str.regexp strrowspace)
+let rule11 = Hashtbl.add rules "colspace" (Str.regexp strcolspace)
+let rule12 = Hashtbl.add rules "dot" (Str.regexp strdot)
+
 
 type typ =
   | TMatrix
@@ -310,7 +326,6 @@ let rec eval = fun (e:expr) ->
     end
 
 let rec expr_of_string = fun (s:string) -> 
-
   failwith "TODO"
 
 
