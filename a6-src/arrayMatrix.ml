@@ -266,15 +266,16 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   (** [null_space m] is is the list of vectors that solve the equation
     * [m] x-vector = 0-vector *)
   let null_space = fun (m:matrix) ->
-    let ins_zero_row = fun (m:matrix) (row:int) ->
+    let rec ins_zero_row = fun (m:matrix) (row:int) ->
       let p,r = dim m in
+      if row = p then ins_zero_row m (row - 2) else
       let m' = Array.make_matrix (p + 1) r N.zero in
       let i = ref 0 in
-      while !i < row do
+      while !i <= row do
         m'.(!i) <- m.(!i);
         i := !i + 1
       done;
-      m'.(row) <- Array.make r N.zero;
+      m'.(!i) <- Array.make r N.zero;
       i := !i + 1;
       while !i < p + 1 do
         m'.(!i) <- m.(!i - 1);
@@ -282,12 +283,15 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       done; m' in
     let p,r = dim m in
     let red = reduce m in
+    let memo = ref [] in
+    if equals red (diagonal r r) |> not then 
     let pvs = pivots red in
     let not_pvs = free red pvs in
-    let memo = ref [] in
     let tmp = ref red in
     List.iter (
-      fun (i,j) -> if i != 0 then tmp := ins_zero_row (!tmp) (i - 1)
+      fun (i,j) -> 
+      print_endline (string_of_int i);
+      tmp := ins_zero_row (!tmp) i
     ) not_pvs;
     tmp := partition (0,0) (r-1,r-1) (!tmp);
     for i=0 to r - 1 do
@@ -295,8 +299,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         let vec = partition (i,0) (i,r - 1) (!tmp) in
         vec.(i).(0) <- N.neg N.one;
         memo := vec::(!memo)
-    done;
-    !memo
+    done; else ();
+    (make r 1 N.zero [[]])::(!memo)
 
   (** [col_space m] is the list of vectors that form the column space of [m] *)
   let col_space = fun (m:matrix) -> 
