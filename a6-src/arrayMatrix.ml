@@ -296,11 +296,11 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     * equation. Fails if the equation cannot be exactly solved for *)
   let solve = fun (m:matrix) (v:matrix) -> 
     let (p,r), (s,t) = dim m, dim v in
-    if t <> 1 then failwith "This is not a linear system of equations" else
+    if t <> 1 then raise MatrixError else
       let aug = augment m v |> reduce in
       let vec = partition (r,0) (r,p-1) aug in
       let pvs = pivots aug in 
-      List.iter (fun (_,j) -> if j = r then failwith "No solution" else ()) pvs;
+      List.iter (fun (_,j) -> if j = r then raise MatrixError else ()) pvs;
       vec::(null_space m)
 
   (** [supp_matrix m i j] is the matrix [m] without values from row [i] or 

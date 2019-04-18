@@ -122,7 +122,7 @@ let make_determinant_test
       if ex then assert_raises RM.MatrixError (fun () -> RM.determinant matrix)
       else assert_equal (RM.determinant matrix) expected_output ~cmp:cmp_rat)
 
-let make_null_space_test 
+let make_null_space_test
     (name: string)
     (matrix: RM.matrix)
     (expected_output: RM.matrix list) =
@@ -133,9 +133,11 @@ let make_solve_test
     (name: string)
     (matrix: RM.matrix)
     (vector: RM.matrix)
-    (expected_output: RM.matrix list) =
-  name >:: (fun _ -> 
-      assert_equal (RM.solve matrix vector) expected_output ~cmp: cmp_set_like_lists)
+    (expected_output: RM.matrix list) 
+    (ex: bool) =
+  name >:: (fun _ ->
+      if ex then assert_raises RM.MatrixError (fun () -> RM.solve matrix vector)
+      else assert_equal (RM.solve matrix vector) expected_output ~cmp: cmp_set_like_lists)
 
 let make_inverse_test
     (name: string)
@@ -587,7 +589,8 @@ let matrix_tests =
         (RM.make 3 1 RATIONAL.zero [
           []
         ])
-      ]);
+      ])
+      (false);
 
     make_solve_test "solve 5x5"
       (RM.make 5 5 RATIONAL.zero [
@@ -609,7 +612,43 @@ let matrix_tests =
         (RM.make 5 1 RATIONAL.zero [
           []
         ])
-      ]);
+      ])
+      (false);
+
+    make_solve_test "solve fails - 5x5 vector not 1 dimensional"
+      (RM.make 5 5 RATIONAL.zero [
+          [Int 2; Int 3; Int 3; Int 4; Int 5];
+          [Int 2; Int 1; Int 3; Int 3; Int 9];
+          [Int 101; Int (-200); Int 3; Int 4; Int 5];
+          [Int 34; Int 2; Int 3; Int 2; Int 1];
+          [Int 2; Int 2; Int 1; Int 3; Int 2]
+        ])
+      (RM.make 5 2 RATIONAL.zero [[Int 34]; [Int 56]; [Int 56]; [Int 23]; [Int 21]])
+      ([
+        (RM.make 5 1 RATIONAL.error [[]])
+      ])
+      (true);
+
+    make_solve_test "solve fails - 5x5 no solution (inconsistent)"
+      (RM.make 5 5 RATIONAL.zero [
+          [Int 0; Int 3; Int 0; Int 0; Int 0];
+          [Int 0; Int 1; Int 0; Int 3; Int 0];
+          [Int 101; Int (-200); Int 0; Int 4; Int 0];
+          [Int 0; Int 0; Int 3; Int 0; Int 0];
+          [Int 0; Int 0; Int 1; Int 0; Int 0]
+        ])
+      (RM.make 5 1 RATIONAL.zero [[Int 34]; [Int 56]; [Int 56]; [Int 23]; [Int 21]])
+      ([(RM.make 5 1 RATIONAL.error [[]])])
+      (true);
+
+    make_solve_test "solve fails - 5x5 no solution"
+      (RM.make 3 3 RATIONAL.zero [
+          [Frac (4,3); Frac (3,4); Int 2];
+          [Int 0; Int 0; Int 0]
+        ])
+      (RM.make 2 1 RATIONAL.zero [[Int 0]; [Int 3]])
+      ([(RM.make 5 1 RATIONAL.error [[]])])
+      (true);
   ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [
