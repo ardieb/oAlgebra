@@ -266,13 +266,15 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       !is_piv in
     for j = 0 to r - 1 do
       if not (is_pivot_col j) then 
-        let vec = (scale (N.neg N.one) (partition (j,0) (j,p - 1) red)) in
-        let vec = set vec j 0 N.one in 
+        let vec = make r 1 N.zero [[]] in
+        for i = 0 to p - 1 do
+          vec.(i).(0) <- red.(i).(j);
+        done;
+        vec.(j).(0) <- N.one;
         memo := vec::(!memo);
-      else ()
-    done;
-    memo := (make p 1 N.zero [[]])::(!memo);
-    !memo 
+        else ()
+      done;
+    memo := (make p 1 N.zero [[]])::(!memo); !memo 
 
   (** [col_space m] is the list of vectors that form the column space of [m] *)
   let col_space = fun (m:matrix) -> 
