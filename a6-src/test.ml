@@ -122,7 +122,7 @@ let make_determinant_test
       if ex then assert_raises RM.MatrixError (fun () -> RM.determinant matrix)
       else assert_equal (RM.determinant matrix) expected_output ~cmp:cmp_rat)
 
-let make_null_space_test 
+let make_null_space_test
     (name: string)
     (matrix: RM.matrix)
     (expected_output: RM.matrix list) =
@@ -133,12 +133,20 @@ let make_solve_test
     (name: string)
     (matrix: RM.matrix)
     (vector: RM.matrix)
+<<<<<<< HEAD
     (expected_output: RM.solution) =
   name >:: (fun _ -> 
       assert_equal (RM.solve matrix vector) expected_output ~cmp: 
       (fun sol1 sol2 -> 
       (RM.equals (fst sol1) (fst sol2)) && 
       cmp_set_like_lists (snd sol1) (snd sol2)))
+=======
+    (expected_output: RM.matrix list) 
+    (ex: bool) =
+  name >:: (fun _ ->
+      if ex then assert_raises RM.MatrixError (fun () -> RM.solve matrix vector)
+      else assert_equal (RM.solve matrix vector) expected_output ~cmp: cmp_set_like_lists)
+>>>>>>> ffa6d67f30e02083fca8be3dbb12c39e33314bbc
 
 let make_inverse_test
     (name: string)
