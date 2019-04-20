@@ -512,10 +512,27 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let boolean = ref true in 
     for col = 0 to cols-1 do
       for row = col+1 to rows-1 do
-        boolean := !boolean && (N.to_float (m.(row).(col)) < 0.005)
+        boolean := !boolean && abs_float (N.to_float (m.(row).(col))) <= 1. /. N.tolerance#
       done;
     done; !boolean
 
-  let eigenvalues = fun (m:matrix) -> failwith "TODO"
+  let diagonal_vals = fun (m:matrix) (size:int)->
+    let vals = ref [] in
+    for i = 0 to size-1 do 
+      vals := m.(i).(i)::(!vals);
+    done; !vals
+
+  let rec eigenvalues = fun (m:matrix) -> 
+    let r,c = dim m in 
+    if r <> c then raise MatrixError 
+    else 
+    if triangular_enough m then
+      diagonal_vals m r
+    else
+      let q,r = qr_fact m in 
+      let a = mul r q in 
+      eigenvalues a
+
+
   let eigenvectors = fun (m:matrix) -> failwith "TODO"
 end

@@ -706,6 +706,25 @@ let matrix_tests =
            []
          ]])
       false;
+
+    make_qr_fact_test "4 x 3 matrix"
+      (RM.make 4 3 RATIONAL.zero [
+          [Int (-1); Int (-1); Int 1];
+          [Int 1; Int 3; Int 3];
+          [Int (-1); Int (-1); Int 5];
+          [Int 1; Int 3; Int 7]
+        ])
+      (RM.make 4 3 RATIONAL.zero [
+          [Frac (-1,2); Frac (1,2); Frac (-1,2)];
+          [Frac (1,2); Frac (1,2); Frac (-1,2)];
+          [Frac (-1,2); Frac (1,2); Frac (1,2)];
+          [Frac (1,2); Frac (1,2); Frac (1,2)];
+        ])
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 2; Int 4; Int 2];
+          [Int 0; Int 2; Int 8];
+          [Int 0; Int 0; Int 4]
+        ])
   ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [
