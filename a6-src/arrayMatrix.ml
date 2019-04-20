@@ -236,15 +236,15 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         | Some col when row = 0 ->
           memo := mulrows !memo row (N.div N.one (!memo).(row).(col))
         | Some col -> begin
-          memo := mulrows !memo row (N.div N.one (!memo).(row).(col));
-          for i = row - 1 downto 0 do
-            memo := addrows !memo row (i) (N.neg (!memo).(i).(col));
-          done; let row' = ref row in
-          while !row' > 0 && pivot_col (!memo) (!row' - 1) = None do
-            memo := swaprows !memo !row' (!row' - 1);
-            row' := !row' - 1;
-          done; backward (!row' - 1)
-        end in 
+            memo := mulrows !memo row (N.div N.one (!memo).(row).(col));
+            for i = row - 1 downto 0 do
+              memo := addrows !memo row (i) (N.neg (!memo).(i).(col));
+            done; let row' = ref row in
+            while !row' > 0 && pivot_col (!memo) (!row' - 1) = None do
+              memo := swaprows !memo !row' (!row' - 1);
+              row' := !row' - 1;
+            done; backward (!row' - 1)
+          end in 
     forward 0 0; backward (p - 1); !memo
 
   (** [augment m1 m2] is the matrix obtained by appending 
@@ -358,12 +358,12 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       let vec = partition (r,0) (r,p-1) aug in
       let pvts = pivots aug in 
       let is_piv_col = fun (col:int) -> 
-      let res = ref false in
-      for i=0 to p - 1 do
-        res := Hashtbl.find pvts (i,col) || !res
-      done; !res in
+        let res = ref false in
+        for i=0 to p - 1 do
+          res := Hashtbl.find pvts (i,col) || !res
+        done; !res in
       if is_piv_col r then raise MatrixError else
-      (vec,(null_space m))
+        (vec,(null_space m))
 
   (** [supp_matrix m i j] is the matrix [m] without values from row [i] or 
     * column [j] 
@@ -466,10 +466,11 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     done; c
 
   (* SPRINT WEEK 2 *)
-  (* this is incorrect because it's supposed to divide by the square root of the length,
-     which requires irrational numbers *)
+  let magnitude = fun (v:matrix) -> 
+    N.pow (dot v v) (N.make_Float 0.5)
+
   let normalize = fun (v:matrix) -> 
-    scale (N.div N.one (dot v v)) v
+    scale (N.div N.one (magnitude v)) v
 
   let qr_fact_q = fun (m:matrix) -> 
     let (rows, cols) = dim m in

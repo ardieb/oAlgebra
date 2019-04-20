@@ -21,6 +21,14 @@ module type NUM = sig
   val zero : t
   (** [one] is the number one *)
   val one : t
+
+  (** [make_X arg ...] makes a rational, either a Float or Int or Frac from 
+      OCaml number types like int and float 
+  *)
+  val make_Float : float -> t 
+  val make_Int : int -> t 
+  val make_Frac : int -> int -> t
+
   (** [add x y] is the sum of [x] and [y] *)
   val add : t -> t -> t
   (** [mul x y] is the product of [x] and [y] *)
@@ -107,6 +115,8 @@ module type MATRIX = sig
   val supp_matrix : matrix -> int -> int -> matrix
   (** [qr_fact m] is the QR factorization of m given as a pair of matrices*)
   val qr_fact : matrix -> matrix * matrix
+  (** [magnitude vector] is the magnitude of [vector]*)
+  val magnitude : matrix -> value
   (** [normalize v] is normalized vector [v] *)
   val normalize : matrix -> matrix
 end

@@ -17,6 +17,10 @@ module RATIONAL : NUM with type t = rational = struct
   (** [one] is [Int 1] *)
   let one = Int 1
 
+  let make_Float = fun (f:float) -> Float f
+  let make_Int = fun (i:int) -> Int i
+  let make_Frac = fun (n:int) (d:int) -> Frac (n,d)
+
   (** [rep_ok r] is the rational number if the reprsentation meets the R.I. and
     * fails otherwise *)
   let rep_ok = function
@@ -109,7 +113,7 @@ module RATIONAL : NUM with type t = rational = struct
       let rec helper = fun (pow:int) -> 
         if pow=0 then Int 1 else 
           mul base (helper (pow - 1))
-      in if int_pow>0 then helper int_pow else 
+      in if int_pow>=0 then helper int_pow else 
         div (Int 1) (helper (abs int_pow))
 
   (** [sub (n1,d1) (n2,d2)] is the difference of two rational numbers *)
