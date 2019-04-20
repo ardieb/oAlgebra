@@ -487,10 +487,13 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
 
   let qr_fact_r = fun (m:matrix) (q:matrix)-> 
     let (rows, cols) = dim m in
-    let r = make rows cols N.zero [[]] in
+    let r = make cols cols N.zero [[]] in
     for col = 0 to cols-1 do
       for row = 0 to col do
-        r.(row).(col) <- N.float_to_int (dot (column q row) (column m col))
+        r.(row).(col) <- 
+          let dot_product = dot (column q row) (column m col) in 
+          try (N.float_to_int dot_product) 
+          with N.ArithmeticError -> dot_product
       done;
     done; r
 

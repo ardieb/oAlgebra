@@ -59,7 +59,6 @@ module RATIONAL : NUM with type t = rational = struct
     | Int i -> Int i
     | Frac (n,d) -> Frac (n,d)
     | Float f -> begin
-        print_endline (string_of_float tolerance);
         simplify (Frac (int_of_float (f *. tolerance), int_of_float tolerance))
       end
 
@@ -67,8 +66,11 @@ module RATIONAL : NUM with type t = rational = struct
     | Float f -> let low = floor f in 
       let high = ceil f in 
 
-      if ((abs_float (f -. high)) <= (1. /. tolerance)) then (Int (int_of_float high))
-      else Int (int_of_float low)
+      if ((abs_float (f -. high)) <= (1. /. tolerance)) then 
+        (Int (int_of_float high))
+      else if ((abs_float (f -. low)) <= (1. /. tolerance)) then 
+        (Int (int_of_float low))
+      else raise ArithmeticError
     | _ -> failwith "need float"
 
   (** [add (n1,d1) (n2,d2)] is the sum of two rational numbers *)
