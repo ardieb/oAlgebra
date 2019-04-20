@@ -27,6 +27,8 @@ module type NUM = sig
   val mul : t -> t -> t
   (** [div x y] is the quotient of [x] and [y] *)
   val div : t -> t -> t
+  (** [pow x y] is x raised to the yth power *)
+  val pow : t -> t -> t
   (** [sub x y] is the difference of [x] and [y] *)
   val sub : t -> t -> t
   (** [abs x] is the absolute value of [x] s*)
@@ -103,6 +105,10 @@ module type MATRIX = sig
   (** [supp_matrix m row col] is the matrix [m] without values from [row] or 
     * from [col] *)
   val supp_matrix : matrix -> int -> int -> matrix
+  (** [qr_fact m] is the QR factorization of m given as a pair of matrices*)
+  val qr_fact : matrix -> matrix * matrix
+  (** [normalize v] is normalized vector [v] *)
+  val normalize : matrix -> matrix
 end
 
 (** [MATRIX_MAKER] is the type of a functor for making a matrix *)

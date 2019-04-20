@@ -74,6 +74,7 @@ module RATIONAL : NUM with type t = rational = struct
     | Float f1, Float f2 -> Float (f1 +. f2)
     | Float f, b -> add (Float f) (Float (to_float b))
     | a, Float f -> add (Float (to_float a)) (Float f)
+
   (** [mul (n1,d1) (n2,d2)] is the product of two t rational numbers *)
   let rec mul = fun (r1:t) (r2:t) ->
     match rep_ok r1, rep_ok r2 with
@@ -84,6 +85,7 @@ module RATIONAL : NUM with type t = rational = struct
     | Float f1, Float f2 -> Float (f1 *. f2)
     | Float f, b -> mul (Float f) (Float (to_float b))
     | a, Float f -> mul (Float (to_float a)) (Float f)
+
   (** [div (n1.d1) (n2.d2)] is the quotient of [r1] by [r2] *)
   let rec div = fun (r1:t) (r2:t) ->
     match rep_ok r1, rep_ok r2 with
@@ -94,6 +96,22 @@ module RATIONAL : NUM with type t = rational = struct
     | Float f1, Float f2 -> Float (f1 /. f2)
     | Float f, b -> div (Float f) (Float (to_float b))
     | a, Float f -> div (Float (to_float a)) (Float f)
+
+  (** [pow r1 r2] is r1 raised to the r2 power. 
+      Require: 
+      [r1] and [r2] are of type t (rationals)
+  *)
+  let pow = fun (base:t) (pow:t) -> 
+    match pow with 
+    | Frac (n,d) -> Float ((to_float base) ** (to_float pow))
+    | Float f -> Float ((to_float base) ** f)
+    | Int int_pow ->
+      let rec helper = fun (pow:int) -> 
+        if pow=0 then Int 1 else 
+          mul base (helper (pow - 1))
+      in if int_pow>0 then helper int_pow else 
+        div (Int 1) (helper (abs int_pow))
+
   (** [sub (n1,d1) (n2,d2)] is the difference of two rational numbers *)
   let rec sub = fun (r1:t) (r2:t) ->
     match rep_ok r1, rep_ok r2 with

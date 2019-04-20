@@ -20,6 +20,7 @@ module type NUM = sig
   val add : t -> t -> t
   val mul : t -> t -> t
   val div : t -> t -> t
+  val pow : t -> t -> t
   val sub : t -> t -> t
   val abs : t -> t
   val neg : t -> t
@@ -56,6 +57,8 @@ module type MATRIX = sig
   val equals : matrix -> matrix -> bool
   val subtract : matrix -> matrix -> matrix
   val supp_matrix : matrix -> int -> int -> matrix
+  val qr_fact : matrix -> matrix * matrix
+  val normalize : matrix -> matrix
 end
 
 module type MATRIX_MAKER = 
