@@ -47,6 +47,9 @@ module type NUM = sig
   val to_float : t -> float
   (** [to_string x] is [x] as a string *)
   val to_string : t -> string
+
+  (** turns Float into Int *)
+  val float_to_int : t -> t
 end
 
 module type MATRIX = sig

@@ -4,7 +4,7 @@ type rational =
   | Frac of int * int  
   | Float of float
 module RATIONAL : NUM with type t = rational = struct
-  let tolerance = 10.0 ** 6.0
+  let tolerance = 10.0 ** (-6.0)
   (** A module for working with t rationalbers *)
   exception ArithmeticError
   (* AF: A value of type t is a Int of type int, a Frac of type int * int,
@@ -62,6 +62,20 @@ module RATIONAL : NUM with type t = rational = struct
         print_endline (string_of_float tolerance);
         simplify (Frac (int_of_float (f *. tolerance), int_of_float tolerance))
       end
+
+  let float_to_int = function 
+    | Float f -> let low = floor f in 
+      let high = ceil f in 
+      print_endline "f, tolerance, diff with high, diff with low";
+      print_float f; print_endline "";
+      print_float tolerance; print_endline "";
+      print_float (f -. high);print_endline "";
+      print_float (f -. low);print_endline "";
+
+      if ((abs_float (f -. high)) <= tolerance) then (Int (int_of_float high))
+      else Int (int_of_float low)
+    | _ -> failwith "need float"
+
   (** [add (n1,d1) (n2,d2)] is the sum of two rational numbers *)
   let rec add = fun (r1:t) (r2:t) ->
     match rep_ok r1, rep_ok r2 with

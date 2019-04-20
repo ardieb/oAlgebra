@@ -490,7 +490,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let r = make rows cols N.zero [[]] in
     for col = 0 to cols-1 do
       for row = 0 to col do
-        r.(row).(col) <- dot (column q row) (column m col)
+        r.(row).(col) <- N.float_to_int (dot (column q row) (column m col))
       done;
     done; r
 

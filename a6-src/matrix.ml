@@ -29,6 +29,8 @@ module type NUM = sig
   val neg : t -> t
   val to_float : t -> float
   val to_string : t -> string
+
+  val float_to_int : t -> t
 end
 
 module type MATRIX = sig
