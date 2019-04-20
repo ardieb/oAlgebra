@@ -208,6 +208,11 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         j := 0
     done; memo
 
+  let get = fun (m:matrix) (r:int) (c:int) ->
+    let rows,cols = dim m in 
+    if r>=rows || c>=cols then raise MatrixError else 
+      m.(r).(c)
+
   (** [reduce m] is the reduced row echelon matrix formed from [m] 
     * ALGORITHM: first reduce [m] to an upper triangular matrix using forward.
     * Then working from the bottom-left pivot up to the top add multiples of the

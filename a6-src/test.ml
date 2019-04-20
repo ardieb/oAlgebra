@@ -17,6 +17,8 @@ let cmp_set_like_lists lst1 lst2 =
   &&
   uniq1 = uniq2
 
+
+
 let make_op_test 
     (name: string)
     (op: rational -> rational -> rational)
@@ -31,6 +33,19 @@ let make_op_test
         ~cmp:cmp_rat)
 
 module RM = MAKE_MATRIX(RATIONAL)
+
+let approx_eq_mat mat1 mat2 =
+  let (r1,c1), (r2,c2) = (RM.dim mat1), (RM.dim mat2) in
+  if (r1 != r2) || (c1 != c2) then false
+  else
+    let eq = ref true in
+    for i=0 to (r1-1) do
+      for j=0 to (c1-1) do 
+        eq := abs_float (RATIONAL.to_float (RATIONAL.sub (RM.get mat1 i j)
+                                              (RM.get mat2 i j))) <= 
+              (1.0 /. (RATIONAL.tolerance)) && !eq;
+      done;
+    done; !eq
 
 let make_transpose_test 
     (name: string)
@@ -161,7 +176,16 @@ let make_inverse_test
       if raises then
         assert_raises RM.MatrixError (fun () -> RM.inverse input)
       else
-        assert_equal expected_output (RM.inverse input) ~cmp:RM.equals
+        assert_equal expected_output (RM.inverse input) ~cmp:RM.equals)
+
+let make_qr_fact_test 
+    (name: string)
+    (input: RM.matrix)
+    (expected_q : RM.matrix)
+    (expected_r: RM.matrix) =
+  name >:: (fun _ -> 
+      assert_equal (fst (RM.qr_fact input)) expected_q ~cmp: approx_eq_mat;
+      assert_equal (snd (RM.qr_fact input)) expected_r ~cmp: approx_eq_mat
     )
 
 let rationals_tests =

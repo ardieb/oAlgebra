@@ -17,6 +17,7 @@ module type NUM = sig
   exception ArithmeticError
   val zero : t
   val one : t
+  val tolerance : float
   val make_Float : float -> t 
   val make_Int : int -> t 
   val make_Frac : int -> int -> t
@@ -65,6 +66,7 @@ module type MATRIX = sig
   val qr_fact : matrix -> matrix * matrix
   val magnitude : matrix -> value
   val normalize : matrix -> matrix
+  val get : matrix -> int -> int -> value
 end
 
 module type MATRIX_MAKER = 

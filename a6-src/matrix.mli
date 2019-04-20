@@ -21,6 +21,7 @@ module type NUM = sig
   val zero : t
   (** [one] is the number one *)
   val one : t
+  val tolerance : float
 
   (** [make_X arg ...] makes a rational, either a Float or Int or Frac from 
       OCaml number types like int and float 
@@ -122,6 +123,7 @@ module type MATRIX = sig
   val magnitude : matrix -> value
   (** [normalize v] is normalized vector [v] *)
   val normalize : matrix -> matrix
+  val get : matrix -> int -> int -> value
 end
 
 (** [MATRIX_MAKER] is the type of a functor for making a matrix *)
