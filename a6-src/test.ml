@@ -130,9 +130,16 @@ let make_null_space_test
         let res = ref true in
         let p,_ = RM.dim matrix in
         List.iter (fun e ->
-          res := RM.equals (RM.mul matrix e) (RM.make p 1 RATIONAL.zero [[]])
-        ) (RM.null_space matrix); !res in
+            res := RM.equals (RM.mul matrix e) (RM.make p 1 RATIONAL.zero [[]])
+          ) (RM.null_space matrix); !res in
       assert_equal true null)
+
+let make_col_space_test
+    (name: string)
+    (matrix: RM.matrix)
+    (expected_output: RM.matrix list) = 
+  name >:: (fun _ ->
+      assert_equal (RM.col_space matrix) expected_output ~cmp:cmp_set_like_lists)
 
 let make_solve_test
     (name: string)
@@ -143,7 +150,7 @@ let make_solve_test
   name >:: (fun _ ->
       if ex then assert_raises RM.MatrixError (fun () -> RM.solve matrix vector)
       else assert_equal (RM.solve matrix vector) expected_output ~cmp:
-      (fun sol1 sol2 -> RM.equals (fst sol1) (fst sol2)))
+          (fun sol1 sol2 -> RM.equals (fst sol1) (fst sol2)))
 
 let make_inverse_test
     (name: string)
@@ -553,6 +560,90 @@ let matrix_tests =
           [Int 4; Int 10; Int 8]
         ]); 
 
+    (*===================== column space tests ================*)
+    make_col_space_test "column space 2x3"
+      (RM.make 2 3 RATIONAL.zero [
+          [Int 9; Int 2; Int (-3)];
+          [Int 92; Int (-23); Int 43]
+        ])
+      ([(RM.make 2 1 RATIONAL.zero [
+           [Int 9];
+           [Int 92]
+         ])
+         ;
+         (RM.make 2 1 RATIONAL.zero [
+             [Int 2];
+             [Int (-23)]
+           ])
+        ]);
+
+    make_col_space_test "column space 5x3"
+      (RM.make 5 3 RATIONAL.zero [
+          [Int 19; Int 2; Int (-32)];
+          [Int 292; Int (-3); Int 4];
+          [Int 22; Int 82; Int 1];
+          [Int (-82); Int 0; Int 0];
+          [Int 52; Int 91; Int 25];
+        ])
+      ([(RM.make 5 1 RATIONAL.zero [
+           [Int (-32)];
+           [Int 4];
+           [Int 1];
+           [Int 0];
+           [Int 25]
+         ])
+         ;
+         (RM.make 5 1 RATIONAL.zero [
+             [Int 19];
+             [Int 292];
+             [Int 22];
+             [Int (-82)];
+             [Int 52]
+           ]);
+         (RM.make 5 1 RATIONAL.zero [
+             [Int 2];
+             [Int (-3)];
+             [Int 82];
+             [Int 0];
+             [Int 91]
+           ])
+        ]);
+    make_col_space_test "column space 4x6"
+      (RM.make 4 6 RATIONAL.zero [
+          [Int 3; Int 6; Int 81; Int 0; Int 9; Int 7];
+          [Int 7; Int 0; Int 0; Int 8; Int 6; Int 2];
+          [Int 1; Int 0; Int 8; Int (-13); Int 4; Int 2];
+          [Int (-5); Int 92; Int 17; Int 8; Int 9; Int 1]
+        ])
+      (
+        [
+          RM.make 4 1 RATIONAL.zero [
+            [Int 0];
+            [Int 8];
+            [Int (-13)];
+            [Int 8];
+          ];
+          RM.make 4 1 RATIONAL.zero [
+            [Int 81];
+            [Int 0];
+            [Int 8];
+            [Int 17];
+          ];
+          RM.make 4 1 RATIONAL.zero [
+            [Int 3];
+            [Int 7];
+            [Int 1];
+            [Int (-5)];
+          ];
+          RM.make 4 1 RATIONAL.zero [
+            [Int 6];
+            [Int 0];
+            [Int 0];
+            [Int 92];
+          ]  
+        ]
+      );
+
     (*============= solve tests ===============*)
     make_solve_test "solve 3x3"
       (RM.make 3 3 RATIONAL.zero [
@@ -566,9 +657,9 @@ let matrix_tests =
           [Int (-24)];
           [Frac (307,25)]
         ],
-        [RM.make 3 1 RATIONAL.zero [
-          []
-        ]])
+       [RM.make 3 1 RATIONAL.zero [
+           []
+         ]])
       false;
 
     make_solve_test "solve 5x5"
@@ -587,10 +678,10 @@ let matrix_tests =
           [Frac (542644,144081)];
           [Frac (945580,144081)]
         ],
-        [RM.make 5 1 RATIONAL.zero [
-          []
-        ]])
-        false;
+       [RM.make 5 1 RATIONAL.zero [
+           []
+         ]])
+      false;
   ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [
