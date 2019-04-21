@@ -4,7 +4,7 @@ type rational =
   | Frac of int * int  
   | Float of float
 module RATIONAL : NUM with type t = rational = struct
-  let tolerance = 10.0 ** 6.0
+  let tolerance = 10.0 ** 8.0
   (** A module for working with t rationalbers *)
   exception ArithmeticError
   (* AF: A value of type t is a Int of type int, a Frac of type int * int,

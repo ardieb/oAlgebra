@@ -512,7 +512,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let boolean = ref true in 
     for col = 0 to cols-1 do
       for row = col+1 to rows-1 do
-        boolean := !boolean && abs_float (N.to_float (m.(row).(col))) <= 1. /. N.tolerance
+        boolean := !boolean && abs_float (N.to_float (m.(row).(col))) <= 0.1 /. N.tolerance
       done;
     done; !boolean
 
