@@ -17,15 +17,21 @@ module type NUM = sig
   exception ArithmeticError
   val zero : t
   val one : t
-  val error : t
+  val tolerance : float
+  val make_Float : float -> t 
+  val make_Int : int -> t 
+  val make_Frac : int -> int -> t
   val add : t -> t -> t
   val mul : t -> t -> t
   val div : t -> t -> t
+  val pow : t -> t -> t
   val sub : t -> t -> t
   val abs : t -> t
   val neg : t -> t
   val to_float : t -> float
   val to_string : t -> string
+
+  val float_to_int : t -> t
 end
 
 module type MATRIX = sig
@@ -35,6 +41,7 @@ module type MATRIX = sig
   type matrix
   type solution = matrix * matrix list
   include Formattable with type t:= matrix
+  val format_solution : Format.formatter -> solution -> unit
   val diagonal : int -> int -> matrix
   val make : int -> int -> value -> value list list -> matrix
   val dim : matrix -> int*int
@@ -56,7 +63,10 @@ module type MATRIX = sig
   val equals : matrix -> matrix -> bool
   val subtract : matrix -> matrix -> matrix
   val supp_matrix : matrix -> int -> int -> matrix
-  val pivots : matrix -> (int * int) list
+  val qr_fact : matrix -> matrix * matrix
+  val magnitude : matrix -> value
+  val normalize : matrix -> matrix
+  val get : matrix -> int -> int -> value
 end
 
 module type MATRIX_MAKER = 

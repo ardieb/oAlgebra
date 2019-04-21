@@ -1,2 +1,2 @@
-(* TODO: set the value below *)
-let hours_worked = [11; 10; 10; 25]
+(* HOURS WORKED *)
+let hours_worked = [12; 12; 12; 25]

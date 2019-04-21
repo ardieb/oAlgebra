@@ -6,39 +6,6 @@ module RM = MAKE_MATRIX(RATIONAL)
 
 open RM
 
-(* #### STRING MATCH CASES #### *)
-let strnum = "\([-]?[0-9]+\\?[0-9]*\)"
-let strrow = "\(\[\([ ]+"^strnum^"[ ]+\)*\]\)"
-let strmatrix = "\["^strrow^"*\]"
-let stradd = "[ ]+add[ ]+"
-let strsub = "[ ]+sub[ ]+"
-let strdiv = "[ ]+div[ ]+"
-let strtranspose = "[ ]+transpose[ ]+"
-let strinverse = "[ ]+inverse[ ]+"
-let strdeterminant = "[ ]+determinant[ ]+"
-let strrowspace = "[ ]+rowspace[ ]+"
-let strnullspace = "[ ]+nullspace[ ]+"
-let strcolspace = "[ ]+colspace[ ]+"
-let strdot = "[ ]+dot[ ]+"
-let strsolve = "[ ]+solve[ ]+"
-let strlet = "[ ]+let[ ]+"
-let strin = "[ ]+in[ ]+"
-
-let rules = Hashtbl.create 20
-let rule1 = Hashtbl.add rules "num" (Str.regexp strnum)
-let rule2 = Hashtbl.add rules "row" (Str.regexp strrow)
-let rule3 = Hashtbl.add rules "matrix" (Str.regexp strmatrix)
-let rule4 = Hashtbl.add rules "add" (Str.regexp stradd)
-let rule5 = Hashtbl.add rules "sub" (Str.regexp strsub)
-let rule6 = Hashtbl.add rules "div" (Str.regexp strdiv)
-let rule7 = Hashtbl.add rules "transpose" (Str.regexp strtranspose)
-let rule8 = Hashtbl.add rules "inverse" (Str.regexp strinverse)
-let rule9 = Hashtbl.add rules "determinant" (Str.regexp strdeterminant)
-let rule10 = Hashtbl.add rules "rowspace" (Str.regexp strrowspace)
-let rule11 = Hashtbl.add rules "colspace" (Str.regexp strcolspace)
-let rule12 = Hashtbl.add rules "dot" (Str.regexp strdot)
-
-
 type typ =
   | TMatrix
   | TValue
@@ -67,6 +34,89 @@ type expr =
   | ColSpace of expr
   | List of expr list
   | Lookup of (expr * int)
+
+exception Malformed of string
+
+(* #### STRING MATCH CASES #### *)
+let strint = "\([-]?[0-9]+\)"
+let strfrac = "\("^strint^"\\"^strint^"\)"
+let strfloat= "\([-]?[0-9]+.[0-9]+\)"
+let strnum = "\("^strint^"\|"^strfloat^"\|"^strfrac^"\)"
+let strrow = "\(\[\([ ]+"^strnum^"[ ]+\)*\]\)"
+let strmatrix = "\["^strrow^"*\]"
+let stradd = "[ ]+add[ ]+"
+let strsub = "[ ]+sub[ ]+"
+let strdiv = "[ ]+div[ ]+"
+let strtranspose = "[ ]+transpose[ ]+"
+let strinverse = "[ ]+inverse[ ]+"
+let strdeterminant = "[ ]+determinant[ ]+"
+let strrowspace = "[ ]+rowspace[ ]+"
+let strnullspace = "[ ]+nullspace[ ]+"
+let strcolspace = "[ ]+colspace[ ]+"
+let strdot = "[ ]+dot[ ]+"
+let strsolve = "[ ]+solve[ ]+"
+let strlet = "[ ]+let[ ]+"
+let strin = "[ ]+in[ ]+"
+let rules = Hashtbl.create 20
+let () = Hashtbl.add rules "int" (Str.regexp strint)
+let () = Hashtbl.add rules "frac" (Str.regexp strfrac)
+let () = Hashtbl.add rules "float" (Str.regexp strfloat)
+let () = Hashtbl.add rules "num" (Str.regexp strnum)
+let () = Hashtbl.add rules "row" (Str.regexp strrow)
+let () = Hashtbl.add rules "matrix" (Str.regexp strmatrix)
+let () = Hashtbl.add rules "add" (Str.regexp stradd)
+let () = Hashtbl.add rules "sub" (Str.regexp strsub)
+let () = Hashtbl.add rules "div" (Str.regexp strdiv)
+let () = Hashtbl.add rules "transpose" (Str.regexp strtranspose)
+let () = Hashtbl.add rules "inverse" (Str.regexp strinverse)
+let () = Hashtbl.add rules "determinant" (Str.regexp strdeterminant)
+let () = Hashtbl.add rules "rowspace" (Str.regexp strrowspace)
+let () = Hashtbl.add rules "colspace" (Str.regexp strcolspace)
+let () = Hashtbl.add rules "dot" (Str.regexp strdot)
+let () = Hashtbl.add rules "solve" (Str.regexp strsolve)
+let () = Hashtbl.add rules "let" (Str.regexp strlet)
+let () = Hashtbl.add rules "in" (Str.regexp strin)
+let () = Hashtbl.add rules "rparen" (Str.regexp "[ ]*([ ]*")
+let () = Hashtbl.add rules "lparen" (Str.regexp "[ ]*)[ ]*")
+
+let num_of_str = fun (s:string) -> 
+  if Str.string_match (Hashtbl.find rules "frac") s 0 then 
+      let u = Str.matched_string s in
+      ignore (Str.search_forward (Hashtbl.find rules "int") u 0);
+      let n = int_of_string (Str.matched_string u) in
+      ignore (Str.search_backward (Hashtbl.find rules "int") u (String.length u - 1));
+      let d = int_of_string (Str.matched_string u) in
+      Value (Frac (n,d))
+    else if Str.string_match (Hashtbl.find rules "int") s 0 then
+      Value (Int (int_of_string (Str.matched_string s)))
+    else if Str.string_match (Hashtbl.find rules "float") s 0 then
+      Value (Float (float_of_string (Str.matched_string s)))
+    else raise (Malformed "numeric input was malformed")
+
+let row_of_str = fun (s:string) ->
+  let rec loop = fun acc pos ->
+    if pos = -1 then acc else
+    let pos' = try Str.search_backward (Hashtbl.find rules "num") s pos with
+    | Failure _ -> -1
+    in 
+    match num_of_str (Str.matched_string s) with
+    | Value v -> loop (v::acc) pos'
+    | _ -> raise (Malformed "row input was malforemd") in 
+  loop [] (String.length s - 1)
+
+let rec matrix_of_str = fun (s:string) ->
+  let rec loop = fun acc pos ->
+    if pos = -1 then acc else
+    let pos' = try Str.search_backward (Hashtbl.find rules "row") s pos with
+    | Failure _ -> -1
+    in loop ((row_of_str (Str.matched_string s))::acc) pos' in
+  let init = loop [] (String.length s - 1) in
+  let m,n = List.length init, List.length (List.hd init) in 
+  Matrix (make m n (Int 0) init)
+
+let rec expr_of_str = fun (s:string) -> failwith "TODO"
+  
+  
 
 let rec string_of_typ = fun (t:typ) ->
   match t with 
@@ -245,9 +295,10 @@ let rec eval = fun (e:expr) ->
     match eval e1, eval e2 with
     | Matrix m1, Matrix m2 -> 
       let memo = ref [] in
+      let sol = solve m1 m2 in
       List.iter (fun m -> 
         memo := (Matrix m)::(!memo)
-      ) (solve m1 m2); List !memo
+      ) (snd sol); List (Matrix (fst sol)::(!memo))
     | _, _ -> failwith "type mismatch"
     end
   | List l -> begin
@@ -324,8 +375,5 @@ let rec eval = fun (e:expr) ->
     | None -> failwith "index out of bounds"
     | Some e -> eval e
     end
-
-let rec expr_of_string = fun (s:string) -> 
-  failwith "TODO"
 
 

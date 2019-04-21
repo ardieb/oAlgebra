@@ -17,6 +17,8 @@ let cmp_set_like_lists lst1 lst2 =
   &&
   uniq1 = uniq2
 
+
+
 let make_op_test 
     (name: string)
     (op: rational -> rational -> rational)
@@ -31,6 +33,32 @@ let make_op_test
         ~cmp:cmp_rat)
 
 module RM = MAKE_MATRIX(RATIONAL)
+
+let approx_eq_mat mat1 mat2 =
+  let (r1,c1), (r2,c2) = (RM.dim mat1), (RM.dim mat2) in
+  if (r1 != r2) || (c1 != c2) then false
+  else
+    let eq = ref true in
+    for i=0 to (r1-1) do
+      for j=0 to (c1-1) do 
+        eq := abs_float (RATIONAL.to_float (RATIONAL.sub (RM.get mat1 i j)
+                                              (RM.get mat2 i j))) <= 
+              (1.0 /. (RATIONAL.tolerance)) && !eq;
+      done;
+    done; !eq
+
+let rec approx_eq_list list1 list2 = 
+  if List.length list1 <> List.length list2 then false
+  else 
+    let uniq1 = List.sort compare list1 in 
+    let uniq2 = List.sort compare list2 in 
+    let eq = ref true in
+    match uniq1, uniq2 with 
+    | [], [] -> !eq
+    | h1::t1, h2::t2 -> eq := abs_float (RATIONAL.to_float (RATIONAL.sub h1 h2)) <= 
+                              (1.0 /. (RATIONAL.tolerance)) && !eq;
+      approx_eq_list t1 t2
+    | _,_-> failwith "should not reach if lists are equal size"
 
 let make_transpose_test 
     (name: string)
@@ -134,6 +162,13 @@ let make_null_space_test
           ) (RM.null_space matrix); !res in
       assert_equal true null)
 
+let make_col_space_test
+    (name: string)
+    (matrix: RM.matrix)
+    (expected_output: RM.matrix list) = 
+  name >:: (fun _ ->
+      assert_equal (RM.col_space matrix) expected_output ~cmp:cmp_set_like_lists)
+
 let make_solve_test
     (name: string)
     (matrix: RM.matrix)
@@ -154,7 +189,16 @@ let make_inverse_test
       if raises then
         assert_raises RM.MatrixError (fun () -> RM.inverse input)
       else
-        assert_equal expected_output (RM.inverse input) ~cmp:RM.equals
+        assert_equal expected_output (RM.inverse input) ~cmp:RM.equals)
+
+let make_qr_fact_test 
+    (name: string)
+    (input: RM.matrix)
+    (expected_q : RM.matrix)
+    (expected_r: RM.matrix) =
+  name >:: (fun _ -> 
+      assert_equal (fst (RM.qr_fact input)) expected_q ~cmp: approx_eq_mat;
+      assert_equal (snd (RM.qr_fact input)) expected_r ~cmp: approx_eq_mat
     )
 
 let make_solve_test
@@ -167,6 +211,13 @@ let make_solve_test
       if ex then assert_raises RM.MatrixError (fun () -> RM.solve matrix vector)
       else assert_equal (RM.solve matrix vector) expected_output ~cmp:
           (fun sol1 sol2 -> RM.equals (fst sol1) (fst sol2)))
+
+let make_eigenvalue_test 
+    (name: string)
+    (matrix: RM.matrix)
+    (expected_output: RM.value list) =
+  name >:: (fun _ ->
+      assert_equal (RM.eigenvalues matrix) expected_output ~cmp:approx_eq_list)
 
 let rationals_tests =
   let add = RATIONAL.add in
@@ -347,7 +398,7 @@ let matrix_tests =
     make_add_test "add fails with invalid matrix sizes"
       (RM.make 2 3 RATIONAL.one [[]])
       (RM.make 3 3 RATIONAL.one [[]])
-      (RM.make 1 1 RATIONAL.error [[]])
+      (RM.make 1 1 (Int (-1)) [[]])
       true;
 
     (*============= matrix subtraction tests =============*)
@@ -384,7 +435,7 @@ let matrix_tests =
     make_subtract_test "subtract fails with invalid matrix sizes"
       (RM.make 2 3 RATIONAL.one [[]])
       (RM.make 2 2 RATIONAL.one [[]])
-      (RM.make 1 1 RATIONAL.error [[]])
+      (RM.make 1 1 (Int (-1)) [[]])
       true;
 
     (*################## SCALE TEST #################*)
@@ -402,7 +453,7 @@ let matrix_tests =
     make_augment_test "augment fails"
       (RM.make 2 2 (Int 4) [[]])
       (RM.make 3 3 (Int 2) [[]])
-      (RM.make 1 1 RATIONAL.error [[]])
+      (RM.make 1 1 (Int (-1)) [[]])
       true;
     (* ################## REDUCE TEST ##############*)
     make_reduce_test "reduce #1"
@@ -485,7 +536,7 @@ let matrix_tests =
           [Int 56; Int 19; Int 0; Int 338; Int 2];
           [Int 76; Int 5; Int (-4); Int 3; Int 23]
         ])
-      (RATIONAL.error)
+      (Int (-1))
       true;
 
     (*=================== matrix inverse tests ===============*)
@@ -521,7 +572,7 @@ let matrix_tests =
           [Int 56; Int 19; Int 0; Int 338; Int 2];
           [Int 76; Int 5; Int (-4); Int 3; Int 23]
         ])
-      (RM.make 1 1 RATIONAL.error [[]])
+      (RM.make 1 1 (Int (-1)) [[]])
       true;    
 
     make_inverse_test "inverse fails - 3x3 linearly dependent"
@@ -530,7 +581,7 @@ let matrix_tests =
           [Int 4; Int 5; Int 6];
           [Int 7; Int 8; Int 9];
         ])
-      (RM.make 1 1 RATIONAL.error [[]])
+      (RM.make 1 1 (Int (-1)) [[]])
       true;
 
     make_inverse_test "inverse fails - 5x5 linearly dependent"
@@ -541,7 +592,7 @@ let matrix_tests =
           [Int 16; Int 17; Int 18; Int 19; Int 20];
           [Int 21; Int 22; Int 23; Int 24; Int 25]
         ])
-      (RM.make 1 1 RATIONAL.error [[]])
+      (RM.make 1 1 (Int (-1)) [[]])
       true;
 
     (*============= null space tests ===============*)
@@ -563,6 +614,90 @@ let matrix_tests =
           [Int 0; Int 2; Int 1];
           [Int 4; Int 10; Int 8]
         ]); 
+
+    (*===================== column space tests ================*)
+    make_col_space_test "column space 2x3"
+      (RM.make 2 3 RATIONAL.zero [
+          [Int 9; Int 2; Int (-3)];
+          [Int 92; Int (-23); Int 43]
+        ])
+      ([(RM.make 2 1 RATIONAL.zero [
+           [Int 9];
+           [Int 92]
+         ])
+         ;
+         (RM.make 2 1 RATIONAL.zero [
+             [Int 2];
+             [Int (-23)]
+           ])
+        ]);
+
+    make_col_space_test "column space 5x3"
+      (RM.make 5 3 RATIONAL.zero [
+          [Int 19; Int 2; Int (-32)];
+          [Int 292; Int (-3); Int 4];
+          [Int 22; Int 82; Int 1];
+          [Int (-82); Int 0; Int 0];
+          [Int 52; Int 91; Int 25];
+        ])
+      ([(RM.make 5 1 RATIONAL.zero [
+           [Int (-32)];
+           [Int 4];
+           [Int 1];
+           [Int 0];
+           [Int 25]
+         ])
+         ;
+         (RM.make 5 1 RATIONAL.zero [
+             [Int 19];
+             [Int 292];
+             [Int 22];
+             [Int (-82)];
+             [Int 52]
+           ]);
+         (RM.make 5 1 RATIONAL.zero [
+             [Int 2];
+             [Int (-3)];
+             [Int 82];
+             [Int 0];
+             [Int 91]
+           ])
+        ]);
+    make_col_space_test "column space 4x6"
+      (RM.make 4 6 RATIONAL.zero [
+          [Int 3; Int 6; Int 81; Int 0; Int 9; Int 7];
+          [Int 7; Int 0; Int 0; Int 8; Int 6; Int 2];
+          [Int 1; Int 0; Int 8; Int (-13); Int 4; Int 2];
+          [Int (-5); Int 92; Int 17; Int 8; Int 9; Int 1]
+        ])
+      (
+        [
+          RM.make 4 1 RATIONAL.zero [
+            [Int 0];
+            [Int 8];
+            [Int (-13)];
+            [Int 8];
+          ];
+          RM.make 4 1 RATIONAL.zero [
+            [Int 81];
+            [Int 0];
+            [Int 8];
+            [Int 17];
+          ];
+          RM.make 4 1 RATIONAL.zero [
+            [Int 3];
+            [Int 7];
+            [Int 1];
+            [Int (-5)];
+          ];
+          RM.make 4 1 RATIONAL.zero [
+            [Int 6];
+            [Int 0];
+            [Int 0];
+            [Int 92];
+          ]  
+        ]
+      );
 
     (*============= solve tests ===============*)
     make_solve_test "solve 3x3"
@@ -602,6 +737,87 @@ let matrix_tests =
            []
          ]])
       false;
+
+    make_qr_fact_test "4 x 3 matrix"
+      (RM.make 4 3 RATIONAL.zero [
+          [Int (-1); Int (-1); Int 1];
+          [Int 1; Int 3; Int 3];
+          [Int (-1); Int (-1); Int 5];
+          [Int 1; Int 3; Int 7]
+        ])
+      (RM.make 4 3 RATIONAL.zero [
+          [Frac (-1,2); Frac (1,2); Frac (-1,2)];
+          [Frac (1,2); Frac (1,2); Frac (-1,2)];
+          [Frac (-1,2); Frac (1,2); Frac (1,2)];
+          [Frac (1,2); Frac (1,2); Frac (1,2)];
+        ])
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 2; Int 4; Int 2];
+          [Int 0; Int 2; Int 8];
+          [Int 0; Int 0; Int 4]
+        ]);
+
+    make_qr_fact_test "3 x 3 matrix"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 12; Int (-51); Int 4];
+          [Int 6; Int 167; Int (-68)];
+          [Int (-4); Int 24; Int (-41)];
+        ])
+      (RM.make 3 3 RATIONAL.zero [
+          [Frac (6,7); Frac (-69,175); Frac (-58,175)];
+          [Frac (3,7); Frac (158,175); Frac (6,175)];
+          [Frac (-2,7); Frac (6,35); Frac (-33,35)];
+        ])
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 14; Int 21; Int (-14)];
+          [Int 0; Int 175; Int (-70)];
+          [Int 0; Int 0; Int 35]
+        ]);
+
+    make_eigenvalue_test "3 x 3 matrix"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int (-2); Int (-4); Int 2];
+          [Int (-2); Int 1; Int 2];
+          [Int 4; Int 2; Int 5]
+        ])
+      ([Int 3; Int (-5); Int 6]);
+
+    make_eigenvalue_test "3 x 3 matrix, not all eigenvals distinct"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 1; Int (-3); Int 3];
+          [Int 3; Int (-5); Int 3];
+          [Int 6; Int (-6); Int 4]
+        ])
+      ([Int (-2); Int (-2); Int 4]);
+
+    make_eigenvalue_test "Yes another 3x3"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 4; Int 0; Int 1];
+          [Int (-1); Int (-6); Int (-2)];
+          [Int 5; Int 0; Int 0]
+        ])
+      ([Int (-1); Int 6; Int 5]);
+
+    make_eigenvalue_test "Yet another 3x3 with repeated value"
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 3; Int 2; Int 4];
+          [Int 2; Int 0; Int 2];
+          [Int 4; Int 2; Int 3]
+        ])
+      ([Int (-1); Int (-1); Int 8]);
+    make_eigenvalue_test "2x2 matrix, non-int values"
+      (RM.make 2 2 RATIONAL.zero [
+          [Frac (4,5); Frac (3,10)];
+          [Frac (1,5); Frac (7,10)]
+        ])
+      ([Frac (1,2); Int 1]);
+    (* times out
+       make_eigenvalue_test "2x2 matrix, reflection matrix"
+       (RM.make 2 2 RATIONAL.zero [
+          [Int 0; Int 1];
+          [Int 1; Int 0]
+        ])
+       ([Int (-1); Int 1]);*)
   ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [

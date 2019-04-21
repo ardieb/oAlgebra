@@ -16,11 +16,11 @@ test:
 	$(OCAMLBUILD) -tag debug $(TEST) && ./$(TEST)
 
 zip:
-	zip search_src.zip *.ml* _tags Makefile
+	zip oalgebra_src.zip *.ml* _tags Makefile
 
 clean:
 	ocamlbuild -clean
-	rm -rf doc.public doc.private report search_src.zip bisect*.out
+	rm -rf doc.public doc.private report oalgebra_src.zip bisect*.out
 
 bisect-test:
 	$(OCAMLBUILD) -package bisect -syntax camlp4o,bisect_pp \
