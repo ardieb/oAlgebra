@@ -522,8 +522,21 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       vals := m.(i).(i)::(!vals);
     done; !vals
 
+  let eigenv_2x2 = fun (m:matrix) -> 
+    let r,c = dim m in 
+    if r<>2 || c<>2 then raise MatrixError 
+    else let b = N.add (get m 0 0) (get m 1 1) in 
+      let det = determinant m in 
+      let sol1 = N.div (N.add b (N.pow (N.sub (N.mul b b) (N.mul (N.make_Int 4) det))(N.make_Float 0.5)))
+          (N.make_Int 2) in 
+      let sol2 = N.div (N.sub b (N.pow (N.sub (N.mul b b) (N.mul (N.make_Int 4) det))(N.make_Float 0.5)))
+          (N.make_Int 2) in 
+      [sol1;sol2]
+
+
   let rec eigenvalues = fun (m:matrix) -> 
     let r,c = dim m in 
+    if r=2 && c=2 then eigenv_2x2 m else
     if r <> c then raise MatrixError 
     else 
     if triangular_enough m then

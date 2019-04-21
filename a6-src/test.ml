@@ -17,8 +17,6 @@ let cmp_set_like_lists lst1 lst2 =
   &&
   uniq1 = uniq2
 
-
-
 let make_op_test 
     (name: string)
     (op: rational -> rational -> rational)
@@ -47,18 +45,20 @@ let approx_eq_mat mat1 mat2 =
       done;
     done; !eq
 
-let rec approx_eq_list list1 list2 = 
-  if List.length list1 <> List.length list2 then false
-  else 
-    let uniq1 = List.sort compare list1 in 
-    let uniq2 = List.sort compare list2 in 
-    let eq = ref true in
-    match uniq1, uniq2 with 
-    | [], [] -> !eq
-    | h1::t1, h2::t2 -> eq := abs_float (RATIONAL.to_float (RATIONAL.sub h1 h2)) <= 
-                              (1.0 /. (RATIONAL.tolerance)) && !eq;
-      approx_eq_list t1 t2
-    | _,_-> failwith "should not reach if lists are equal size"
+let approx_eq_list list1 list2 = 
+  let rec approx_eq_list_help list1 list2 boolean = 
+    if List.length list1 <> List.length list2 then false
+    else 
+      let uniq1 = List.sort compare list1 in 
+      let uniq2 = List.sort compare list2 in 
+      match uniq1, uniq2 with 
+      | [], [] -> boolean
+      | h1::t1, h2::t2 -> 
+        let bool_pass = abs_float (RATIONAL.to_float (RATIONAL.sub h1 h2)) <= 
+                        (1.0 /. (RATIONAL.tolerance)) in 
+        boolean && (approx_eq_list_help t1 t2 bool_pass)
+      | _,_-> failwith "should not reach if lists are equal size"
+  in approx_eq_list_help list1 list2 true
 
 let make_transpose_test 
     (name: string)
@@ -738,6 +738,8 @@ let matrix_tests =
          ]])
       false;
 
+
+    (*================== QR Factorization tests ====================*)
     make_qr_fact_test "4 x 3 matrix"
       (RM.make 4 3 RATIONAL.zero [
           [Int (-1); Int (-1); Int 1];
@@ -774,6 +776,7 @@ let matrix_tests =
           [Int 0; Int 0; Int 35]
         ]);
 
+    (*==================eigenvalue tests =====================*)
     make_eigenvalue_test "3 x 3 matrix"
       (RM.make 3 3 RATIONAL.zero [
           [Int (-2); Int (-4); Int 2];
@@ -796,7 +799,7 @@ let matrix_tests =
           [Int (-1); Int (-6); Int (-2)];
           [Int 5; Int 0; Int 0]
         ])
-      ([Int (-1); Int 6; Int 5]);
+      ([Int (-1); Int (-6300); Int 5]);
 
     make_eigenvalue_test "Yet another 3x3 with repeated value"
       (RM.make 3 3 RATIONAL.zero [
