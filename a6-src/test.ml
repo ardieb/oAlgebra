@@ -45,12 +45,18 @@ let approx_eq_mat mat1 mat2 =
       done;
     done; !eq
 
+let rat_cmp_to_int = fun x1 x2 -> 
+  match (RATIONAL.compare x1 x2) with
+  | EQ -> 0
+  | LT -> (-1)
+  | GT -> 1
+
 let approx_eq_list list1 list2 = 
   let rec approx_eq_list_help list1 list2 boolean = 
     if List.length list1 <> List.length list2 then false
     else 
-      let uniq1 = List.sort compare list1 in 
-      let uniq2 = List.sort compare list2 in 
+      let uniq1 = List.sort rat_cmp_to_int list1 in 
+      let uniq2 = List.sort rat_cmp_to_int list2 in 
       match uniq1, uniq2 with 
       | [], [] -> boolean
       | h1::t1, h2::t2 -> 
@@ -799,7 +805,7 @@ let matrix_tests =
           [Int (-1); Int (-6); Int (-2)];
           [Int 5; Int 0; Int 0]
         ])
-      ([Int (-1); Int (-6300); Int 5]);
+      ([Int (-1); Int (-6); Int 5]);
 
     make_eigenvalue_test "Yet another 3x3 with repeated value"
       (RM.make 3 3 RATIONAL.zero [
@@ -814,13 +820,13 @@ let matrix_tests =
           [Frac (1,5); Frac (7,10)]
         ])
       ([Frac (1,2); Int 1]);
-    (* times out
-       make_eigenvalue_test "2x2 matrix, reflection matrix"
-       (RM.make 2 2 RATIONAL.zero [
+
+    make_eigenvalue_test "2x2 matrix, reflection matrix"
+      (RM.make 2 2 RATIONAL.zero [
           [Int 0; Int 1];
           [Int 1; Int 0]
         ])
-       ([Int (-1); Int 1]);*)
+      ([Int (-1); Int 1]);
   ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [
