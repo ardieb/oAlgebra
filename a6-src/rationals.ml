@@ -141,7 +141,8 @@ module RATIONAL : NUM with type t = rational = struct
   let rec to_string = function
     | Int i -> string_of_int i
     | Frac (n,d) -> (string_of_int n)^"/"^(string_of_int d)
-    | Float f -> to_string (to_exact (Float f))
+    | Float f -> string_of_float f
+  (* to_string (to_exact (Float f)) *)
 
   (** [compare r1 r2] is the order of the rational numbers [r1] and [r2]
     * If [r1] is less than [r2], is LT

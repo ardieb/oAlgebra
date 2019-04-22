@@ -536,6 +536,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
 
   let rec eigenvalues = fun (m:matrix) -> 
     let r,c = dim m in 
+    (* Format.fprintf (format) m "\n"; *)
     if r=2 && c=2 then eigenv_2x2 m else
     if r <> c then raise MatrixError 
     else 
