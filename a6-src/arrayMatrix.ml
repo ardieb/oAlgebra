@@ -451,12 +451,12 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   let to_string = fun (m:matrix) ->
     let res = ref "[ " in
     Array.iter (fun row -> 
-      res := !res ^ "[ ";
-      Array.iter (fun elt ->
-        res := !res ^ " "^(N.to_string elt)^" "
-      ) row;
-      res := !res ^ " ]";
-    ) m; 
+        res := !res ^ "[ ";
+        Array.iter (fun elt ->
+            res := !res ^ " "^(N.to_string elt)^" "
+          ) row;
+        res := !res ^ " ]";
+      ) m; 
     res := !res ^ " ]"; !res
 
   (** [format_solution fmt sol] is the formatted solution to a matrix eq *)
@@ -591,6 +591,24 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       let augmented = augment b2 b1 in 
       let rref = reduce augmented in 
       partition (c1,0) (c1*2-1,r1-1) rref
+
+
+  let lu_decomp = fun (m:matrix) -> 
+    let rows,cols = dim m in 
+    let empty_vec = make rows 1 N.zero [[]] in 
+    let vec_array = Array.make rows empty_vec in 
+    let u = ref m in 
+    let pivot_coors = Hashtbl.fold (fun (x,y) boolean acc -> if 
+                                     (Hashtbl.find (pivots m) (x,y)) then y::acc
+                                     else acc) (pivots m) [] in
+    for col = 0 to cols-1 do 
+      if (List.mem col pivot_coors) then vec_array.(col) <- column m col; 
+      for row = col+1 to rows-1 do
+        let constant = N.div (N.neg m.(row).(col)) m.(col).(col) in 
+        u := addrows (!u) col row constant;
+      done;
+    done;
+    !u
 
   let eigenvectors = fun (m:matrix) -> failwith "TODO"
 end
