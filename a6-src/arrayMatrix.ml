@@ -449,15 +449,15 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
 
   (** [to_string m] is the string m of matrix [m] *)
   let to_string = fun (m:matrix) ->
-    let res = ref "[ " in
+    let res = ref "" in
     Array.iter (fun row -> 
         res := !res ^ "[ ";
         Array.iter (fun elt ->
             res := !res ^ " "^(N.to_string elt)^" "
           ) row;
-        res := !res ^ " ]";
+        res := !res ^ " ]\n";
       ) m; 
-    res := !res ^ " ]"; !res
+    res := !res ^ ""; !res
 
   (** [format_solution fmt sol] is the formatted solution to a matrix eq *)
   let format_solution = fun (fmt:Format.formatter) (sol:solution) ->
@@ -598,14 +598,26 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let empty_vec = make rows 1 N.zero [[]] in 
     let vec_array = Array.make rows empty_vec in 
     let u = ref m in 
+
+    let pivs = pivots (reduce m) in
+
     let pivot_coors = Hashtbl.fold (fun (x,y) boolean acc -> if 
-                                     (Hashtbl.find (pivots m) (x,y)) then y::acc
-                                     else acc) (pivots m) [] in
-    for col = 0 to cols-1 do 
+                                     (Hashtbl.find pivs (x,y)) then y::acc
+                                     else acc) pivs [] in
+    for col = 0 to (min (rows-1) (cols-1)) do 
       if (List.mem col pivot_coors) then vec_array.(col) <- column m col; 
       for row = col+1 to rows-1 do
-        let constant = N.div (N.neg m.(row).(col)) m.(col).(col) in 
-        u := addrows (!u) col row constant;
+        match (N.compare N.zero (!u.(col).(col))) with 
+        | LT
+        | GT ->
+          let constant = N.div (N.neg !u.(row).(col)) !u.(col).(col) in 
+          (* print_endline ((N.to_string m.(row).(col)) ^ 
+                         (N.to_string m.(row).(col))) *)
+          u := addrows (!u) col row constant;
+          print_string ("constant is ");
+          print_endline (N.to_string constant);
+          print_endline (to_string !u);
+        | EQ -> ()
       done;
     done;
     !u

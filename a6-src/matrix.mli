@@ -142,6 +142,8 @@ module type MATRIX = sig
   val orth_decomp : matrix -> matrix -> matrix * matrix
   (** [to_string m] is the string of matrix [m] *)
   val to_string : matrix -> string
+
+  val lu_decomp : matrix -> matrix
 end
 
 (** [MATRIX_MAKER] is the type of a functor for making a matrix *)

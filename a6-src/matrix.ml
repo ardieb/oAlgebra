@@ -72,6 +72,8 @@ module type MATRIX = sig
   val distance : matrix -> matrix -> value
   val orth_decomp : matrix -> matrix -> matrix * matrix
   val to_string : matrix -> string
+
+  val lu_decomp : matrix -> matrix
 end
 
 module type MATRIX_MAKER = 
