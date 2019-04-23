@@ -42,11 +42,11 @@ let row_of = fun (s:string) ->
   ) [] |> List.rev
 
 let matrix_of = fun (s:string) ->
-  let rec loop acc s =
-    if Str.string_partial_match (Str.regexp string_row) s 0 then
-      loop ((Str.matched_string s |> row_of)::(acc)) (Str.replace_matched "" s)
-    else List.rev acc in
-  let mat = loop [] s in 
+  let s = String.sub s 1 (String.length s - 2) in
+  let rows = Str.split (Str.regexp ";[ ]+\|\t") s in 
+  let mat = List.fold_left (fun acc row -> 
+    (row_of row)::acc
+  ) [] rows in 
   let len = List.hd mat |> List.length in
   List.iter (fun row ->
     if List.length row != len then 

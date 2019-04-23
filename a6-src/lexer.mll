@@ -8,8 +8,8 @@ let int = '-'? digit+
 let frac = '-'? int+ '/' int+
 let float = '-'? int+ '.' int+
 let number = int | frac | float
-let row = '[' (white number white)+ ']'
-let mat = '[' (white row white)+ ']'
+let row = '[' (number ' '?)+ ']'
+let mat = '[' (row ';'? ' '?)+ ']'
 
 rule read =
   parse

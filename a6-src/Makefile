@@ -3,6 +3,7 @@ OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
 TEST=test.byte
+MAIN=main.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind -use-menhir
 PKGS=unix,oUnit,str,qcheck,ANSITerminal, Menhir, Ocamllex
 
@@ -12,6 +13,9 @@ default: build
 generate-parser:
 	$(OCAMLBUILD) lexer.ml $(OBJECTS) \
 	$(OCAMLBUILD) parser.ml $(OBJECTS)
+
+run:
+	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
 
 build:
 	$(OCAMLBUILD) $(OBJECTS)
