@@ -21,12 +21,23 @@ module type NUM = sig
   val zero : t
   (** [one] is the number one *)
   val one : t
+  val tolerance : float
+
+  (** [make_X arg ...] makes a rational, either a Float or Int or Frac from 
+      OCaml number types like int and float 
+  *)
+  val make_Float : float -> t 
+  val make_Int : int -> t 
+  val make_Frac : int -> int -> t
+
   (** [add x y] is the sum of [x] and [y] *)
   val add : t -> t -> t
   (** [mul x y] is the product of [x] and [y] *)
   val mul : t -> t -> t
   (** [div x y] is the quotient of [x] and [y] *)
   val div : t -> t -> t
+  (** [pow x y] is x raised to the yth power *)
+  val pow : t -> t -> t
   (** [sub x y] is the difference of [x] and [y] *)
   val sub : t -> t -> t
   (** [abs x] is the absolute value of [x] s*)
@@ -37,6 +48,9 @@ module type NUM = sig
   val to_float : t -> float
   (** [to_string x] is [x] as a string *)
   val to_string : t -> string
+
+  (** turns Float into Int *)
+  val float_to_int : t -> t
 end
 
 module type MATRIX = sig
@@ -103,6 +117,27 @@ module type MATRIX = sig
   (** [supp_matrix m row col] is the matrix [m] without values from [row] or 
     * from [col] *)
   val supp_matrix : matrix -> int -> int -> matrix
+  (** [qr_fact m] is the QR factorization of m given as a pair of matrices*)
+  val qr_fact : matrix -> matrix * matrix
+  (** [magnitude vector] is the magnitude of [vector]*)
+  val magnitude : matrix -> value
+  (** [normalize v] is normalized vector [v] *)
+  val normalize : matrix -> matrix
+  (** [m r c] gets you the value in row [r] column [c] in matrix [m]*)
+  val get : matrix -> int -> int -> value
+  (** [change_of_bases b1 b2] is the standard matrix of the linear 
+      transformation from basis [b1] to basis [b2] *)
+  val change_of_basis : matrix -> matrix -> matrix
+  (** [orth_proj basis vector] is the orthogonal projection of [vector] onto 
+      the subspace spanned by the columns of [basis]*)
+  val orth_proj : matrix -> matrix -> matrix
+  (** [distance basis vector] is the distance from [vector] to the subspace 
+      spanned by the columns of [basis] *)
+  val distance : matrix -> matrix -> value
+  (** [orth_decomp basis vector] is a tuple containing the orthogonal projection
+      from [vector] to the columns spanned by [basis] and the projection of [vector]
+      onto the orthogonal subspace of [basis] *)
+  val orth_decomp : matrix -> matrix -> matrix * matrix
 end
 
 (** [MATRIX_MAKER] is the type of a functor for making a matrix *)

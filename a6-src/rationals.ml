@@ -4,7 +4,7 @@ type rational =
   | Frac of int * int  
   | Float of float
 module RATIONAL : NUM with type t = rational = struct
-  let tolerance = 10.0 ** 6.0
+  let tolerance = 10.0 ** 8.0
   (** A module for working with t rationalbers *)
   exception ArithmeticError
   (* AF: A value of type t is a Int of type int, a Frac of type int * int,
@@ -16,6 +16,10 @@ module RATIONAL : NUM with type t = rational = struct
   let zero = Int 0
   (** [one] is [Int 1] *)
   let one = Int 1
+
+  let make_Float = fun (f:float) -> Float f
+  let make_Int = fun (i:int) -> Int i
+  let make_Frac = fun (n:int) (d:int) -> Frac (n,d)
 
   (** [rep_ok r] is the rational number if the reprsentation meets the R.I. and
     * fails otherwise *)
@@ -55,9 +59,20 @@ module RATIONAL : NUM with type t = rational = struct
     | Int i -> Int i
     | Frac (n,d) -> Frac (n,d)
     | Float f -> begin
-        print_endline (string_of_float tolerance);
         simplify (Frac (int_of_float (f *. tolerance), int_of_float tolerance))
       end
+
+  let float_to_int = function 
+    | Float f -> let low = floor f in 
+      let high = ceil f in 
+
+      if ((abs_float (f -. high)) <= (1. /. tolerance)) then 
+        (Int (int_of_float high))
+      else if ((abs_float (f -. low)) <= (1. /. tolerance)) then 
+        (Int (int_of_float low))
+      else raise ArithmeticError
+    | _ -> failwith "need float"
+
   (** [add (n1,d1) (n2,d2)] is the sum of two rational numbers *)
   let rec add = fun (r1:t) (r2:t) ->
     match rep_ok r1, rep_ok r2 with
@@ -74,6 +89,7 @@ module RATIONAL : NUM with type t = rational = struct
     | Float f1, Float f2 -> Float (f1 +. f2)
     | Float f, b -> add (Float f) (Float (to_float b))
     | a, Float f -> add (Float (to_float a)) (Float f)
+
   (** [mul (n1,d1) (n2,d2)] is the product of two t rational numbers *)
   let rec mul = fun (r1:t) (r2:t) ->
     match rep_ok r1, rep_ok r2 with
@@ -84,6 +100,7 @@ module RATIONAL : NUM with type t = rational = struct
     | Float f1, Float f2 -> Float (f1 *. f2)
     | Float f, b -> mul (Float f) (Float (to_float b))
     | a, Float f -> mul (Float (to_float a)) (Float f)
+
   (** [div (n1.d1) (n2.d2)] is the quotient of [r1] by [r2] *)
   let rec div = fun (r1:t) (r2:t) ->
     match rep_ok r1, rep_ok r2 with
@@ -94,6 +111,22 @@ module RATIONAL : NUM with type t = rational = struct
     | Float f1, Float f2 -> Float (f1 /. f2)
     | Float f, b -> div (Float f) (Float (to_float b))
     | a, Float f -> div (Float (to_float a)) (Float f)
+
+  (** [pow r1 r2] is r1 raised to the r2 power. 
+      Require: 
+      [r1] and [r2] are of type t (rationals)
+  *)
+  let pow = fun (base:t) (pow:t) -> 
+    match pow with 
+    | Frac (n,d) -> Float ((to_float base) ** (to_float pow))
+    | Float f -> Float ((to_float base) ** f)
+    | Int int_pow ->
+      let rec helper = fun (pow:int) -> 
+        if pow=0 then Int 1 else 
+          mul base (helper (pow - 1))
+      in if int_pow>=0 then helper int_pow else 
+        div (Int 1) (helper (abs int_pow))
+
   (** [sub (n1,d1) (n2,d2)] is the difference of two rational numbers *)
   let rec sub = fun (r1:t) (r2:t) ->
     match rep_ok r1, rep_ok r2 with
@@ -108,7 +141,9 @@ module RATIONAL : NUM with type t = rational = struct
   let rec to_string = function
     | Int i -> string_of_int i
     | Frac (n,d) -> (string_of_int n)^"/"^(string_of_int d)
-    | Float f -> to_string (to_exact (Float f))
+    | Float f -> string_of_float f
+  (* to_string (to_exact (Float f)) *)
+
   (** [compare r1 r2] is the order of the rational numbers [r1] and [r2]
     * If [r1] is less than [r2], is LT
     * If [r1] is greater than [r2], is GT
