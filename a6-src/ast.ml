@@ -8,23 +8,32 @@ type num = RATIONAL.t
 type matrix = RM.matrix
 
 (* Functions for working with regex strings *)
+(* matches an integer *)
 let string_int = "[-]?[0-9]+"
+(* matches a float *)
 let string_float = Format.sprintf "%s.%s" string_int string_int
+(* matches a fraction *)
 let string_frac = Format.sprintf "%s/%s" string_int string_int
-let string_row = Format.sprintf "\[\([ ]+%s[ ]+\)*\]"  
-  (string_int^"\|"^string_frac^"\|"^string_float)
 
+(** [frac_of s] is the fraction matched from string [s]. 
+  * Fails if the string does not match a fraction *)
 let frac_of = fun (s:string) ->
   match Str.split (Str.regexp "/") s with
   | n::d::[] -> Frac (int_of_string n, int_of_string d)
   | _ -> failwith "Invalid fraction"
 
+(** [float_of s] is the float matched from string [s].
+  * Fails if the string does not match a float *)
 let float_of = fun (s:string) -> 
   Float (float_of_string s)
 
+(** [int_of s] is the integer matched from string [s].
+  * Fails if the string does not match an integer *)
 let int_of = fun (s:string) -> 
   Int (int_of_string s)
 
+(** [num_of s] is the numeric value matched from string [s].
+  * Fails if the string does not match a numeric value *)
 let num_of = fun (s:string) ->
   if Str.string_match (Str.regexp string_int) s 0 then
     int_of s
@@ -34,16 +43,20 @@ let num_of = fun (s:string) ->
     frac_of s
   else failwith "Nan"  
 
+(** [row_of s] is the row (list) matched by string [s] *)
 let row_of = fun (s:string) ->
-  Str.global_replace (Str.regexp "\[\|\]") "" s |>
+  Str.global_replace (Str.regexp "\\[\\|\\]") "" s |>
   Str.split (Str.regexp "[ ]+") |> 
   List.fold_left (fun acc e ->
     (num_of e)::acc
   ) [] |> List.rev
 
+(** [matrix_of s] is the matrix matched by string [s].
+  * Fails if the rows of the matrix have different lengths or if the 
+  * type of elements are not numeric *)
 let matrix_of = fun (s:string) ->
   let s = String.sub s 1 (String.length s - 2) in
-  let rows = Str.split (Str.regexp ";[ ]+\|\t") s in 
+  let rows = Str.split (Str.regexp ";[ ]+\\|\\t") s in 
   let mat = List.fold_left (fun acc row -> 
     (row_of row)::acc
   ) [] rows in 
@@ -54,6 +67,7 @@ let matrix_of = fun (s:string) ->
     else ()) mat;
   RM.make (List.length mat) len (Int 0) mat
 
+(** [unaryop] is a variant type that classifies operations with one argument*)
 type unaryop =
 | Transpose
 | Inverse
@@ -62,7 +76,7 @@ type unaryop =
 | Nullspace
 | Colspace
 | Reduce
-
+(** [binaryop] is a variant type that classifies operations with two arguments*)
 type binaryop = 
 | Add
 | Sub
@@ -71,24 +85,24 @@ type binaryop =
 | Dot
 | Solve
 | Scale
-
+(** [expr] is a variant type that classifies operations on matricies and numbers*)
 type expr =
 | Matrix of matrix
 | Num of num
 | Unary of (unaryop * expr)
 | Binary of (expr * binaryop * expr)
 | List of expr list
-
+(** [typ] is a variant type that classfiies the type of an [expr] *)
 type typ =
 | TMatrix
 | TNum
 | TList of typ
-
+(** [string_of_type t] is the string form of [t]yp *)
 let rec string_of_type = function
 | TMatrix -> "TMatrix"
 | TNum -> "TNum"
 | TList t -> Format.sprintf "TList %s" (string_of_type t)
-
+(** [typecheck e] is the type of the [e]xpr. Fails if the type is incoherent *)
 let rec typecheck = function
 | Matrix _ -> TMatrix
 | Num _ -> TNum
@@ -128,7 +142,9 @@ let rec typecheck = function
         Format.sprintf "Type %s does not match type %s" 
         (t' |> string_of_type) (typecheck e |> string_of_type)
       ) else ()) l; t'
-
+(** [eval e] is the evaluated expression (value) from [e].
+  * All expressions step to either Matrix m or Num n eventually.
+  * Will not during steps since typecheck is applied at the beginning. *)
 let eval = fun (e:expr) -> 
   ignore (typecheck e);
   let rec eval' = function
@@ -175,7 +191,7 @@ let eval = fun (e:expr) ->
       (Matrix e)::init) (RM.solve m n |> snd) []))
     | _, _, _ -> failwith "Type mismatch"
     end in eval' e 
-
+(** [string_of_expr e] is the string form of the [e]xpr *)
 let rec string_of_expr = function
 | Matrix m -> RM.to_string m
 | Num n -> RATIONAL.to_string n

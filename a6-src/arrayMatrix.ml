@@ -356,7 +356,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     * [m] x-vector = [v]. The first vector is the particular solution to the 
     * equation. Fails if the equation cannot be exactly solved for
     * ALGORITHM: Augment [m] with [v]. Then reduced the augmented matrix to
-    *  row echelon form and then read off the pivots of the matrix. If there is 
+    * row echelon form and then read off the pivots of the matrix. If there is 
     * a pivot in the rightmost column, there is no particular solution and fails
     * If there is a solution, the solution is a linear combination of the 
     * null-space of [m] and the particular solution to [m]x = [v], which is the
@@ -446,7 +446,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         Array.iter ( fun e -> Format.fprintf fmt " %a " N.format e ) row;
         Format.fprintf fmt "]\n";
       ) m
-
+  (* SPRINT WEEK 2 *)
   (** [to_string m] is the string m of matrix [m] *)
   let to_string = fun (m:matrix) ->
     let res = ref "" in
@@ -497,7 +497,6 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let z = subtract v projection in 
     (projection,z)
 
-  (* SPRINT WEEK 2 *)
   (** [magnitude v] is the length of a vector*)
   let magnitude = fun (v:matrix) -> 
     N.pow (dot v v) (N.make_Float 0.5)
@@ -568,7 +567,6 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       let sol2 = N.div (N.sub b (N.pow (N.sub (N.mul b b) (N.mul (N.make_Int 4) det))(N.make_Float 0.5)))
           (N.make_Int 2) in 
       [sol1;sol2]
-
 
   let rec eigenvalues = fun (m:matrix) -> 
     let r,c = dim m in 
