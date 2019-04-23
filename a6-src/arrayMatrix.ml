@@ -598,12 +598,15 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let u = ref m in 
 
     let pivs = pivots (reduce m) in
+    let curr_idx = ref 0 in
 
     let pivot_coors = Hashtbl.fold (fun (x,y) boolean acc -> if 
                                      (Hashtbl.find pivs (x,y)) then y::acc
                                      else acc) pivs [] in
     for col = 0 to (min (rows-1) (cols-1)) do 
-      if (List.mem col pivot_coors) then vec_array.(col) <- column m col; 
+      if (List.mem col pivot_coors) then 
+        (vec_array.(!curr_idx) <- column m col;
+         curr_idx := !curr_idx + 1);
       for row = col+1 to rows-1 do
         match (N.compare N.zero (!u.(col).(col))) with 
         | LT
