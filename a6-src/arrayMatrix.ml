@@ -1,8 +1,8 @@
 open Matrix
 (** A module for performing operations on matricies *)
 module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct 
-  (* AF: A ['a matrix] is constructed from a list of lists with elements of type
-   * ['a]. The size of the matrix is denouted by a int*int pair *)
+  (* AF: A ['a matrix] is constructed from a array of arrays with elements of type
+   * ['a]. The size of the matrix is denoted by a int*int pair *)
   (* RI: The length of the rows of the matrix must all be equal and the elements 
    * o the matrix must be numeric *)
   module N = T
@@ -19,7 +19,6 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     List.iteri (fun i row -> List.iteri (fun j e -> m.(i).(j) <- e) row) l;
     (m : matrix)
 
-  (* TODO: what if n>r? that would give index out of bounds error *)
   (** [diagonal n r] is the [n] x [r] diagonal matrix with 
     * [1]'s on its diagonal *)
   let diagonal = fun (n:int) (r:int) -> 
@@ -28,7 +27,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       m.(i).(i) <- N.one;
     done; m
 
-  (** [dim m] is the dimensions of the matrix [m] *)
+  (** [dim m] is the dimensions of the matrix [m], in row   -column order *)
   let dim = fun (m:matrix) ->
     Array.length m, Array.length m.(0)
 
@@ -252,9 +251,9 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
           end in 
     forward 0 0; backward (p - 1); !memo
 
-  (** [augment m1 m2] is the matrix obtained by appending 
-      * the columns of [m2] to [m1] 
-      * Requires: [m1] and [m2] have the same number of rows *)
+  (** [augment m1 m2] is the matrix obtained by appending the columns of [m2] 
+      to [m1] 
+    * Requires: [m1] and [m2] have the same number of rows *)
   let augment = fun (m1:matrix) (m2:matrix) -> 
     let (m,n), (p,r) = dim m1, dim m2 in
     if m != p then raise MatrixError else
@@ -347,6 +346,12 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       else ()
     done; !memo 
 
+  (** [row_space m] is the list of vectors that form the row space of [m], i.e.
+    * the rows of [m] that contain pivots. The row shpace is the column space
+      of [transpose m]*)
+  let row_space = fun (m:matrix) -> 
+    m |> transpose |> col_space
+
   (** [solve m v] is the list of vectors that solves the linear equation
     * [m] x-vector = [v]. The first vector is the particular solution to the 
     * equation. Fails if the equation cannot be exactly solved for
@@ -403,17 +408,6 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       j := 0;
     done; m'
 
-  (*let supp_matrix_1st_row = fun (m:matrix) (col:int) -> 
-    let (rows,cols) = dim m in
-    let new_mat = make (rows-1) (rows-1) N.zero [[]] in
-    for i = 1 to rows-1 do 
-      for j = 0 to rows-1 do 
-        if (j < col) then new_mat.(i-1).(j) <- m.(i).(j)
-        else if (j > col) then new_mat.(i-1).(j-1) <- m.(i).(j)
-      done;
-    done;
-    new_mat*)
-
   (** [determinant m] is the determinant of matrix [m] 
     * ALGORITHM: Cauchy expansion *)
   let rec determinant = fun (m:matrix) -> 
@@ -430,7 +424,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
                (determinant (supp_matrix m 0 counter)))
       done; !sum
 
-  (** [inverse m] is the inverse of matrix [m], 
+  (** [inverse m] is the inverse of matrix [m], i.e. the matrix [n] s.t. 
+      [mul m n] = the identity matrix
     * Raises [MatrixError] if the matrix [m] is not square or if the
     * determinant of [m] is zero 
     * ALGORITHM: Augment the identity matrix to [m] and reduce to row echelon 
@@ -471,12 +466,16 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     done; c
 
   (* SPRINT WEEK 2 *)
+  (** [magnitude v] is the length of a vector*)
   let magnitude = fun (v:matrix) -> 
     N.pow (dot v v) (N.make_Float 0.5)
 
+  (** [normalize v] is the vector [v] scaled to length 1*)
   let normalize = fun (v:matrix) -> 
     scale (N.div N.one (magnitude v)) v
 
+  (** [qr_fact_q m] is an orthogonal matrix such that A = QR, where R is an
+      R is upper triangular*)
   let qr_fact_q = fun (m:matrix) -> 
     let (rows, cols) = dim m in
     (*Base case*)
@@ -490,6 +489,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       q := augment !q (normalize !curr_u)
     done; !q
 
+  (** [qr_fact_r m q] is an upper-triangular matrix such that A = QR, where Q is 
+      an orthogonal matrix*)
   let qr_fact_r = fun (m:matrix) (q:matrix)-> 
     let (rows, cols) = dim m in
     let r = make cols cols N.zero [[]] in
@@ -502,10 +503,13 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       done;
     done; r
 
+  (** [qr_fact m] is the orthogonal matrix [q] and the upper triangular [r] 
+      s.t. m = qr*)
   let qr_fact = fun (m:matrix) ->
     let q = qr_fact_q m in
     let r = qr_fact_r m q in
     (q,r)
+
 
   let triangular_enough = fun (m:matrix) -> 
     let (rows, cols) = dim m in 
