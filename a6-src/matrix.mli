@@ -123,7 +123,21 @@ module type MATRIX = sig
   val magnitude : matrix -> value
   (** [normalize v] is normalized vector [v] *)
   val normalize : matrix -> matrix
+  (** [m r c] gets you the value in row [r] column [c] in matrix [m]*)
   val get : matrix -> int -> int -> value
+  (** [change_of_bases b1 b2] is the standard matrix of the linear 
+      transformation from basis [b1] to basis [b2] *)
+  val change_of_basis : matrix -> matrix -> matrix
+  (** [orth_proj basis vector] is the orthogonal projection of [vector] onto 
+      the subspace spanned by the columns of [basis]*)
+  val orth_proj : matrix -> matrix -> matrix
+  (** [distance basis vector] is the distance from [vector] to the subspace 
+      spanned by the columns of [basis] *)
+  val distance : matrix -> matrix -> value
+  (** [orth_decomp basis vector] is a tuple containing the orthogonal projection
+      from [vector] to the columns spanned by [basis] and the projection of [vector]
+      onto the orthogonal subspace of [basis] *)
+  val orth_decomp : matrix -> matrix -> matrix * matrix
 end
 
 (** [MATRIX_MAKER] is the type of a functor for making a matrix *)

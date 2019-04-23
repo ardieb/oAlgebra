@@ -465,6 +465,26 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       c.(i).(0) <- m.(i).(j)
     done; c
 
+  let orth_proj = fun (b:matrix) (v:matrix) ->
+    let rows, cols = dim b in
+    let v_rows,v_cols = dim v in
+    if v_cols <> 1 || v_rows <> rows then raise MatrixError else
+      let y = ref (make rows 1 N.zero [[]]) in 
+      for i = 0 to cols-1 do
+        let u = column b i in
+        y := add !y  (proj v u)
+      done; !y
+
+  let distance = fun (b:matrix) (v:matrix) -> 
+    N.pow (dot (subtract v (orth_proj b v)) (subtract v 
+                                               (orth_proj b v)))
+      (N.make_Float 0.5)
+
+  let orth_decomp = fun (b:matrix) (v:matrix) -> 
+    let projection = orth_proj b v in 
+    let z = subtract v projection in 
+    (projection,z)
+
   (* SPRINT WEEK 2 *)
   (** [magnitude v] is the length of a vector*)
   let magnitude = fun (v:matrix) -> 
@@ -551,6 +571,14 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       let a = mul r q in 
       eigenvalues a
 
+  let change_of_basis = fun (b1:matrix) (b2:matrix) -> 
+    let r1,c1 = dim b1 in 
+    let r2,c2 = dim b2 in
+    if (determinant b1)=N.zero || (determinant b2)=N.zero || r1<>r2 then raise 
+        MatrixError else
+      let augmented = augment b2 b1 in 
+      let rref = reduce augmented in 
+      partition (c1,0) (c1*2-1,r1-1) rref
 
   let eigenvectors = fun (m:matrix) -> failwith "TODO"
 end
