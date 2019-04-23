@@ -68,6 +68,9 @@ module type MATRIX = sig
   val normalize : matrix -> matrix
   val get : matrix -> int -> int -> value
   val change_of_basis : matrix -> matrix -> matrix
+  val orth_proj : matrix -> matrix -> matrix
+  val distance : matrix -> matrix -> value
+  val orth_decomp : matrix -> matrix -> matrix * matrix
 end
 
 module type MATRIX_MAKER = 
