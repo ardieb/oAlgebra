@@ -67,6 +67,7 @@ module type MATRIX = sig
   val magnitude : matrix -> value
   val normalize : matrix -> matrix
   val get : matrix -> int -> int -> value
+  val change_of_basis : matrix -> matrix -> matrix
 end
 
 module type MATRIX_MAKER = 

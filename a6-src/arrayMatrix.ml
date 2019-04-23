@@ -547,6 +547,15 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       let a = mul r q in 
       eigenvalues a
 
+  let change_of_basis = fun (b1:matrix) (b2:matrix) -> 
+    let r1,c1 = dim b1 in 
+    let r2,c2 = dim b2 in
+    if (determinant b1)=N.zero || (determinant b2)=N.zero || r1<>r2 then raise 
+        MatrixError else
+      let augmented = augment b2 b1 in 
+      let rref = reduce augmented in 
+      partition (c1,0) (c1*2-1,r1-1) rref
+
 
   let eigenvectors = fun (m:matrix) -> failwith "TODO"
 end
