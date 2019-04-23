@@ -2,6 +2,5 @@
 #require "str";;
 #require "bisect";;
 #require "qcheck";;
-#require "menhir";;
-#require "ocamllex";;
+#require "ANSITerminal";;
 #load_rec "fractions.cmo"

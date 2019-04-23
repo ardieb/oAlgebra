@@ -30,7 +30,6 @@ module type NUM = sig
   val neg : t -> t
   val to_float : t -> float
   val to_string : t -> string
-
   val float_to_int : t -> t
 end
 
@@ -60,6 +59,7 @@ module type MATRIX = sig
   val determinant : matrix -> value
   val null_space : matrix -> matrix list
   val col_space : matrix -> matrix list
+  val row_space : matrix -> matrix list
   val equals : matrix -> matrix -> bool
   val subtract : matrix -> matrix -> matrix
   val supp_matrix : matrix -> int -> int -> matrix
@@ -71,6 +71,7 @@ module type MATRIX = sig
   val orth_proj : matrix -> matrix -> matrix
   val distance : matrix -> matrix -> value
   val orth_decomp : matrix -> matrix -> matrix * matrix
+  val to_string : matrix -> string
 end
 
 module type MATRIX_MAKER = 

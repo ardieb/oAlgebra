@@ -1,9 +1,9 @@
-MODULES=rationals matrix arrayMatrix test ast parser lexer
+MODULES=rationals matrix arrayMatrix test ast parser lexer main
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
 TEST=test.byte
-OCAMLBUILD=ocamlbuild -use-ocamlfind
+OCAMLBUILD=ocamlbuild -use-ocamlfind -use-menhir
 PKGS=unix,oUnit,str,qcheck
 
 default: build

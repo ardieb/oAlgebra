@@ -2,9 +2,8 @@
   open Ast
 %}
 
-type num = RATIONAL.t
-%token <num> NUM
-%token <matrix> MATRIX
+%token <Ast.num> NUM
+%token <Ast.matrix> MATRIX
 %token EQUALS
 %token TIMES
 %token SCALE
@@ -32,7 +31,6 @@ type num = RATIONAL.t
 %nonassoc REDUCE
 %left PLUS
 %left TIMES
-%left PLUS
 %left DOT
 %left DIV
 

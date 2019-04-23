@@ -7,15 +7,15 @@ let digit = ['0'-'9']
 let int = '-'? digit+
 let frac = '-'? int+ '/' int+
 let float = '-'? int+ '.' int+
-let num = int | frac | float
-let row = '[' [white num white]+ ']'
-let matrix = '[' [white row white]+ ']'
+let number = int | frac | float
+let row = '[' (white number white)+ ']'
+let mat = '[' (white row white)+ ']'
 
 rule read =
   parse
   | white {read lexbuf}
-  | num { NUM ( num_of num ) }
-  | matrix { MATRIX ( matrix_of matrix ) }
+  | number { NUM ( Ast.num_of (Lexing.lexeme lexbuf) ) }
+  | mat { MATRIX ( Ast.matrix_of (Lexing.lexeme lexbuf) ) }
   | "(" { LPAREN }
   | ")" { RPAREN }
   | "=" { EQUALS }
@@ -24,7 +24,7 @@ rule read =
   | "/" { DIV }
   | "*" { TIMES }
   | "Scale" { SCALE }
-  | "Transpose { TRANSPOSE }
+  | "Transpose" { TRANSPOSE }
   | "Inverse" { INVERSE }
   | "Det" { DET }
   | "Rowspace" { ROWSPACE }

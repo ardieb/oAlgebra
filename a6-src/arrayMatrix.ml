@@ -447,6 +447,18 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         Format.fprintf fmt "]\n";
       ) m
 
+  (** [to_string m] is the string m of matrix [m] *)
+  let to_string = fun (m:matrix) ->
+    let res = ref "[ " in
+    Array.iter (fun row -> 
+      res := !res ^ "[ ";
+      Array.iter (fun elt ->
+        res := !res ^ " "^(N.to_string elt)^" "
+      ) row;
+      res := !res ^ " ]";
+    ) m; 
+    res := !res ^ " ]"; !res
+
   (** [format_solution fmt sol] is the formatted solution to a matrix eq *)
   let format_solution = fun (fmt:Format.formatter) (sol:solution) ->
     format fmt (fst sol);

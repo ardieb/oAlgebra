@@ -48,7 +48,6 @@ module type NUM = sig
   val to_float : t -> float
   (** [to_string x] is [x] as a string *)
   val to_string : t -> string
-
   (** turns Float into Int *)
   val float_to_int : t -> t
 end
@@ -109,6 +108,9 @@ module type MATRIX = sig
   val null_space : matrix -> matrix list
   (** [col_space m] is the column space of [m] *)
   val col_space : matrix -> matrix list
+  (** [row_space m] is a list of vectors that form the row space of the [m]atrix
+      which is the basis for the span of the rows of [m] *)
+  val row_space : matrix -> matrix list  
   (** [equals m1 m2] is true if [m1] is structurally equal to [m2] and false
     * otherwise *)
   val equals : matrix -> matrix -> bool
@@ -138,6 +140,8 @@ module type MATRIX = sig
       from [vector] to the columns spanned by [basis] and the projection of [vector]
       onto the orthogonal subspace of [basis] *)
   val orth_decomp : matrix -> matrix -> matrix * matrix
+  (** [to_string m] is the string of matrix [m] *)
+  val to_string : matrix -> string
 end
 
 (** [MATRIX_MAKER] is the type of a functor for making a matrix *)

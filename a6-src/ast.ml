@@ -176,6 +176,36 @@ let eval = fun (e:expr) ->
     | _, _, _ -> failwith "Type mismatch"
     end in eval' e 
 
+let rec string_of_expr = function
+| Matrix m -> RM.to_string m
+| Num n -> RATIONAL.to_string n
+| Unary (op, e) -> begin
+  match op with
+  | Transpose -> Format.sprintf "Transpose %s" (string_of_expr e)
+  | Inverse -> Format.sprintf "Inverse %s" (string_of_expr e)
+  | Rowspace -> Format.sprintf "Rowspace %s" (string_of_expr e)
+  | Colspace -> Format.sprintf "Colspace %s" (string_of_expr e)
+  | Nullspace -> Format.sprintf "Nullspace %s" (string_of_expr e)
+  | Det -> Format.sprintf "Determinant %s" (string_of_expr e)
+  | Reduce -> Format.sprintf "Reduce %s" (string_of_expr e)
+  end
+| Binary (e1, op, e2) -> begin
+  match op with
+  | Add -> Format.sprintf "%s + %s" (string_of_expr e1) (string_of_expr e2)
+  | Sub -> Format.sprintf "%s - %s" (string_of_expr e1) (string_of_expr e2)
+  | Div -> Format.sprintf "%s / %s" (string_of_expr e1) (string_of_expr e2)
+  | Mul -> Format.sprintf "%s * %s" (string_of_expr e1) (string_of_expr e2)
+  | Dot -> Format.sprintf "%s Dot %s" (string_of_expr e1) (string_of_expr e2)
+  | Solve -> Format.sprintf "%s = %s" (string_of_expr e1) (string_of_expr e2)
+  | Scale -> Format.sprintf "%s %s" (string_of_expr e1) (string_of_expr e2) 
+  end
+| List l -> 
+  List.fold_left (fun acc elt ->
+    acc^(string_of_expr elt)^" "
+  ) "" l
+  
+
+
 
 
   

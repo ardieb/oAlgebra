@@ -1,1 +1,1 @@
-true: package(unix), package(oUnit), package(str), package(qcheck), package(menhir), package(ocamllex), use_menhir
+true: package(unix), package(oUnit), package(str), package(qcheck), package(ANSITerminal)
