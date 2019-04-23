@@ -1,4 +1,4 @@
-MODULES=rationals matrix arrayMatrix test
+MODULES=rationals matrix arrayMatrix test ast parser lexer
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
@@ -8,6 +8,10 @@ PKGS=unix,oUnit,str,qcheck
 
 default: build
 	utop
+
+generate-parser:
+	$(OCAMLBUILD) lexer.ml $(OBJECTS) \
+	$(OCAMLBUILD) parser.ml $(OBJECTS)
 
 build:
 	$(OCAMLBUILD) $(OBJECTS)
@@ -41,3 +45,4 @@ docs-private: build
 	ocamlfind ocamldoc -I _build -package $(PKGS) \
 		-html -stars -d doc.private \
 		-inv-merge-ml-mli -m A -hide-warnings $(MLIS) $(MLS)
+
