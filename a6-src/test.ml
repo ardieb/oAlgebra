@@ -207,6 +207,19 @@ let make_qr_fact_test
       assert_equal (snd (RM.qr_fact input)) expected_r ~cmp: approx_eq_mat
     )
 
+let make_orth_decomp_test 
+    (name: string)
+    (input_basis: RM.matrix)
+    (input_vector: RM.matrix)
+    (expected_proj : RM.matrix)
+    (expected_z: RM.matrix) =
+  name >:: (fun _ -> 
+      assert_equal (fst (RM.orth_decomp input_basis input_vector)) expected_proj 
+        ~cmp: approx_eq_mat;
+      assert_equal (snd (RM.orth_decomp input_basis input_vector)) expected_z
+        ~cmp: approx_eq_mat;
+    )
+
 let make_solve_test
     (name: string)
     (matrix: RM.matrix)
@@ -827,6 +840,77 @@ let matrix_tests =
           [Int 1; Int 0]
         ])
       ([Int (-1); Int 1]);
+
+    (*================ orthogonal decomposition ===================*)
+    make_orth_decomp_test "3x2 basis, R3 vector"
+      (RM.make 3 2 RATIONAL.zero [
+          [Int 2; Int (-2)];
+          [Int 5; Int 1];
+          [Int (-1); Int 1]
+        ])
+      (RM.make 3 1 RATIONAL.zero [
+          [Int 1];
+          [Int 2];
+          [Int 3];
+        ])
+      (RM.make 3 1 RATIONAL.zero [
+          [Frac ((-2),5)];
+          [Int 2];
+          [Frac (1,5)]
+        ])
+      (RM.make 3 1 RATIONAL.zero [
+          [Frac (7,5)];
+          [Int 0];
+          [Frac (14,5)]
+        ]);
+
+    make_orth_decomp_test "3x2 basis, R3 vector #2"
+      (RM.make 3 2 RATIONAL.zero [
+          [Int 1; Int (-1)];
+          [Int 1; Int 1];
+          [Int 0; Int 0];
+        ])
+      (RM.make 3 1 RATIONAL.zero [
+          [Int (-1)];
+          [Int 4];
+          [Int 3]
+        ])
+      (RM.make 3 1 RATIONAL.zero [
+          [Int (-1)];
+          [Int 4];
+          [Int 0]
+        ])
+      (RM.make 3 1 RATIONAL.zero [
+          [Int 0];
+          [Int 0];
+          [Int 3]
+        ]);
+
+    make_orth_decomp_test "4x3 basis, R4 vector"
+      (RM.make 4 3 RATIONAL.zero [
+          [Int 1; Int (-1); Int (-1)];
+          [Int 1; Int 3; Int 0];
+          [Int 0; Int 1; Int 1];
+          [ Int 1; Int (-2); Int 1]
+        ])
+      (RM.make 4 1 RATIONAL.zero [
+          [Int 4];
+          [Int 3];
+          [Int 3];
+          [Int (-1)]
+        ])
+      (RM.make 4 1 RATIONAL.zero [
+          [Int 2];
+          [Int 4];
+          [Int 0];
+          [Int 0];
+        ])
+      (RM.make 4 1 RATIONAL.zero [
+          [Int 2];
+          [Int (-1)];
+          [Int 3];
+          [Int (-1)];
+        ]);
   ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [

@@ -475,13 +475,14 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let v_rows,v_cols = dim v in
     if v_cols <> 1 || v_rows <> rows then raise MatrixError else
       let y = ref (make rows 1 N.zero [[]]) in 
-      for i = 0 to cols-1 do 
-        let u = column b i in 
-        y := add !y  (proj v u) 
+      for i = 0 to cols-1 do
+        let u = column b i in
+        y := add !y  (proj v u)
       done; !y
 
   let distance = fun (b:matrix) (v:matrix) -> 
-    N.pow (dot (subtract v (orth_proj b v)) (subtract v (orth_proj b v)))
+    N.pow (dot (subtract v (orth_proj b v)) (subtract v 
+                                               (orth_proj b v)))
       (N.make_Float 0.5)
 
   let orth_decomp = fun (b:matrix) (v:matrix) -> 
