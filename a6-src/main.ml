@@ -1,4 +1,4 @@
-open Ast 
+open Ast
 
 let parse (s : string) : expr =
   let lexbuf = Lexing.from_string s in
@@ -14,7 +14,6 @@ let rec run () =
     | s when s = "done" -> exit ok
     | s -> 
       print_endline (parse s |> eval |> Ast.string_of_expr);
-      run ()
-  )
+      run ())
 
 let _ = run ()

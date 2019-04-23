@@ -4,7 +4,7 @@ MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
 TEST=test.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind -use-menhir
-PKGS=unix,oUnit,str,qcheck
+PKGS=unix,oUnit,str,qcheck,ANSITerminal, Menhir, Ocamllex
 
 default: build
 	utop
@@ -34,7 +34,7 @@ bisect: clean bisect-test
 	bisect-report -I _build -html report bisect0001.out
 
 docs: docs-public docs-private
-	
+	m
 docs-public: build
 	mkdir -p doc.public
 	ocamlfind ocamldoc -I _build -package $(PKGS) \
