@@ -22,13 +22,11 @@ module type NUM = sig
   (** [one] is the number one *)
   val one : t
   val tolerance : float
-
   (** [make_X arg ...] makes a rational, either a Float or Int or Frac from 
     * OCaml number types like int and float *)
   val make_Float : float -> t 
   val make_Int : int -> t 
   val make_Frac : int -> int -> t
-
   (** [add x y] is the sum of [x] and [y] *)
   val add : t -> t -> t
   (** [mul x y] is the product of [x] and [y] *)
