@@ -84,10 +84,6 @@ module type MATRIX = sig
   (** [inverse m] is the inverse of [m]. Raises matrix error if there is no
     * inverse *)
   val inverse : matrix -> matrix
-  (** [eigenvalues m] are the list of eigenvalues of [m] *)
-  val eigenvalues : matrix -> value list
-  (** [eigenvectors m] are the list of eigenvectors of [m] *)
-  val eigenvectors : matrix -> matrix list
   (** [reduce m] is the reduced echelon form of [m] *)
   val reduce : matrix -> matrix
   (** [augment m1 m2] is the matrix [m1][m2] where the columns of [m2] are 
