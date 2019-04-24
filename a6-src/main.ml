@@ -14,12 +14,13 @@ let parse (s : string) : expr =
 let rec run () = 
   let ok = 0 in 
   ANSITerminal.(
-    print_endline "Enter an expression > ";
+    print_endline "Enter an expression >> ";
     match read_line () with
     | exception End_of_file -> exit ok
     | s when s = "done" -> exit ok
     | s -> 
-      try print_endline (parse s |> eval |> Ast.string_of_expr); run ()
+      try parse s |> eval |> Ast.format_expr Format.str_formatter |> 
+        Format.flush_str_formatter |> print_endline; run ()
       with _ -> print_endline "The entered expression was invalid"; run ())
 
 let _ = run ()

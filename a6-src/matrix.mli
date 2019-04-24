@@ -136,8 +136,6 @@ module type MATRIX = sig
       from [vector] to the columns spanned by [basis] and the projection of [vector]
       onto the orthogonal subspace of [basis] *)
   val orth_decomp : matrix -> matrix -> matrix * matrix
-  (** [to_string m] is the string of matrix [m] *)
-  val to_string : matrix -> string
   (** [lu_decomp m] is a tuple containing matrices L and U, L being a lower
       triangular square matrix with 1's on the diagonal, U being the echelon form of 
       matrix [m], and the product of L and U being [m] *)

@@ -9,7 +9,7 @@ let frac = '-'? int+ '/' int+
 let float = '-'? int+ '.' int+
 let number = int | frac | float
 let row = '[' (' '? number ' '?)+ ']'
-let mat = '[' (' '? row ';'? ' '?)+ ']'
+let mat = (' '? row ';'? ' '?)+
 let variable = ['A'-'Z']
 
 rule read =

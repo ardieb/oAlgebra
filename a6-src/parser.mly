@@ -29,18 +29,23 @@
 %token RPAREN
 %token EOF
 
-%nonassoc TRANSPOSE
-%nonassoc INVERSE
-%nonassoc DET
-%nonassoc ROWSPACE
-%nonassoc COLSPACE
-%nonassoc NULLSPACE
-%nonassoc REDUCE
-%nonassoc CHANGEBASIS
-%nonassoc ORTHPROJECT
 %nonassoc DECOMP
 %nonassoc LUDECOMP
+%nonassoc QRFACTOR
+
+
+%left TRANSPOSE
+%left INVERSE
+%left DET
+%left ROWSPACE
+%left COLSPACE
+%left NULLSPACE
+%left REDUCE
+%left CHANGEBASIS
+%left ORTHPROJECT
+%left DISTTOBASIS
 %left PLUS
+%left MINUS
 %left TIMES
 %left DOT
 %left DIV

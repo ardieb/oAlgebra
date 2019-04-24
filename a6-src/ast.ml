@@ -60,10 +60,9 @@ let row_of = fun (s:string) ->
 (** [matrix_of s] is the matrix matched by string [s].
   * Fails if the rows of the matrix have different lengths or if the 
   * type of elements are not numeric 
-  * Ex: matrix_of "[[1 2 3]; [1 2 3]]" = 
+  * Ex: matrix_of "[1 2 3]; [1 2 3]" = 
     [[Int 1; Int 2; Int 3]; [Int 1; Int 2; Int 3]] *)
 let matrix_of = fun (s:string) ->
-  let s = String.sub s 1 (String.length s - 2) in
   let rows = Str.split (Str.regexp ";[ ]+\\|\\t") s in 
   let mat = List.fold_left (fun acc row -> 
     (row_of row)::acc
@@ -228,51 +227,51 @@ let eval = fun (e:expr) ->
     | _, _, _ -> failwith "Type mismatch"
     end in eval' e 
 
-(** [string_of_expr e] is the string form of the [e]xpr *)
-let rec string_of_expr = function
-| Matrix m -> RM.to_string m
-| Num n -> RATIONAL.to_string n
+(** [format_expr e] is the printing function for the [e]xpr *)
+let rec format_expr fmt = function
+| Matrix m -> RM.format fmt m
+| Num n -> RATIONAL.format fmt n
 | Unary (op, e) -> begin
   match op with
-  | Transpose -> Format.sprintf "Transpose %s" (string_of_expr e)
-  | Inverse -> Format.sprintf "Inverse %s" (string_of_expr e)
-  | Rowspace -> Format.sprintf "Rowspace %s" (string_of_expr e)
-  | Colspace -> Format.sprintf "Colspace %s" (string_of_expr e)
-  | Nullspace -> Format.sprintf "Nullspace %s" (string_of_expr e)
-  | Det -> Format.sprintf "Determinant %s" (string_of_expr e)
-  | Reduce -> Format.sprintf "Reduce %s" (string_of_expr e)
-  | QRFactor -> Format.sprintf "QR Factor %s" (string_of_expr e)
-  | LuDecomp -> Format.sprintf "LU Decompose %s" (string_of_expr e)
+  | Transpose -> Format.fprintf fmt "Transpose %a" format_expr e
+  | Inverse -> Format.fprintf fmt "Inverse %a" format_expr e
+  | Rowspace -> Format.fprintf fmt "Rowspace %a" format_expr e
+  | Colspace -> Format.fprintf fmt "Colspace %a" format_expr e
+  | Nullspace -> Format.fprintf fmt "Nullspace %a" format_expr e
+  | Det -> Format.fprintf fmt "Determinant %a" format_expr e
+  | Reduce -> Format.fprintf fmt "Reduce %a" format_expr e
+  | QRFactor -> Format.fprintf fmt "QR Factor %a" format_expr e
+  | LuDecomp -> Format.fprintf fmt "LU Decompose %a" format_expr e
   end
 | Binary (e1, op, e2) -> begin
   match op with
-  | Add -> Format.sprintf "%s + %s" 
-    (string_of_expr e1) (string_of_expr e2)
-  | Sub -> Format.sprintf "%s - %s" 
-    (string_of_expr e1) (string_of_expr e2)
-  | Div -> Format.sprintf "%s / %s" 
-    (string_of_expr e1) (string_of_expr e2)
-  | Mul -> Format.sprintf "%s * %s" 
-    (string_of_expr e1) (string_of_expr e2)
-  | Dot -> Format.sprintf "%s Dot %s" 
-    (string_of_expr e1) (string_of_expr e2)
-  | Solve -> Format.sprintf "%s = %s" 
-    (string_of_expr e1) (string_of_expr e2)
-  | Scale -> Format.sprintf "%s %s" 
-    (string_of_expr e1) (string_of_expr e2) 
-  | ChangeBasis -> Format.sprintf "%s changed to %s" 
-    (string_of_expr e1) (string_of_expr e2)
-  | OrthProject -> Format.sprintf "%s projected onto %s" 
-    (string_of_expr e1) (string_of_expr e2)
-  | DistToBasis -> Format.sprintf "%s distance to %s" 
-    (string_of_expr e1) (string_of_expr e2)
-  | Decomp -> Format.sprintf "%s decomposed on %s"
-    (string_of_expr e1) (string_of_expr e2)
+  | Add -> Format.fprintf fmt "%a + %a" 
+    format_expr e1 format_expr e2
+  | Sub -> Format.fprintf fmt "%a - %a" 
+    format_expr e1 format_expr e2
+  | Div -> Format.fprintf fmt "%a / %a" 
+    format_expr e1 format_expr e2
+  | Mul -> Format.fprintf fmt "%a * %a" 
+    format_expr e1 format_expr e2
+  | Dot -> Format.fprintf fmt "%a Dot %a" 
+    format_expr e1 format_expr e2
+  | Solve -> Format.fprintf fmt "%a = %a" 
+    format_expr e1 format_expr e2
+  | Scale -> Format.fprintf fmt "%a %a" 
+    format_expr e1 format_expr e2
+  | ChangeBasis -> Format.fprintf fmt "%a changed to %a" 
+    format_expr e1 format_expr e2
+  | OrthProject -> Format.fprintf fmt "%a projected onto %a" 
+    format_expr e1 format_expr e2
+  | DistToBasis -> Format.fprintf fmt "%a distance to %a" 
+    format_expr e1 format_expr e2
+  | Decomp -> Format.fprintf fmt "%a decomposed on %a"
+    format_expr e1 format_expr e2
   end
-| List l -> 
-  List.fold_left (fun acc elt ->
-    acc^(string_of_expr elt)^"\n\n"
-  ) "" l
+| List exprs -> 
+  List.iter (fun elt ->
+    Format.fprintf fmt "%a" format_expr elt
+  ) exprs 
   
 
 

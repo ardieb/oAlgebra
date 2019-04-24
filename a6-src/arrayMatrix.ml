@@ -527,24 +527,16 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
 
   (** [format fmt m] is the formatted matrix [m] *)
   let format = fun (fmt:Format.formatter) (m:matrix) ->
+    Format.open_vbox 0;
     Format.fprintf fmt "\n";
     Array.iter (fun row -> 
+        Format.open_hbox (); 
         Format.fprintf fmt "[";
         Array.iter ( fun e -> Format.fprintf fmt " %a " N.format e ) row;
         Format.fprintf fmt "]\n";
-      ) m
-
-  (** [to_string m] is the string m of matrix [m] *)
-  let to_string = fun (m:matrix) ->
-    let res = ref "" in
-    Array.iter (fun row -> 
-        res := !res ^ "[ ";
-        Array.iter (fun elt ->
-            res := !res ^ " "^(N.to_string elt)^" "
-          ) row;
-        res := !res ^ " ]\n";
-      ) m; 
-    res := !res ^ ""; !res
+        Format.close_box ()
+      ) m;
+    Format.close_box ()
 
   (** [format_solution fmt sol] is the formatted solution to a matrix eq *)
   let format_solution = fun (fmt:Format.formatter) (sol:solution) ->
@@ -578,23 +570,22 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
 
 
   (** [distance basis vector] is the distance from [vector] to the subspace 
-        spanned by the columns of [basis] *)
+    * spanned by the columns of [basis] *)
   let distance = fun (b:matrix) (v:matrix) -> 
-    N.pow (dot (subtract v (orth_proj b v)) (subtract v 
-                                               (orth_proj b v)))
+    N.pow (dot (subtract v (orth_proj b v)) (subtract v (orth_proj b v)))
       (N.make_Float 0.5)
 
   (** [orth_decomp basis vector] is a tuple containing the orthogonal projection
     * from [vector] to the columns spanned by [basis] and the projection of 
-      [vector] onto the orthogonal subspace of [basis]
+    * [vector] onto the orthogonal subspace of [basis]
     * Raises: MatrixError, if the columns of [b] are linearly dependent *)
   let orth_decomp = fun (b:matrix) (v:matrix) -> 
     let rows, cols = dim b in
     let v_rows,v_cols = dim v in
     let pivs = pivots (reduce b) in
-    let pivot_coors = Hashtbl.fold (fun (x,y) boolean acc -> if 
-                                     (Hashtbl.find pivs (x,y)) then y::acc
-                                     else acc) pivs [] in
+    let pivot_coors = Hashtbl.fold (fun (x,y) boolean acc -> 
+      if (Hashtbl.find pivs (x,y)) then y::acc 
+      else acc) pivs [] in
     let num_pivs = List.length pivot_coors in
     if num_pivs <> cols || v_cols <> 1 || v_rows <> rows 
     then raise MatrixError
@@ -614,7 +605,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     scale (N.div N.one (magnitude v)) v
 
   (** [qr_fact_q m] is an orthogonal matrix such that A = QR, where R is an
-      R is upper triangular*)
+    * R is upper triangular*)
   let qr_fact_q = fun (m:matrix) -> 
     let (rows, cols) = dim m in
     (*Base case*)
@@ -643,7 +634,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     done; r
 
   (** [qr_fact m] is the orthogonal matrix [q] and the upper triangular [r] 
-      s.t. m = qr*)
+    * s.t. m = qr*)
   let qr_fact = fun (m:matrix) ->
     let q = qr_fact_q m in
     let r = qr_fact_r m q in
