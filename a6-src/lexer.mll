@@ -39,4 +39,5 @@ rule read =
   | "projected onto" { ORTHPROJECT }
   | "decomposed on" { DECOMP }
   | "distance to" { DISTTOBASIS }
+  | "lu decompose" { LUDECOMP }
   | eof { EOF }

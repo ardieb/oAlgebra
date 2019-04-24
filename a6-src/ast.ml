@@ -77,6 +77,7 @@ type unaryop =
 | Colspace
 | Reduce
 | QRFactor
+| LuDecomp
 
 (** [binaryop] is a variant type that classifies operations with two arguments*)
 type binaryop = 
@@ -129,6 +130,7 @@ let rec typecheck = function
     | Colspace -> TList TMatrix
     | Reduce -> TMatrix
     | QRFactor -> TList TMatrix
+    | LuDecomp -> TMatrix
   end
 | Binary (e1,Scale,e2) ->
   if (typecheck e1 <> TNum || typecheck e2 <> TMatrix) then
@@ -181,8 +183,11 @@ let eval = fun (e:expr) ->
       (Matrix e)::init) (RM.row_space arg) [])
     | QRFactor -> let q,r = RM.qr_fact arg in
       List ((Matrix q)::(Matrix r)::[])
+    | LuDecomp -> 
+      let l,u = RM.lu_decomp arg in
+      List ((Matrix l)::(Matrix u)::[])
   end
-  | Binary (arg1, Scale, arg2) ->
+  | Binary (arg1, Scale, arg2) -> 
     let arg1, arg2 =
     match eval' arg1, eval' arg2 with
     | Num n, Matrix m -> n, m
@@ -229,6 +234,7 @@ let rec string_of_expr = function
   | Det -> Format.sprintf "Determinant %s" (string_of_expr e)
   | Reduce -> Format.sprintf "Reduce %s" (string_of_expr e)
   | QRFactor -> Format.sprintf "QR Factor %s" (string_of_expr e)
+  | LuDecomp -> Format.sprintf "LU Decompose %s" (string_of_expr e)
   end
 | Binary (e1, op, e2) -> begin
   match op with
