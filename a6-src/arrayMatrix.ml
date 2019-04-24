@@ -585,8 +585,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       (N.make_Float 0.5)
 
   (** [orth_decomp basis vector] is a tuple containing the orthogonal projection
-    * from [vector] to the columns spanned by [basis] and the projection of [vector]
-    * onto the orthogonal subspace of [basis]
+    * from [vector] to the columns spanned by [basis] and the projection of 
+      [vector] onto the orthogonal subspace of [basis]
     * Raises: MatrixError, if the columns of [b] are linearly dependent *)
   let orth_decomp = fun (b:matrix) (v:matrix) -> 
     let rows, cols = dim b in

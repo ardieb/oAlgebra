@@ -243,6 +243,21 @@ let make_orth_decomp_test
            ~cmp: approx_eq_mat);
     )
 
+let make_change_of_basis_test 
+    (name: string)
+    (input_basis1 : RM.matrix)
+    (input_basis2 : RM.matrix)
+    (expected : RM.matrix)
+    (raises : bool) = 
+  name >:: (fun _ -> 
+      if raises then (
+        assert_raises RM.MatrixError
+          (fun () -> RM.change_of_basis input_basis1 input_basis2)
+      )
+      else
+        (assert_equal (RM.change_of_basis input_basis1 input_basis2) expected)
+    )
+
 let make_solve_test
     (name: string)
     (matrix: RM.matrix)
@@ -920,6 +935,77 @@ let matrix_tests =
         ])
       (RM.make 0 0 RATIONAL.zero [[]])
       (RM.make 0 0 RATIONAL.zero [[]])
+      true;
+
+    (*======================== change of basis tests ====================== *)
+    make_change_of_basis_test "2x2 change of basis test"
+      (RM.make 2 2 RATIONAL.zero [
+          [Int (-9); Int (-5)];
+          [Int 1; Int (-1)]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 1; Int 3];
+          [Int (-4); Int (-5)]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 6; Int 4];
+          [Int (-5); Int (-3)]
+        ])
+      false;
+
+    make_change_of_basis_test "2x2 change of basis test"
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 1; Int 3];
+          [Int (-4); Int (-5)]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int (-9); Int (-5)];
+          [Int 1; Int (-1)]
+        ])
+      (RM.inverse (RM.make 2 2 RATIONAL.zero [
+           [Int 6; Int 4];
+           [Int (-5); Int (-3)]
+         ]))
+      false;
+
+    make_change_of_basis_test "2x2 change of basis fails because matrix1
+      is not a basis"
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 1; Int 3];
+          [Int 2; Int 6]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int (-9); Int (-5)];
+          [Int 1; Int (-1)]
+        ])
+      (RM.make 2 2 RATIONAL.zero [[]])
+      true;
+
+    make_change_of_basis_test "2x2 change of basis fails because matrix2
+      is not a basis"
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 1; Int 3];
+          [Int 2; Int 5]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int (-9); Int (-5)];
+          [Int 9; Int 5]
+        ])
+      (RM.make 2 2 RATIONAL.zero [[]])
+      true;
+
+    make_change_of_basis_test "2x2 change of basis fails because matrix1 and
+      matrix2 are different sizes"
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 1; Int 3];
+          [Int 2; Int 5]
+        ])
+      (RM.make 3 3 RATIONAL.zero [
+          [Int 1; Int 0; Int 0];
+          [Int 0; Int 1; Int 0];
+          [Int 0; Int 0; Int 1]
+        ])
+      (RM.make 2 2 RATIONAL.zero [[]])
       true;
   ]
 
