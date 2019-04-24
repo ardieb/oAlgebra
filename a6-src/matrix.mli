@@ -102,7 +102,7 @@ module type MATRIX = sig
   (** [col_space m] is the column space of [m] *)
   val col_space : matrix -> matrix list
   (** [row_space m] is a list of vectors that form the row space of the [m]atrix
-      which is the basis for the span of the rows of [m] *)
+    * which is the basis for the span of the rows of [m] *)
   val row_space : matrix -> matrix list  
   (** [equals m1 m2] is true if [m1] is structurally equal to [m2] and false
     * otherwise *)
@@ -121,24 +121,25 @@ module type MATRIX = sig
   (** [m r c] gets you the value in row [r] column [c] in matrix [m]*)
   val get : matrix -> int -> int -> value
   (** [change_of_bases b1 b2] is the standard matrix of the linear 
-      transformation from basis [b1] to basis [b2] *)
+    * transformation from basis [b1] to basis [b2] *)
   val change_of_basis : matrix -> matrix -> matrix
   (** [orth_proj basis vector] is the orthogonal projection of [vector] onto 
-      the subspace spanned by the columns of [basis]*)
+    * the subspace spanned by the columns of [basis]*)
   val orth_proj : matrix -> matrix -> matrix
   (** [distance basis vector] is the distance from [vector] to the subspace 
-      spanned by the columns of [basis] *)
+    * spanned by the columns of [basis] *)
   val distance : matrix -> matrix -> value
-
-  val least_square : matrix -> matrix -> matrix
-
+  (** [least_square m v] is the particular least squares solution to the
+    * equation [m] x = [v]. This is the vector in the column spac of [m] that is
+    * closest to the vector [v] *)
+  val least_square : matrix -> matrix -> matrix 
   (** [orth_decomp basis vector] is a tuple containing the orthogonal projection
-      from [vector] to the columns spanned by [basis] and the projection of [vector]
-      onto the orthogonal subspace of [basis] *)
+    * from [vector] to the columns spanned by [basis] and the projection of [vector]
+    * onto the orthogonal subspace of [basis] *)
   val orth_decomp : matrix -> matrix -> matrix * matrix
   (** [lu_decomp m] is a tuple containing matrices L and U, L being a lower
-      triangular square matrix with 1's on the diagonal, U being the echelon form of 
-      matrix [m], and the product of L and U being [m] *)
+    * triangular square matrix with 1's on the diagonal, U being the echelon form of 
+    * matrix [m], and the product of L and U being [m] *)
   val lu_decomp : matrix -> matrix*matrix
 end
 
