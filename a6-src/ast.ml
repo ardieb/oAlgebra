@@ -1,11 +1,12 @@
+(* HEADER *)
 open Matrix
 open ArrayMatrix
 open Rationals
 
 module RM = MAKE_MATRIX(RATIONAL)
-
 type num = RATIONAL.t
 type matrix = RM.matrix
+(* END HEADER *)
 
 (* Functions for working with regex strings *)
 (* matches an integer *)
@@ -16,24 +17,28 @@ let string_float = Format.sprintf "%s.%s" string_int string_int
 let string_frac = Format.sprintf "%s/%s" string_int string_int
 
 (** [frac_of s] is the fraction matched from string [s]. 
-  * Fails if the string does not match a fraction *)
+  * Fails if the string does not match a fraction.
+  * Ex: frac_of "5/3" = Frac (5,3), frac_of "4" fails *)
 let frac_of = fun (s:string) ->
   match Str.split (Str.regexp "/") s with
   | n::d::[] -> Frac (int_of_string n, int_of_string d)
   | _ -> failwith "Invalid fraction"
 
 (** [float_of s] is the float matched from string [s].
-  * Fails if the string does not match a float *)
+  * Fails if the string does not match a float.
+  * Ex: float_of "5.0" = Float 5.0, float_of "5" fails *)
 let float_of = fun (s:string) -> 
   Float (float_of_string s)
 
 (** [int_of s] is the integer matched from string [s].
-  * Fails if the string does not match an integer *)
+  * Fails if the string does not match an integer.
+  * Ex: int_of "5" = Int 5, int_of "5.0" fails *)
 let int_of = fun (s:string) -> 
   Int (int_of_string s)
 
 (** [num_of s] is the numeric value matched from string [s].
-  * Fails if the string does not match a numeric value *)
+  * Fails if the string does not match a numeric value.
+  * Ex: num_of "5.0" = Float 5.0 *)
 let num_of = fun (s:string) ->
   if Str.string_match (Str.regexp string_int) s 0 then
     int_of s
@@ -43,7 +48,8 @@ let num_of = fun (s:string) ->
     frac_of s
   else failwith "Nan"  
 
-(** [row_of s] is the row (list) matched by string [s] *)
+(** [row_of s] is the row (list) matched by string [s] 
+  * Ex: row_of "[1 2 3]" = [Int 1; Int 2; Int 3] *)
 let row_of = fun (s:string) ->
   Str.global_replace (Str.regexp "\\[\\|\\]") "" s |>
   Str.split (Str.regexp "[ ]+") |> 
@@ -53,7 +59,9 @@ let row_of = fun (s:string) ->
 
 (** [matrix_of s] is the matrix matched by string [s].
   * Fails if the rows of the matrix have different lengths or if the 
-  * type of elements are not numeric *)
+  * type of elements are not numeric 
+  * Ex: matrix_of "[[1 2 3]; [1 2 3]]" = 
+    [[Int 1; Int 2; Int 3]; [Int 1; Int 2; Int 3]] *)
 let matrix_of = fun (s:string) ->
   let s = String.sub s 1 (String.length s - 2) in
   let rows = Str.split (Str.regexp ";[ ]+\\|\\t") s in 
@@ -67,7 +75,7 @@ let matrix_of = fun (s:string) ->
     else ()) mat;
   RM.make (List.length mat) len (Int 0) mat
 
-(** [unaryop] is a variant type that classifies operations with one argument*)
+(** [unaryop] is a type that classifies operations with one argument *)
 type unaryop =
 | Transpose
 | Inverse
@@ -77,8 +85,9 @@ type unaryop =
 | Colspace
 | Reduce
 | QRFactor
+| LuDecomp
 
-(** [binaryop] is a variant type that classifies operations with two arguments*)
+(** [binaryop] is a type that classifies operations with two arguments*)
 type binaryop = 
 | Add
 | Sub
@@ -92,7 +101,7 @@ type binaryop =
 | DistToBasis
 | Decomp
 
-(** [expr] is a variant type that classifies operations on matricies and numbers*)
+(** [expr] is a type that classifies operations on matricies and numbers*)
 type expr =
 | Matrix of matrix
 | Num of num
@@ -100,7 +109,7 @@ type expr =
 | Binary of (expr * binaryop * expr)
 | List of expr list
 
-(** [typ] is a variant type that classfiies the type of an [expr] *)
+(** [typ] is a type that classfiies the type of an [expr] *)
 type typ =
 | TMatrix
 | TNum
@@ -129,6 +138,7 @@ let rec typecheck = function
     | Colspace -> TList TMatrix
     | Reduce -> TMatrix
     | QRFactor -> TList TMatrix
+    | LuDecomp -> TMatrix
   end
 | Binary (e1,Scale,e2) ->
   if (typecheck e1 <> TNum || typecheck e2 <> TMatrix) then
@@ -181,8 +191,11 @@ let eval = fun (e:expr) ->
       (Matrix e)::init) (RM.row_space arg) [])
     | QRFactor -> let q,r = RM.qr_fact arg in
       List ((Matrix q)::(Matrix r)::[])
+    | LuDecomp -> 
+      let l,u = RM.lu_decomp arg in
+      List ((Matrix l)::(Matrix u)::[])
   end
-  | Binary (arg1, Scale, arg2) ->
+  | Binary (arg1, Scale, arg2) -> 
     let arg1, arg2 =
     match eval' arg1, eval' arg2 with
     | Num n, Matrix m -> n, m
@@ -229,6 +242,7 @@ let rec string_of_expr = function
   | Det -> Format.sprintf "Determinant %s" (string_of_expr e)
   | Reduce -> Format.sprintf "Reduce %s" (string_of_expr e)
   | QRFactor -> Format.sprintf "QR Factor %s" (string_of_expr e)
+  | LuDecomp -> Format.sprintf "LU Decompose %s" (string_of_expr e)
   end
 | Binary (e1, op, e2) -> begin
   match op with

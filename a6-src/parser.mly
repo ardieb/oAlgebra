@@ -22,6 +22,7 @@
 %token DISTTOBASIS
 %token QRFACTOR
 %token DECOMP
+%token LUDECOMP
 %token REDUCE
 %token DOT
 %token LPAREN
@@ -38,6 +39,7 @@
 %nonassoc CHANGEBASIS
 %nonassoc ORTHPROJECT
 %nonassoc DECOMP
+%nonassoc LUDECOMP
 %left PLUS
 %left TIMES
 %left DOT
@@ -61,6 +63,7 @@ expr:
   | COLSPACE; e = expr { Unary (Colspace, e) }
   | REDUCE; e = expr { Unary (Reduce, e) }
   | QRFACTOR; e = expr { Unary (QRFactor, e) }
+  | LUDECOMP; e = expr { Unary (LuDecomp, e) }
   | e1 = expr; TIMES; e2 = expr { Binary (e1, Mul, e2) }
   | e1 = expr; DIV; e2 = expr { Binary (e1, Div, e2) }
   | e1 = expr; MINUS; e2 = expr { Binary (e1, Sub, e2) }
