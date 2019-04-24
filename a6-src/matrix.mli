@@ -141,6 +141,10 @@ module type MATRIX = sig
   val orth_decomp : matrix -> matrix -> matrix * matrix
   (** [to_string m] is the string of matrix [m] *)
   val to_string : matrix -> string
+  (** [lu_decomp m] is a tuple containing matrices L and U, L being a lower
+      triangular square matrix with 1's on the diagonal, U being the echelon form of 
+      matrix [m], and the product of L and U being [m] *)
+  val lu_decomp : matrix -> matrix*matrix
 end
 
 (** [MATRIX_MAKER] is the type of a functor for making a matrix *)

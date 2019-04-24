@@ -1,10 +1,10 @@
 open Matrix
 (** A module for performing operations on matricies *)
 module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct 
-  (* AF: A ['a matrix] is constructed from a array of arrays with elements of type
-   * ['a]. The size of the matrix is denoted by a int*int pair *)
+  (* AF: A ['a matrix] is constructed from a array of arrays with elements of 
+   * type ['a]. The size of the matrix is denoted by a int*int pair *)
   (* RI: The length of the rows of the matrix must all be equal and the elements 
-   * o the matrix must be numeric *)
+   * of the matrix must be numeric *)
   module N = T
   type value = N.t
   type matrix = value array array
@@ -449,16 +449,15 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   (* SPRINT WEEK 2 *)
   (** [to_string m] is the string m of matrix [m] *)
   let to_string = fun (m:matrix) ->
-    let res = ref "[ " in
-    Array.iteri (fun i row -> 
+    let res = ref "" in
+    Array.iter (fun row -> 
         res := !res ^ "[ ";
         Array.iter (fun elt ->
             res := !res ^ " "^(N.to_string elt)^" "
           ) row;
-        if i = Array.length m - 1 then res := !res^" ]"
-        else res := !res^" ]\n"; 
+        res := !res ^ " ]\n";
       ) m; 
-    res := !res ^ " ]"; !res
+    res := !res ^ ""; !res
 
   (** [format_solution fmt sol] is the formatted solution to a matrix eq *)
   let format_solution = fun (fmt:Format.formatter) (sol:solution) ->
@@ -592,22 +591,50 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       partition (c1,0) (c1*2-1,r1-1) rref
 
 
-  let lu_decomp = fun (m:matrix) -> 
-    let rows,cols = dim m in 
-    let empty_vec = make rows 1 N.zero [[]] in 
-    let vec_array = Array.make rows empty_vec in 
-    let u = ref m in 
-    let pivot_coors = Hashtbl.fold (fun (x,y) boolean acc -> if 
-                                     (Hashtbl.find (pivots m) (x,y)) then y::acc
-                                     else acc) (pivots m) [] in
-    for col = 0 to cols-1 do 
-      if (List.mem col pivot_coors) then vec_array.(col) <- column m col; 
-      for row = col+1 to rows-1 do
-        let constant = N.div (N.neg m.(row).(col)) m.(col).(col) in 
-        u := addrows (!u) col row constant;
+  let lu_decomp = fun (m:matrix) ->
+    let lu_decomp_helper = fun (m:matrix) -> 
+      let rows,cols = dim m in 
+      let empty_vec = make rows 1 N.zero [[]] in 
+      let vec_array = Array.make rows empty_vec in 
+      let u = ref m in 
+
+      let pivs = pivots (reduce m) in
+      let curr_idx = ref 0 in
+
+      let pivot_coors = Hashtbl.fold (fun (x,y) boolean acc -> if 
+                                       (Hashtbl.find pivs (x,y)) then y::acc
+                                       else acc) pivs [] in
+      for col = 0 to (cols-1) do 
+        if (List.mem col pivot_coors) then 
+          (vec_array.(!curr_idx) <- column !u col;
+           for i=0 to !curr_idx-1 do 
+             vec_array.(!curr_idx).(i).(0) <- N.zero;
+           done;
+           curr_idx := !curr_idx + 1);
+        for row = col+1 to rows-1 do
+          match (N.compare N.zero (!u.(row).(col))) with 
+
+          | LT
+          | GT ->
+            let constant = N.div (N.neg !u.(row).(col)) !u.(col).(col) in 
+            u := addrows (!u) col row constant;
+          | EQ -> ()
+        done;
       done;
-    done;
-    !u
+
+      let identity = diagonal rows rows in
+      let l = ref (make rows 0 N.zero [[]]) in
+      for col = 0 to rows-1 do
+        if col>=(List.length pivot_coors) then 
+          (* print_endline "line 631"; *)
+          l := augment !l  (column identity col) else 
+          l := augment !l
+              (scale (N.div N.one vec_array.(col).(col).(0)) 
+                 (Array.get vec_array col));
+      done;
+      !l,!u
+
+    in try (lu_decomp_helper m) with N.ArithmeticError -> raise MatrixError
 
   let eigenvectors = fun (m:matrix) -> failwith "TODO"
 end
