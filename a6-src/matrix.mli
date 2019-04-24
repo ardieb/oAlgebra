@@ -143,7 +143,7 @@ module type MATRIX = sig
   (** [to_string m] is the string of matrix [m] *)
   val to_string : matrix -> string
 
-  val lu_decomp : matrix -> matrix
+  val lu_decomp : matrix -> matrix*matrix
 end
 
 (** [MATRIX_MAKER] is the type of a functor for making a matrix *)

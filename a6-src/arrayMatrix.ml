@@ -591,37 +591,50 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       partition (c1,0) (c1*2-1,r1-1) rref
 
 
-  let lu_decomp = fun (m:matrix) -> 
-    let rows,cols = dim m in 
-    let empty_vec = make rows 1 N.zero [[]] in 
-    let vec_array = Array.make rows empty_vec in 
-    let u = ref m in 
+  let lu_decomp = fun (m:matrix) ->
+    let lu_decomp_helper = fun (m:matrix) -> 
+      let rows,cols = dim m in 
+      let empty_vec = make rows 1 N.zero [[]] in 
+      let vec_array = Array.make rows empty_vec in 
+      let u = ref m in 
 
-    let pivs = pivots (reduce m) in
-    let curr_idx = ref 0 in
+      let pivs = pivots (reduce m) in
+      let curr_idx = ref 0 in
 
-    let pivot_coors = Hashtbl.fold (fun (x,y) boolean acc -> if 
-                                     (Hashtbl.find pivs (x,y)) then y::acc
-                                     else acc) pivs [] in
-    for col = 0 to (min (rows-1) (cols-1)) do 
-      if (List.mem col pivot_coors) then 
-        (vec_array.(!curr_idx) <- column m col;
-         curr_idx := !curr_idx + 1);
-      for row = col+1 to rows-1 do
-        match (N.compare N.zero (!u.(col).(col))) with 
-        | LT
-        | GT ->
-          let constant = N.div (N.neg !u.(row).(col)) !u.(col).(col) in 
-          (* print_endline ((N.to_string m.(row).(col)) ^ 
-                         (N.to_string m.(row).(col))) *)
-          u := addrows (!u) col row constant;
-          print_string ("constant is ");
-          print_endline (N.to_string constant);
-          print_endline (to_string !u);
-        | EQ -> ()
+      let pivot_coors = Hashtbl.fold (fun (x,y) boolean acc -> if 
+                                       (Hashtbl.find pivs (x,y)) then y::acc
+                                       else acc) pivs [] in
+      for col = 0 to (cols-1) do 
+        if (List.mem col pivot_coors) then 
+          (vec_array.(!curr_idx) <- column !u col;
+           for i=0 to !curr_idx-1 do 
+             vec_array.(col).(i).(0) <- N.zero;
+           done;
+           curr_idx := !curr_idx + 1);
+        for row = col+1 to rows-1 do
+          match (N.compare N.zero (!u.(row).(col))) with 
+
+          | LT
+          | GT ->
+            let constant = N.div (N.neg !u.(row).(col)) !u.(col).(col) in 
+            u := addrows (!u) col row constant;
+          | EQ -> ()
+        done;
       done;
-    done;
-    !u
+
+      let identity = diagonal rows rows in
+      let l = ref (make rows 0 N.zero [[]]) in
+      for col = 0 to rows-1 do 
+        if col>=(List.length pivot_coors) then 
+          (* print_endline "line 631"; *)
+          l := augment !l  (column identity col) else 
+          l := augment !l
+              (scale (N.div N.one vec_array.(col).(col).(0)) 
+                 (Array.get vec_array col));
+      done;
+      !l,!u
+
+    in try (lu_decomp_helper m) with N.ArithmeticError -> raise MatrixError
 
   let eigenvectors = fun (m:matrix) -> failwith "TODO"
 end
