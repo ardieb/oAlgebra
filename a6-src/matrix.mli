@@ -24,8 +24,7 @@ module type NUM = sig
   val tolerance : float
 
   (** [make_X arg ...] makes a rational, either a Float or Int or Frac from 
-      OCaml number types like int and float 
-  *)
+    * OCaml number types like int and float *)
   val make_Float : float -> t 
   val make_Int : int -> t 
   val make_Frac : int -> int -> t

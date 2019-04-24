@@ -76,6 +76,8 @@ type unaryop =
 | Nullspace
 | Colspace
 | Reduce
+| QRFactor
+
 (** [binaryop] is a variant type that classifies operations with two arguments*)
 type binaryop = 
 | Add
@@ -85,6 +87,11 @@ type binaryop =
 | Dot
 | Solve
 | Scale
+| ChangeBasis
+| OrthProject
+| DistToBasis
+| Decomp
+
 (** [expr] is a variant type that classifies operations on matricies and numbers*)
 type expr =
 | Matrix of matrix
@@ -92,16 +99,19 @@ type expr =
 | Unary of (unaryop * expr)
 | Binary of (expr * binaryop * expr)
 | List of expr list
+
 (** [typ] is a variant type that classfiies the type of an [expr] *)
 type typ =
 | TMatrix
 | TNum
 | TList of typ
+
 (** [string_of_type t] is the string form of [t]yp *)
 let rec string_of_type = function
 | TMatrix -> "TMatrix"
 | TNum -> "TNum"
 | TList t -> Format.sprintf "TList %s" (string_of_type t)
+
 (** [typecheck e] is the type of the [e]xpr. Fails if the type is incoherent *)
 let rec typecheck = function
 | Matrix _ -> TMatrix
@@ -118,6 +128,7 @@ let rec typecheck = function
     | Nullspace -> TList TMatrix
     | Colspace -> TList TMatrix
     | Reduce -> TMatrix
+    | QRFactor -> TList TMatrix
   end
 | Binary (e1,Scale,e2) ->
   if (typecheck e1 <> TNum || typecheck e2 <> TMatrix) then
@@ -142,6 +153,7 @@ let rec typecheck = function
         Format.sprintf "Type %s does not match type %s" 
         (t' |> string_of_type) (typecheck e |> string_of_type)
       ) else ()) l; t'
+
 (** [eval e] is the evaluated expression (value) from [e].
   * All expressions step to either Matrix m or Num n eventually.
   * Will not during steps since typecheck is applied at the beginning. *)
@@ -167,6 +179,8 @@ let eval = fun (e:expr) ->
       (Matrix e)::init) (RM.col_space arg) [])
     | Rowspace -> List (List.fold_right (fun e init ->
       (Matrix e)::init) (RM.row_space arg) [])
+    | QRFactor -> let q,r = RM.qr_fact arg in
+      List ((Matrix q)::(Matrix r)::[])
   end
   | Binary (arg1, Scale, arg2) ->
     let arg1, arg2 =
@@ -189,8 +203,18 @@ let eval = fun (e:expr) ->
       List ((Matrix (fst sol))::
       (List.fold_right (fun e init ->
       (Matrix e)::init) (RM.solve m n |> snd) []))
+    | Matrix oldbasis, ChangeBasis, Matrix newbasis -> 
+      Matrix (RM.change_of_basis oldbasis newbasis)
+    | Matrix vector, OrthProject, Matrix basis ->
+      Matrix (RM.orth_proj basis vector)
+    | Matrix vector, DistToBasis, Matrix basis ->
+      Num (RM.distance basis vector)
+    | Matrix vector, Decomp, Matrix basis ->
+      let col_proj, orth_proj = RM.orth_decomp basis vector in
+      List ((Matrix col_proj)::(Matrix orth_proj)::[])
     | _, _, _ -> failwith "Type mismatch"
     end in eval' e 
+
 (** [string_of_expr e] is the string form of the [e]xpr *)
 let rec string_of_expr = function
 | Matrix m -> RM.to_string m
@@ -204,20 +228,36 @@ let rec string_of_expr = function
   | Nullspace -> Format.sprintf "Nullspace %s" (string_of_expr e)
   | Det -> Format.sprintf "Determinant %s" (string_of_expr e)
   | Reduce -> Format.sprintf "Reduce %s" (string_of_expr e)
+  | QRFactor -> Format.sprintf "QR Factor %s" (string_of_expr e)
   end
 | Binary (e1, op, e2) -> begin
   match op with
-  | Add -> Format.sprintf "%s + %s" (string_of_expr e1) (string_of_expr e2)
-  | Sub -> Format.sprintf "%s - %s" (string_of_expr e1) (string_of_expr e2)
-  | Div -> Format.sprintf "%s / %s" (string_of_expr e1) (string_of_expr e2)
-  | Mul -> Format.sprintf "%s * %s" (string_of_expr e1) (string_of_expr e2)
-  | Dot -> Format.sprintf "%s Dot %s" (string_of_expr e1) (string_of_expr e2)
-  | Solve -> Format.sprintf "%s = %s" (string_of_expr e1) (string_of_expr e2)
-  | Scale -> Format.sprintf "%s %s" (string_of_expr e1) (string_of_expr e2) 
+  | Add -> Format.sprintf "%s + %s" 
+    (string_of_expr e1) (string_of_expr e2)
+  | Sub -> Format.sprintf "%s - %s" 
+    (string_of_expr e1) (string_of_expr e2)
+  | Div -> Format.sprintf "%s / %s" 
+    (string_of_expr e1) (string_of_expr e2)
+  | Mul -> Format.sprintf "%s * %s" 
+    (string_of_expr e1) (string_of_expr e2)
+  | Dot -> Format.sprintf "%s Dot %s" 
+    (string_of_expr e1) (string_of_expr e2)
+  | Solve -> Format.sprintf "%s = %s" 
+    (string_of_expr e1) (string_of_expr e2)
+  | Scale -> Format.sprintf "%s %s" 
+    (string_of_expr e1) (string_of_expr e2) 
+  | ChangeBasis -> Format.sprintf "%s changed to %s" 
+    (string_of_expr e1) (string_of_expr e2)
+  | OrthProject -> Format.sprintf "%s projected onto %s" 
+    (string_of_expr e1) (string_of_expr e2)
+  | DistToBasis -> Format.sprintf "%s distance to %s" 
+    (string_of_expr e1) (string_of_expr e2)
+  | Decomp -> Format.sprintf "%s decomposed on %s"
+    (string_of_expr e1) (string_of_expr e2)
   end
 | List l -> 
   List.fold_left (fun acc elt ->
-    acc^(string_of_expr elt)^" "
+    acc^(string_of_expr elt)^"\n\n"
   ) "" l
   
 

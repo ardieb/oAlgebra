@@ -4,6 +4,7 @@
 
 %token <Ast.num> NUM
 %token <Ast.matrix> MATRIX
+%token VAR
 %token EQUALS
 %token TIMES
 %token SCALE
@@ -16,6 +17,11 @@
 %token ROWSPACE
 %token COLSPACE 
 %token NULLSPACE
+%token CHANGEBASIS
+%token ORTHPROJECT
+%token DISTTOBASIS
+%token QRFACTOR
+%token DECOMP
 %token REDUCE
 %token DOT
 %token LPAREN
@@ -29,6 +35,9 @@
 %nonassoc COLSPACE
 %nonassoc NULLSPACE
 %nonassoc REDUCE
+%nonassoc CHANGEBASIS
+%nonassoc ORTHPROJECT
+%nonassoc DECOMP
 %left PLUS
 %left TIMES
 %left DOT
@@ -51,12 +60,17 @@ expr:
   | NULLSPACE; e = expr { Unary (Nullspace, e) }
   | COLSPACE; e = expr { Unary (Colspace, e) }
   | REDUCE; e = expr { Unary (Reduce, e) }
+  | QRFACTOR; e = expr { Unary (QRFactor, e) }
   | e1 = expr; TIMES; e2 = expr { Binary (e1, Mul, e2) }
   | e1 = expr; DIV; e2 = expr { Binary (e1, Div, e2) }
   | e1 = expr; MINUS; e2 = expr { Binary (e1, Sub, e2) }
   | e1 = expr; PLUS; e2 = expr { Binary (e1, Add, e2) }
   | e1 = expr; DOT; e2 = expr { Binary (e1, Dot, e2) }
-  | e1 = expr; EQUALS; e2 = expr { Binary (e1, Solve, e2) }
+  | e1 = expr; TIMES; VAR; EQUALS; e2 = expr { Binary (e1, Solve, e2) }
   | e1 = expr; SCALE; e2 = expr { Binary (e1, Scale, e2) }
+  | e1 = expr; CHANGEBASIS; e2 = expr { Binary (e1, ChangeBasis, e2) }
+  | e1 = expr; ORTHPROJECT; e2 = expr { Binary (e1, OrthProject, e2) }
+  | e1 = expr; DISTTOBASIS; e2 = expr { Binary (e1, DistToBasis, e2) }
+  | e1 = expr; DECOMP; e2 = expr { Binary (e1, Decomp, e2) }
   | LPAREN; e = expr; RPAREN { e }
   ;

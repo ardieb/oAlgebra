@@ -5,7 +5,7 @@ MLIS=$(MODULES:=.mli)
 TEST=test.byte
 MAIN=main.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind -use-menhir 
-PKGS=unix,oUnit,str,qcheck,ANSITerminal, Menhir, Ocamllex
+PKGS=unix,oUnit,str,qcheck, ANSITerminal, Menhir, Ocamllex
 
 default: build
 	utop
@@ -24,7 +24,7 @@ test:
 	$(OCAMLBUILD) -tag debug $(TEST) && ./$(TEST)
 
 zip:
-	zip oalgebra_src.zip *.ml* _tags Makefile
+	zip oalgebra_src.zip *.ml* *.mll* *.mly* _tags Makefile
 
 clean:
 	ocamlbuild -clean
