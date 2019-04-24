@@ -1,10 +1,10 @@
 open Matrix
 (** A module for performing operations on matricies *)
 module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct 
-  (* AF: A ['a matrix] is constructed from a array of arrays with elements of type
-   * ['a]. The size of the matrix is denoted by a int*int pair *)
+  (* AF: A ['a matrix] is constructed from a array of arrays with elements of 
+   * type ['a]. The size of the matrix is denoted by a int*int pair *)
   (* RI: The length of the rows of the matrix must all be equal and the elements 
-   * o the matrix must be numeric *)
+   * of the matrix must be numeric *)
   module N = T
   type value = N.t
   type matrix = value array array
