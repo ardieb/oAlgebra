@@ -258,6 +258,19 @@ let make_change_of_basis_test
         (assert_equal (RM.change_of_basis input_basis1 input_basis2) expected)
     )
 
+let make_lu_decomp_test 
+    (name: string)
+    (input: RM.matrix)
+    (raises: bool) = 
+  name >:: (fun _ ->
+      if raises then (
+        assert_raises RM.MatrixError
+          (fun () -> RM.lu_decomp input)
+      )
+      else (let l,u = RM.lu_decomp input in 
+            (assert_equal (RM.mul l u) input))
+    )
+
 let make_solve_test
     (name: string)
     (matrix: RM.matrix)
@@ -1006,6 +1019,41 @@ let matrix_tests =
           [Int 0; Int 0; Int 1]
         ])
       (RM.make 2 2 RATIONAL.zero [[]])
+      true;
+
+    (*====================== LU decomposition tests ====================*)
+    make_lu_decomp_test "4x4 LU decomposition"
+      (RM.make 4 4 RATIONAL.zero [
+          [Int 3; Int (-7); Int (-2); Int 2];
+          [Int (-3); Int 5; Int 1; Int 0];
+          [Int 6; Int (-4); Int 0; Int (-5)];
+          [Int (-9); Int 5; Int (-5); Int 12]
+        ])
+      false;
+
+    make_lu_decomp_test "3x4 LU decomposition"
+      (RM.make 3 4 RATIONAL.zero [
+          [Int 2; Int (-4); Int 4; Int (-2)];
+          [Int 6; Int (-9); Int 7; Int (-3)];
+          [Int (-1); Int (-4); Int 8; Int 0]
+        ])
+      false;
+
+    make_lu_decomp_test "5x3 LU decomposition"
+      (RM.make 5 3 RATIONAL.zero [
+          [Int 2; Int (-6); Int 6];
+          [Int (-4); Int 5; Int (-7)];
+          [Int 3; Int 5; Int (-1)];
+          [Int (-6); Int 4; Int (-8)];
+          [Int 8; Int (-3); Int 9];
+        ])
+      false;
+
+    make_lu_decomp_test "LU decomposition fails"
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 0; Int 1];
+          [Int 1; Int 1]
+        ])
       true;
   ]
 
