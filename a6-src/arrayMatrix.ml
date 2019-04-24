@@ -566,16 +566,16 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     done; c
 
   (** [orth_proj basis vector] is the orthogonal projection of [vector] onto 
-        the subspace spanned by the columns of [basis] *)
+    * the subspace spanned by the columns of [basis]
+    * Raises: MatrixError, if the columns of [b] are linearly dependent  *)
   let orth_proj = fun (b:matrix) (v:matrix) ->
     let rows, cols = dim b in
-    let v_rows,v_cols = dim v in
-    if v_cols <> 1 || v_rows <> rows then raise MatrixError else
-      let y = ref (make rows 1 N.zero [[]]) in 
-      for i = 0 to cols-1 do
-        let u = column b i in
-        y := add !y  (proj v u)
-      done; !y
+    let y = ref (make rows 1 N.zero [[]]) in 
+    for i = 0 to cols-1 do
+      let u = column b i in
+      y := add !y  (proj v u)
+    done; !y
+
 
   (** [distance basis vector] is the distance from [vector] to the subspace 
         spanned by the columns of [basis] *)
@@ -585,12 +585,25 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       (N.make_Float 0.5)
 
   (** [orth_decomp basis vector] is a tuple containing the orthogonal projection
-      from [vector] to the columns spanned by [basis] and the projection of [vector]
-      onto the orthogonal subspace of [basis] *)
+    * from [vector] to the columns spanned by [basis] and the projection of [vector]
+    * onto the orthogonal subspace of [basis]
+    * Raises: MatrixError, if the columns of [b] are linearly dependent *)
   let orth_decomp = fun (b:matrix) (v:matrix) -> 
-    let projection = orth_proj b v in 
-    let z = subtract v projection in 
-    (projection,z)
+    let rows, cols = dim b in
+    let v_rows,v_cols = dim v in
+    let pivs = pivots (reduce b) in
+    let pivot_coors = Hashtbl.fold (fun (x,y) boolean acc -> if 
+                                     (Hashtbl.find pivs (x,y)) then y::acc
+                                     else acc) pivs [] in
+    let num_pivs = List.length pivot_coors in
+    if num_pivs <> cols || v_cols <> 1 || v_rows <> rows 
+    then raise MatrixError
+    else 
+      let projection = orth_proj b v
+      in 
+      let z = subtract v projection in 
+      (projection,z)
+
 
   (** [magnitude v] is the length of a vector *)
   let magnitude = fun (v:matrix) ->

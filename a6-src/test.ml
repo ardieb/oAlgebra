@@ -3,11 +3,15 @@ open Matrix
 open Rationals
 open ArrayMatrix
 
+(** [cmp_rat x1 x2] is [true] iff x1 equals x2*)
 let cmp_rat = fun x1 x2 -> 
   match RATIONAL.compare x1 x2 with
   | EQ -> true
   | _ -> false
 
+
+(** [cmp_set_like_lists lst1 ls2] is true iff [lst1] and [lst2] contain the same
+  * elements, regardless of order or number of repetitions*)
 let cmp_set_like_lists lst1 lst2 =
   let uniq1 = List.sort_uniq compare lst1 in
   let uniq2 = List.sort_uniq compare lst2 in
@@ -16,6 +20,9 @@ let cmp_set_like_lists lst1 lst2 =
   List.length lst2 = List.length uniq2
   &&
   uniq1 = uniq2
+
+(** [make_<fun>_test arg] builds a test case for the function <fun>, with 
+  * arguments defined as needed for the function*)
 
 let make_op_test 
     (name: string)
@@ -30,8 +37,11 @@ let make_op_test
         (expected_output)
         ~cmp:cmp_rat)
 
+(** [RM] is the matrix module with values of type [RATIONAL] as its entries. *)
 module RM = MAKE_MATRIX(RATIONAL)
 
+(** [approx_eq_mat mat1 mat2] is true iff all elements (i,j) of [mat1] are 
+  * within 1/10^6 of element (i,j) of [mat2]*)
 let approx_eq_mat mat1 mat2 =
   let (r1,c1), (r2,c2) = (RM.dim mat1), (RM.dim mat2) in
   if (r1 != r2) || (c1 != c2) then false
@@ -45,12 +55,18 @@ let approx_eq_mat mat1 mat2 =
       done;
     done; !eq
 
+(** [rat_cmp_to_int x1 x2] is:
+  * -1 if RATIONAL.compare x1 x2 evaluates to LT
+  *  0 if RATIONAL.compare x1 x2 evaluates to EQ
+  *  1 if RATIONAL.compare x1 x2 evaluates to GT *)
 let rat_cmp_to_int = fun x1 x2 -> 
   match (RATIONAL.compare x1 x2) with
   | EQ -> 0
   | LT -> (-1)
   | GT -> 1
 
+(** [approx_eq_list list1 list2] is true if all elements i of [list1] are 
+  * withim 1/10^6 of element i of [list2] *)
 let approx_eq_list list1 list2 = 
   let rec approx_eq_list_help list1 list2 boolean = 
     if List.length list1 <> List.length list2 then false
@@ -212,12 +228,19 @@ let make_orth_decomp_test
     (input_basis: RM.matrix)
     (input_vector: RM.matrix)
     (expected_proj : RM.matrix)
-    (expected_z: RM.matrix) =
+    (expected_z: RM.matrix) 
+    (raises: bool) =
   name >:: (fun _ -> 
-      assert_equal (fst (RM.orth_decomp input_basis input_vector)) expected_proj 
-        ~cmp: approx_eq_mat;
-      assert_equal (snd (RM.orth_decomp input_basis input_vector)) expected_z
-        ~cmp: approx_eq_mat;
+      if raises then (
+        assert_raises RM.MatrixError
+          (fun () -> 
+             RM.orth_decomp input_basis input_vector) 
+      )
+      else
+        (assert_equal (fst (RM.orth_decomp input_basis input_vector)) 
+           expected_proj ~cmp: approx_eq_mat;
+         assert_equal (snd (RM.orth_decomp input_basis input_vector)) expected_z
+           ~cmp: approx_eq_mat);
     )
 
 let make_solve_test
@@ -809,7 +832,7 @@ let matrix_tests =
           [Frac (7,5)];
           [Int 0];
           [Frac (14,5)]
-        ]);
+        ]) false;
 
     make_orth_decomp_test "3x2 basis, R3 vector #2"
       (RM.make 3 2 RATIONAL.zero [
@@ -831,7 +854,7 @@ let matrix_tests =
           [Int 0];
           [Int 0];
           [Int 3]
-        ]);
+        ]) false;
 
     make_orth_decomp_test "4x3 basis, R4 vector"
       (RM.make 4 3 RATIONAL.zero [
@@ -857,7 +880,47 @@ let matrix_tests =
           [Int (-1)];
           [Int 3];
           [Int (-1)];
-        ]);
+        ]) false;
+
+    make_orth_decomp_test "fails with linear dependence"
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 1; Int 2];
+          [Int 2; Int 4]
+        ])
+      (RM.make 2 1 RATIONAL.zero [
+          [Int 1];
+          [Int 1]
+        ])
+      (RM.make 0 0 RATIONAL.zero [[]])
+      (RM.make 0 0 RATIONAL.zero [[]])
+      true;
+
+    make_orth_decomp_test "fails with vector having more than 1 column (not a
+    fucking vector) "
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 1; Int 2];
+          [Int 3; Int 4]
+        ])
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 1; Int 2];
+          [Int 1; Int (-2)]
+        ])
+      (RM.make 0 0 RATIONAL.zero [[]])
+      (RM.make 0 0 RATIONAL.zero [[]])
+      true;
+
+    make_orth_decomp_test "fails with number of rows not lining up between the
+    basis and the vector "
+      (RM.make 2 2 RATIONAL.zero [
+          [Int 1; Int 2];
+          [Int 3; Int 4]
+        ])
+      (RM.make 1 1 RATIONAL.zero [
+          [Int 1];
+        ])
+      (RM.make 0 0 RATIONAL.zero [[]])
+      (RM.make 0 0 RATIONAL.zero [[]])
+      true;
   ]
 
 let suite = "test suite for LinAlg" >::: List.flatten [
