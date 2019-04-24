@@ -129,6 +129,9 @@ module type MATRIX = sig
   (** [distance basis vector] is the distance from [vector] to the subspace 
       spanned by the columns of [basis] *)
   val distance : matrix -> matrix -> value
+
+  val least_square : matrix -> matrix -> matrix
+
   (** [orth_decomp basis vector] is a tuple containing the orthogonal projection
       from [vector] to the columns spanned by [basis] and the projection of [vector]
       onto the orthogonal subspace of [basis] *)

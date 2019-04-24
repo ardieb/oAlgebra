@@ -664,6 +664,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       let rref = reduce augmented in 
       partition (c1,0) (c1*2-1,r1-1) rref
 
+  let least_square = fun (m:matrix) (v:matrix) ->
+    mul (inverse (mul (transpose m) m)) (mul (transpose m) v);;
 
   let lu_decomp = fun (m:matrix) ->
     let lu_decomp_helper = fun (m:matrix) -> 
