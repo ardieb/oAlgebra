@@ -23,7 +23,7 @@ let make_op_test
     (input1: rational)
     (input2: rational)
     (expected_output: rational) : test =
-  name >:: (fun _ -> 
+  name >:: (fun _ ->
       assert_equal (op 
                       (input1) 
                       (input2)) 
@@ -206,6 +206,18 @@ let make_qr_fact_test
       assert_equal (fst (RM.qr_fact input)) expected_q ~cmp: approx_eq_mat;
       assert_equal (snd (RM.qr_fact input)) expected_r ~cmp: approx_eq_mat
     )
+
+let make_least_square_test
+    (name: string)
+    (input_matrix: RM.matrix)
+    (input_vector: RM.matrix)
+    (expected_output: RM.matrix)
+    (raises: bool) = 
+  name >:: (fun _ ->
+      if raises then
+        assert_raises RM.MatrixError (fun () -> RM.least_square input_matrix input_vector)
+      else
+        assert_equal expected_output (RM.least_square input_matrix input_vector) ~cmp:RM.equals)
 
 let make_orth_decomp_test 
     (name: string)
@@ -637,7 +649,7 @@ let matrix_tests =
            [Int 9];
            [Int 92]
          ])
-         ;
+       ;
          (RM.make 2 1 RATIONAL.zero [
              [Int 2];
              [Int (-23)]
@@ -659,7 +671,7 @@ let matrix_tests =
            [Int 0];
            [Int 25]
          ])
-         ;
+       ;
          (RM.make 5 1 RATIONAL.zero [
              [Int 19];
              [Int 292];
@@ -770,6 +782,40 @@ let matrix_tests =
           [Int 0; Int 2; Int 8];
           [Int 0; Int 0; Int 4]
         ]);
+
+    make_least_square_test "3 x 2 matrix"
+      (RM.make 3 2 RATIONAL.zero 
+         [[Int 1; Int 3]; 
+          [Int 2; Int 4;]; 
+          [Int 1; Int 6;]
+         ])
+      (RM.make 3 1 RATIONAL.zero 
+         [[Int 4;]; 
+          [Int 1;]; 
+          [Int 3;]
+         ])
+      (RM.make 2 1 RATIONAL.zero 
+         [[Frac ((-29), 77);]; [
+             Frac (51, 77);]]
+      )
+      (false);
+
+    make_least_square_test "3 x 2 matrix"
+      (RM.make 3 2 RATIONAL.zero
+         [[Int 1; Int 3]; 
+          [Int 2; Int 4;]; 
+          [Int 1; Int 6;]
+         ])
+      (RM.make 3 2 RATIONAL.zero 
+         [[Int 4; Int 4;]; 
+          [Int 1; Int 1;];
+          [Int 3; Int 3;]
+         ])
+      (RM.make 2 1 RATIONAL.zero 
+         [[Frac ((-29), 77);]; [
+             Frac (51, 77);]]
+      )
+      (true);
 
     make_qr_fact_test "3 x 3 matrix"
       (RM.make 3 3 RATIONAL.zero [

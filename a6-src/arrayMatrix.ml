@@ -652,7 +652,10 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       partition (c1,0) (c1*2-1,r1-1) rref
 
   let least_square = fun (m:matrix) (v:matrix) ->
-    mul (inverse (mul (transpose m) m)) (mul (transpose m) v);;
+    let (_, matrix_cols) = dim v in 
+    let (_, vector_cols) = dim m in
+    if vector_cols < 1 || matrix_cols <> 1 then raise MatrixError
+    else mul (inverse (mul (transpose m) m)) (mul (transpose m) v);;
 
   let lu_decomp = fun (m:matrix) ->
     let lu_decomp_helper = fun (m:matrix) -> 
