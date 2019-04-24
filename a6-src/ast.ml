@@ -66,7 +66,7 @@ let matrix_of = fun (s:string) ->
   let rows = Str.split (Str.regexp ";[ ]+\\|\\t") s in 
   let mat = List.fold_left (fun acc row -> 
     (row_of row)::acc
-  ) [] rows in 
+  ) [] rows |> List.rev in 
   let len = List.hd mat |> List.length in
   List.iter (fun row ->
     if List.length row != len then 
