@@ -24,7 +24,7 @@ test:
 	$(OCAMLBUILD) -tag debug $(TEST) && ./$(TEST)
 
 zip:
-	zip oalgebra_src.zip *.ml* *.mll* *.mly* _tags Makefile
+	zip oalgebra_src.zip *.ml* *.mll* *.mly* *.txt* _tags Makefile
 
 clean:
 	ocamlbuild -clean

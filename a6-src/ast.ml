@@ -210,11 +210,17 @@ let eval = fun (e:expr) ->
     | Num m, Sub, Num n -> Num (RATIONAL.sub m n)
     | Num m, Div, Num n -> Num (RATIONAL.div m n)
     | Matrix m, Dot, Matrix n -> Num (RM.dot m n)
-    | Matrix m, Solve, Matrix n -> 
-      let sol = RM.solve m n in
-      List ((Matrix (fst sol))::
-      (List.fold_right (fun e init ->
-      (Matrix e)::init) (RM.solve m n |> snd) []))
+    | Matrix m, Solve, Matrix n -> begin
+      try
+        let sol = RM.solve m n in
+        List ((Matrix (fst sol))::
+        (List.fold_right (fun e init ->
+        (Matrix e)::init) (RM.solve m n |> snd) []))
+      with
+        RM.MatrixError ->
+        print_endline ("No exact solution found. Approximate solution is: ");
+        Matrix (RM.least_square m n)
+      end
     | Matrix oldbasis, ChangeBasis, Matrix newbasis -> 
       Matrix (RM.change_of_basis oldbasis newbasis)
     | Matrix vector, OrthProject, Matrix basis ->

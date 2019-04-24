@@ -853,7 +853,7 @@ let matrix_tests =
     make_least_square_test "3 x 2 matrix"
       (RM.make 3 2 RATIONAL.zero
          [[Int 1; Int 3]; 
-          [Int 2; Int 4;]; 
+          [Int 2; Int 4]; 
           [Int 1; Int 6;]
          ])
       (RM.make 3 2 RATIONAL.zero 
