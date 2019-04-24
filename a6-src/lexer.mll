@@ -5,9 +5,9 @@
 let white = [' ' '\t']+
 let digit = ['0'-'9']
 let int = '-'? digit+
-let frac = '-'? int+ '/' int+
-let float = '-'? int+ '.' int+
-let number = int | frac | float
+let frac = int+ '/' int+
+let float = int+ '.' int+
+let number = (frac | int | float)
 let row = '[' (' '? number ' '?)+ ']'
 let mat = (' '? row ';'? ' '?)+
 let variable = ['A'-'Z']

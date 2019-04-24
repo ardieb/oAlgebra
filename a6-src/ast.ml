@@ -12,7 +12,7 @@ type matrix = RM.matrix
 (* matches an integer *)
 let string_int = "[-]?[0-9]+"
 (* matches a float *)
-let string_float = Format.sprintf "%s.%s" string_int string_int
+let string_float = Format.sprintf "%s\\.%s" string_int string_int
 (* matches a fraction *)
 let string_frac = Format.sprintf "%s/%s" string_int string_int
 
@@ -40,12 +40,12 @@ let int_of = fun (s:string) ->
   * Fails if the string does not match a numeric value.
   * Ex: num_of "5.0" = Float 5.0 *)
 let num_of = fun (s:string) ->
-  if Str.string_match (Str.regexp string_int) s 0 then
-    int_of s
+  if Str.string_match (Str.regexp string_frac) s 0 then
+    frac_of (Str.matched_string s)
   else if Str.string_match (Str.regexp string_float) s 0 then
-    float_of s
-  else if Str.string_match (Str.regexp string_frac) s 0 then
-    frac_of s
+    float_of (Str.matched_string s)
+  else if Str.string_match (Str.regexp string_int) s 0 then
+    int_of (Str.matched_string s)
   else failwith "Nan"  
 
 (** [row_of s] is the row (list) matched by string [s] 
