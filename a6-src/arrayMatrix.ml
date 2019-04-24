@@ -608,7 +608,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         if (List.mem col pivot_coors) then 
           (vec_array.(!curr_idx) <- column !u col;
            for i=0 to !curr_idx-1 do 
-             vec_array.(col).(i).(0) <- N.zero;
+             vec_array.(!curr_idx).(i).(0) <- N.zero;
            done;
            curr_idx := !curr_idx + 1);
         for row = col+1 to rows-1 do
@@ -624,7 +624,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
 
       let identity = diagonal rows rows in
       let l = ref (make rows 0 N.zero [[]]) in
-      for col = 0 to rows-1 do 
+      for col = 0 to rows-1 do
         if col>=(List.length pivot_coors) then 
           (* print_endline "line 631"; *)
           l := augment !l  (column identity col) else 
