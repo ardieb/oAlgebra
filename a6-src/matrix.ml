@@ -50,8 +50,6 @@ module type MATRIX = sig
   val add : matrix -> matrix -> matrix
   val scale : value -> matrix -> matrix
   val inverse : matrix -> matrix
-  val eigenvalues : matrix -> value list
-  val eigenvectors : matrix -> matrix list
   val reduce : matrix -> matrix
   val augment : matrix -> matrix -> matrix
   val partition : int * int -> int * int -> matrix -> matrix 
@@ -72,7 +70,6 @@ module type MATRIX = sig
   val distance : matrix -> matrix -> value
   val orth_decomp : matrix -> matrix -> matrix * matrix
   val to_string : matrix -> string
-
   val lu_decomp : matrix -> matrix*matrix
 end
 

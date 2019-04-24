@@ -231,13 +231,6 @@ let make_solve_test
       else assert_equal (RM.solve matrix vector) expected_output ~cmp:
           (fun sol1 sol2 -> RM.equals (fst sol1) (fst sol2)))
 
-let make_eigenvalue_test 
-    (name: string)
-    (matrix: RM.matrix)
-    (expected_output: RM.value list) =
-  name >:: (fun _ ->
-      assert_equal (RM.eigenvalues matrix) expected_output ~cmp:approx_eq_list)
-
 let rationals_tests =
   let add = RATIONAL.add in
   let mul = RATIONAL.mul in
@@ -794,52 +787,6 @@ let matrix_tests =
           [Int 0; Int 175; Int (-70)];
           [Int 0; Int 0; Int 35]
         ]);
-
-    (*==================eigenvalue tests =====================*)
-    make_eigenvalue_test "3 x 3 matrix"
-      (RM.make 3 3 RATIONAL.zero [
-          [Int (-2); Int (-4); Int 2];
-          [Int (-2); Int 1; Int 2];
-          [Int 4; Int 2; Int 5]
-        ])
-      ([Int 3; Int (-5); Int 6]);
-
-    make_eigenvalue_test "3 x 3 matrix, not all eigenvals distinct"
-      (RM.make 3 3 RATIONAL.zero [
-          [Int 1; Int (-3); Int 3];
-          [Int 3; Int (-5); Int 3];
-          [Int 6; Int (-6); Int 4]
-        ])
-      ([Int (-2); Int (-2); Int 4]);
-
-    make_eigenvalue_test "Yes another 3x3"
-      (RM.make 3 3 RATIONAL.zero [
-          [Int 4; Int 0; Int 1];
-          [Int (-1); Int (-6); Int (-2)];
-          [Int 5; Int 0; Int 0]
-        ])
-      ([Int (-1); Int (-6); Int 5]);
-
-    make_eigenvalue_test "Yet another 3x3 with repeated value"
-      (RM.make 3 3 RATIONAL.zero [
-          [Int 3; Int 2; Int 4];
-          [Int 2; Int 0; Int 2];
-          [Int 4; Int 2; Int 3]
-        ])
-      ([Int (-1); Int (-1); Int 8]);
-    make_eigenvalue_test "2x2 matrix, non-int values"
-      (RM.make 2 2 RATIONAL.zero [
-          [Frac (4,5); Frac (3,10)];
-          [Frac (1,5); Frac (7,10)]
-        ])
-      ([Frac (1,2); Int 1]);
-
-    make_eigenvalue_test "2x2 matrix, reflection matrix"
-      (RM.make 2 2 RATIONAL.zero [
-          [Int 0; Int 1];
-          [Int 1; Int 0]
-        ])
-      ([Int (-1); Int 1]);
 
     (*================ orthogonal decomposition ===================*)
     make_orth_decomp_test "3x2 basis, R3 vector"
