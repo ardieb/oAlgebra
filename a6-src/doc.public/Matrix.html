@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Rationals.html">
+<link rel="next" href="ArrayMatrix.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Index of module types" rel=Appendix href="index_module_types.html">
+<link title="Rationals" rel="Chapter" href="Rationals.html">
+<link title="Matrix" rel="Chapter" href="Matrix.html">
+<link title="ArrayMatrix" rel="Chapter" href="ArrayMatrix.html">
+<link title="Test" rel="Chapter" href="Test.html">
+<link title="Ast" rel="Chapter" href="Ast.html">
+<link title="Main" rel="Chapter" href="Main.html"><title>Matrix</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Rationals.html" title="Rationals">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="ArrayMatrix.html" title="ArrayMatrix">Next</a>
+</div>
+<h1>Module <a href="type_Matrix.html">Matrix</a></h1>
+
+<pre><span id="MODULEMatrix"><span class="keyword">module</span> Matrix</span>: <code class="code">sig</code> <a href="Matrix.html">..</a> <code class="code">end</code></pre><div class="info module top">
+<div class="info-desc">
+<p><code class="code">order</code> is the order comparison returned by <code class="code">Comparable.compare x y</code></p>
+</div>
+</div>
+<hr width="100%">
+
+<pre><code><span id="TYPEorder"><span class="keyword">type</span> <code class="type"></code>order</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTorder.LT"><span class="constructor">LT</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTorder.GT"><span class="constructor">GT</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTorder.EQ"><span class="constructor">EQ</span></span></code></td>
+
+</tr></table>
+
+
+
+<pre><span id="MODULETYPEComparable"><span class="keyword">module type</span> <a href="Matrix.Comparable.html">Comparable</a></span> = <code class="code">sig</code> <a href="Matrix.Comparable.html">..</a> <code class="code">end</code></pre>
+<pre><span id="MODULETYPEFormattable"><span class="keyword">module type</span> <a href="Matrix.Formattable.html">Formattable</a></span> = <code class="code">sig</code> <a href="Matrix.Formattable.html">..</a> <code class="code">end</code></pre>
+<pre><span id="MODULETYPENUM"><span class="keyword">module type</span> <a href="Matrix.NUM.html">NUM</a></span> = <code class="code">sig</code> <a href="Matrix.NUM.html">..</a> <code class="code">end</code></pre>
+<pre><span id="MODULETYPEMATRIX"><span class="keyword">module type</span> <a href="Matrix.MATRIX.html">MATRIX</a></span> = <code class="code">sig</code> <a href="Matrix.MATRIX.html">..</a> <code class="code">end</code></pre>
+<pre><span id="MODULETYPEMATRIX_MAKER"><span class="keyword">module type</span> <a href="Matrix.MATRIX_MAKER.html">MATRIX_MAKER</a></span> = <code class="code">functor (</code><code class="code">T</code><code class="code"> : </code><code class="type"><a href="Matrix.NUM.html">NUM</a></code><code class="code">) -&gt; </code><code class="type"><a href="Matrix.MATRIX.html">MATRIX</a></code><code class="type">  with module N := T</code></pre><div class="info">
+<p><code class="code">MATRIX_MAKER</code> is the type of a functor for making a matrix</p>
+
+</div>
+</body></html>

@@ -367,13 +367,13 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     *  [2; -4; 5; 8; 4]
     * 
     *  The result is 
-    *  {
-    *  [2] [1] [-3]
-    *  [1]  [0] [0]
-    *  [0] [-2] [2]
-    *  [0] [1] [0]
-    *  [0] [0]  [1]
-    *  }
+    *  
+    *  [2 1 -3]
+    *  [1 0  0]
+    *  [0 -2 2]
+    *  [0 1  0]
+    *  [0 0  1]
+    *  
   *)
   let null_space = fun (m:matrix) ->
     let ins_row = fun (m:matrix) (row:int) ->
@@ -669,9 +669,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       let u = ref m in 
       let pivs = pivots (reduce m) in
       let curr_idx = ref 0 in
-      let pivot_coors = Hashtbl.fold (fun (x,y) boolean acc -> if 
-                                       (Hashtbl.find pivs (x,y)) then y::acc
-                                       else acc) pivs [] in
+      let pivot_coors = Hashtbl.fold (fun (x,y) boolean acc -> 
+        if (Hashtbl.find pivs (x,y)) then y::acc else acc) pivs [] in
       for col = 0 to (cols-1) do 
         if (List.mem col pivot_coors) then 
           (vec_array.(!curr_idx) <- column !u col;
@@ -681,7 +680,6 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
            curr_idx := !curr_idx + 1);
         for row = col+1 to rows-1 do
           match (N.compare N.zero (!u.(row).(col))) with 
-
           | LT
           | GT ->
             let constant = N.div (N.neg !u.(row).(col)) !u.(col).(col) in 
@@ -689,7 +687,6 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
           | EQ -> ()
         done;
       done;
-
       let identity = diagonal rows rows in
       let l = ref (make rows 0 N.zero [[]]) in
       for col = 0 to rows-1 do
@@ -700,6 +697,5 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
                  (Array.get vec_array col));
       done;
       !l,!u
-
     in try (lu_decomp_helper m) with N.ArithmeticError -> raise MatrixError
 end

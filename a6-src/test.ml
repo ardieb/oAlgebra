@@ -23,7 +23,6 @@ let cmp_set_like_lists lst1 lst2 =
 
 (** [make_<fun>_test arg] builds a test case for the function <fun>, with 
   * arguments defined as needed for the function*)
-
 let make_op_test 
     (name: string)
     (op: rational -> rational -> rational)
