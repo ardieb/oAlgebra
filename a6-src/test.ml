@@ -96,7 +96,7 @@ let make_dot_test
     (raises: bool) = 
   name >:: (fun _ ->
       if raises then
-        assert_raises RM.MatrixError (fun () -> RM.dot input1 input2)
+        assert_raises (RM.MatrixError) (fun () -> RM.dot input1 input2)
       else 
         (assert_equal (RM.dot input1 input2) expected_output ~cmp: cmp_rat))
 
@@ -108,7 +108,7 @@ let make_mul_test
     (raises: bool) =
   name >:: (fun _ ->
       if raises then
-        assert_raises RM.MatrixError (fun () -> RM.mul input1 input1)
+        assert_raises (RM.MatrixError) (fun () -> RM.mul input1 input1)
       else
         assert_equal expected_output (RM.mul input1 input2) ~cmp: RM.equals)
 
@@ -120,7 +120,7 @@ let make_add_test
     (raises: bool) =
   name >:: (fun _ ->
       if raises then
-        assert_raises RM.MatrixError (fun () -> RM.add input1 input2)
+        assert_raises (RM.MatrixError) (fun () -> RM.add input1 input2)
       else
         assert_equal expected_output (RM.add input1 input2))
 
@@ -132,7 +132,7 @@ let make_subtract_test
     (raises: bool) =
   name >:: (fun _ ->
       if raises then
-        assert_raises RM.MatrixError (fun () -> RM.subtract input1 input2)
+        assert_raises (RM.MatrixError) (fun () -> RM.subtract input1 input2)
       else
         assert_equal expected_output (RM.subtract input1 input2))
 
@@ -151,7 +151,7 @@ let make_augment_test
     (expected_output: RM.matrix)
     (ex: bool) =
   name >:: (fun _ ->
-      if ex then assert_raises RM.MatrixError (fun () -> RM.augment m1 m2)
+      if ex then assert_raises (RM.MatrixError) (fun () -> RM.augment m1 m2)
       else assert_equal expected_output (RM.augment m1 m2)
     )
 
@@ -168,7 +168,7 @@ let make_determinant_test
     (expected_output: RM.value)
     (ex: bool) = 
   name >:: (fun _ ->  
-      if ex then assert_raises RM.MatrixError (fun () -> RM.determinant matrix)
+      if ex then assert_raises (RM.MatrixError) (fun () -> RM.determinant matrix)
       else assert_equal (RM.determinant matrix) expected_output ~cmp:cmp_rat)
 
 let make_null_space_test
@@ -197,7 +197,7 @@ let make_solve_test
     (expected_output: RM.solution) 
     (ex: bool) =
   name >:: (fun _ ->
-      if ex then assert_raises RM.MatrixError (fun () -> RM.solve matrix vector)
+      if ex then assert_raises (RM.MatrixError) (fun () -> RM.solve matrix vector)
       else assert_equal (RM.solve matrix vector) expected_output ~cmp:
           (fun sol1 sol2 -> RM.equals (fst sol1) (fst sol2)))
 

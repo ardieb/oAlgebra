@@ -57,7 +57,9 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     * 96 *)
   let dot = fun (u:matrix) (v:matrix) ->
     let (m,n),(p,r) = dim u, dim v in
-    if n != 1 || r != 1 || m != p then raise MatrixError else
+    if n != 1 || r != 1 || m != p then 
+      raise MatrixError
+    else
       let res = ref T.zero in
       for i = 0 to m-1 do 
         res := N.add !res (N.mul u.(i).(0) v.(i).(0))
@@ -125,7 +127,9 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     * Requires: [m1] and [m2] have the same dimensions *)
   let add = fun (m1:matrix) (m2:matrix) -> 
     let (m,n), (p,r) = dim m1, dim m2 in
-    if m <> p || n <> r then raise MatrixError else
+    if m <> p || n <> r then 
+      raise MatrixError
+    else
       let res = make m n N.zero [[]] in
       for i = 0 to m-1 do
         for j = 0 to n-1 do
@@ -229,7 +233,9 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     * row and col are within bounds of [matrix]'s dimensions *)
   let get = fun (m:matrix) (r:int) (c:int) ->
     let rows,cols = dim m in 
-    if r>=rows || c>=cols then raise MatrixError else 
+    if r>=rows || c>=cols then 
+      raise MatrixError
+    else 
       m.(r).(c)
   (** [reduce m] is the reduced row echelon matrix formed from [m] 
     * ALGORITHM: first reduce [m] to an upper triangular matrix using forward.
@@ -456,7 +462,9 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   (** [determinant m] is the determinant of matrix [m] 
     * ALGORITHM: Cauchy expansion *)
   let rec determinant = fun (m:matrix) -> 
-    let (row,col) = dim m in if row<>col || row<1 then raise MatrixError else 
+    let (row,col) = dim m in if row<>col || row<1 then 
+      raise MatrixError 
+    else 
     if row=1 then m.(0).(0) else
     if row=2 then let a,b,c,d = (m.(0).(0), m.(0).(1), m.(1).(0), m.(1).(1)) in 
       N.sub (N.mul a d) (N.mul b c) 
@@ -476,7 +484,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     * form. The inverse of [m] is read off from the reduced augmented matrix*)
   let inverse = fun (m:matrix) -> 
     let (rows, cols) = dim m in 
-    if rows<>cols || (determinant m)=N.zero then raise MatrixError 
+    if rows<>cols || (determinant m)=N.zero then 
+      raise MatrixError
     else
       let augmented = augment m (identity rows) in 
       let reduced = reduce augmented in 
@@ -538,8 +547,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       else acc) pivs [] in
     let num_pivs = List.length pivot_coors in
     if num_pivs <> cols || v_cols <> 1 || v_rows <> rows 
-    then raise MatrixError
-    else 
+    then raise MatrixError else 
       let projection = orth_proj b v
       in 
       let z = subtract v projection in 
@@ -595,8 +603,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   let change_of_basis = fun (b1:matrix) (b2:matrix) -> 
     let r1,c1 = dim b1 in 
     let r2,c2 = dim b2 in
-    if (determinant b1)=N.zero || (determinant b2)=N.zero || r1<>r2 then raise 
-        MatrixError else
+    if (determinant b1)=N.zero || (determinant b2)=N.zero || r1<>r2 then
+      raise MatrixError else
       let augmented = augment b2 b1 in 
       let rref = reduce augmented in 
       partition (c1,0) (c1*2-1,r1-1) rref
@@ -606,7 +614,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   let least_square = fun (m:matrix) (v:matrix) ->
     let (_, matrix_cols) = dim v in 
     let (_, vector_cols) = dim m in
-    if vector_cols < 1 || matrix_cols <> 1 then raise MatrixError
+    if vector_cols < 1 || matrix_cols <> 1 then 
+      raise MatrixError 
     else mul (inverse (mul (transpose m) m)) (mul (transpose m) v);;
   (** [lu_decomp m] is the LU decomposition of the [m]atrix. L is the lower 
     * triangular matrix of with [1]'s on the diagonal and U is the echelon form
@@ -646,6 +655,9 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
           l := augment !l  (column identity col) else 
           l := augment !l
               (scale (N.div N.one vec_array.(col).(col).(0)) 
-                 (Array.get vec_array col)); done; !l,!u
-    in try (lu_decomp_helper m) with N.ArithmeticError -> raise MatrixError
+                 (Array.get vec_array col)); done; !l,!u in
+    try 
+      lu_decomp_helper m 
+    with 
+      N.ArithmeticError -> raise MatrixError
 end
