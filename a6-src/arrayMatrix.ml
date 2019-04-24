@@ -31,18 +31,33 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   let dim = fun (m:matrix) ->
     Array.length m, Array.length m.(0)
 
-  (** [set m row col entry] sets [row] [col] of [m]atrix to [entry]*)
+  (** [set m row col entry] is the matrix [m] with  [row] [col] set to [entry]*)
   let set = fun (m:matrix) (row:int) (col:int) (entry:N.t)-> 
     m.(row).(col) <- entry; m
 
-  (** [transpose m] is the trasnposed matrix of [m] *)
+  (** [transpose m] is the transposed matrix of [m] *)
   let transpose = fun (m:matrix) ->
     let rows,cols = dim m in
     let m' = make cols rows N.zero [[]] in
     Array.iteri (fun i row -> Array.iteri (fun j e -> m'.(j).(i) <- e) row) m;m'
 
   (** [dot u v] is the dot product of two vectors (1d matricies) 
-    * Requires: [u] and [v] have the same height and have width of [1] *)
+    * Requires: [u] and [v] have the same height and have width of [1] 
+
+      Example: 
+      given vector 1 is 
+      [2]
+      [8]
+      [1]
+
+      and vector 2 is
+      [8]
+      [9]
+      [8]
+
+      the result is 
+      96
+  *)
   let dot = fun (u:matrix) (v:matrix) ->
     let (m,n),(p,r) = dim u, dim v in
     if n != 1 || r != 1 || m != p then raise MatrixError else
@@ -51,7 +66,21 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         res := N.add !res (N.mul u.(i).(0) v.(i).(0))
       done; !res
 
-  (** [scale c m] is the matrix [m] scaled by constant [c] *)
+  (** [scale c m] is the matrix [m] scaled by constant [c] 
+
+      Example: 
+      given matrix is 
+      [1; 6; 2]
+      [9; 2; 1]
+      [23; 1; 9]
+
+      and c is 2
+
+      then the result is
+      [2; 12; 4]
+      [18; 4; 2]
+      [46; 2; 18]
+  *)
   let scale = fun (c:value) (m:matrix) -> 
     let p,r = dim m in
     let res = make p r N.zero [[]] in
@@ -64,7 +93,17 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     * and columns [x1..x2] 
     * Requires: x1 and x2 are less than the width of the matrix
     * y1 and y2 are less than the height of the matrix
-    * x1 < x2 and y1 < y2 *)
+    * x1 < x2 and y1 < y2 
+
+      Given (x1,y1) is (1,1) and (x2,y2) is (2,2) and the matrix is 
+      [1; 2; 3]
+      [4; 5; 6]
+      [7; 8; 9]
+
+      then the result is 
+      [5; 6]
+      [8; 9]
+  *)
   let partition = fun ((x1,y1):int*int) ((x2,y2):int*int) (m:matrix) -> 
     let p,r = dim m in
     if y1 > p || y2 > p || x1 > r || x2 > r || x1 > x2 || y1 > y2 
@@ -95,7 +134,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     for i = 0 to (n-1) do 
       empty.(i).(i) <- N.one
     done;
-    empty
+    empty 
 
   (** [add m1 m2] is the sum of matricies [m1] and [m2] 
     * Requires: [m1] and [m2] have the same dimensions *)
@@ -209,6 +248,11 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         j := 0
     done; memo
 
+  (** 
+    * [get matrix row col] is the element [row] [col] from [matrix]
+    * 
+    * Requires: 
+    * row and col are within bounds of [matrix]'s dimensions *)
   let get = fun (m:matrix) (r:int) (c:int) ->
     let rows,cols = dim m in 
     if r>=rows || c>=cols then raise MatrixError else 
@@ -217,7 +261,17 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
   (** [reduce m] is the reduced row echelon matrix formed from [m] 
     * ALGORITHM: first reduce [m] to an upper triangular matrix using forward.
     * Then working from the bottom-left pivot up to the top add multiples of the
-    * pivot rows to the above rows until no further reductions can be made *)
+    * pivot rows to the above rows until no further reductions can be made 
+    *
+    * given the matrix 
+    * [1; 2; 1]
+    * [-2; -3; 1]
+    * [3; 5; 0]
+    *
+    * the result is
+    * [1; 0; -5]
+    * [0; 1; 3]
+    * [0; 0; 0] *)
   let reduce = fun (m:matrix) -> 
     let p,r = dim m in
     let memo = ref m in
@@ -254,8 +308,23 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     forward 0 0; backward (p - 1); !memo
 
   (** [augment m1 m2] is the matrix obtained by appending the columns of [m2] 
-      to [m1] 
-    * Requires: [m1] and [m2] have the same number of rows *)
+    *  to [m1] 
+    * Requires: [m1] and [m2] have the same number of rows 
+    *
+      Given m1 is
+    * [1; 0; -5]
+    * [0; 1; 3]
+    * [0; 0; 0]
+    *
+    *  and m2 is 
+    *  [2; 3]
+    *  [5; 1]
+    *  [7; 0]
+    *
+    *  then the result is 
+    *  [1; 0; -5; 2; 3]
+    *  [0; 1; 3; 5; 1]
+    *  [0; 0; 0; 7; 0] *)
   let augment = fun (m1:matrix) (m2:matrix) -> 
     let (m,n), (p,r) = dim m1, dim m2 in
     if m != p then raise MatrixError else
@@ -290,7 +359,22 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     * zero-rows from the bottom of the matrix. Then reading along the diagonal 
     * of the reduced and squared matrix, if a zero is encountered, append
     * that column to the null-basis and replace the position in the vector
-    * that matches the index of the column with -1 *)
+    * that matches the index of the column with -1 
+    *
+    *  Given the matrix is 
+    *  [-3; 6; -1; 1; -7]
+    *  [1; -2; 2; 3; -1]
+    *  [2; -4; 5; 8; 4]
+    * 
+    *  The result is 
+    *  {
+    *  [2] [1] [-3]
+    *  [1]  [0] [0]
+    *  [0] [-2] [2]
+    *  [0] [1] [0]
+    *  [0] [0]  [1]
+    *  }
+  *)
   let null_space = fun (m:matrix) ->
     let ins_row = fun (m:matrix) (row:int) ->
       let p,r = dim m in
@@ -449,7 +533,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         Array.iter ( fun e -> Format.fprintf fmt " %a " N.format e ) row;
         Format.fprintf fmt "]\n";
       ) m
-  (* SPRINT WEEK 2 *)
+
   (** [to_string m] is the string m of matrix [m] *)
   let to_string = fun (m:matrix) ->
     let res = ref "" in
@@ -481,6 +565,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       c.(i).(0) <- m.(i).(j)
     done; c
 
+  (** [orth_proj basis vector] is the orthogonal projection of [vector] onto 
+        the subspace spanned by the columns of [basis] *)
   let orth_proj = fun (b:matrix) (v:matrix) ->
     let rows, cols = dim b in
     let v_rows,v_cols = dim v in
@@ -491,18 +577,23 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
         y := add !y  (proj v u)
       done; !y
 
+  (** [distance basis vector] is the distance from [vector] to the subspace 
+        spanned by the columns of [basis] *)
   let distance = fun (b:matrix) (v:matrix) -> 
     N.pow (dot (subtract v (orth_proj b v)) (subtract v 
                                                (orth_proj b v)))
       (N.make_Float 0.5)
 
+  (** [orth_decomp basis vector] is a tuple containing the orthogonal projection
+      from [vector] to the columns spanned by [basis] and the projection of [vector]
+      onto the orthogonal subspace of [basis] *)
   let orth_decomp = fun (b:matrix) (v:matrix) -> 
     let projection = orth_proj b v in 
     let z = subtract v projection in 
     (projection,z)
 
-  (** [magnitude v] is the length of a vector*)
-  let magnitude = fun (v:matrix) -> 
+  (** [magnitude v] is the length of a vector *)
+  let magnitude = fun (v:matrix) ->
     N.pow (dot v v) (N.make_Float 0.5)
 
   (** [normalize v] is the vector [v] scaled to length 1*)
@@ -525,7 +616,7 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     done; !q
 
   (** [qr_fact_r m q] is an upper-triangular matrix such that A = QR, where Q is 
-      an orthogonal matrix*)
+      an orthogonal matrix *)
   let qr_fact_r = fun (m:matrix) (q:matrix)-> 
     let (rows, cols) = dim m in
     let r = make cols cols N.zero [[]] in
@@ -545,46 +636,11 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
     let r = qr_fact_r m q in
     (q,r)
 
-
-  let triangular_enough = fun (m:matrix) -> 
-    let (rows, cols) = dim m in 
-    let boolean = ref true in 
-    for col = 0 to cols-1 do
-      for row = col+1 to rows-1 do
-        boolean := !boolean && 
-                   abs_float (N.to_float (m.(row).(col))) <= 0.1 /. N.tolerance
-      done;
-    done; !boolean
-
   let diagonal_vals = fun (m:matrix) (size:int)->
     let vals = ref [] in
     for i = 0 to size-1 do 
       vals := m.(i).(i)::(!vals);
     done; !vals
-
-  let eigenv_2x2 = fun (m:matrix) -> 
-    let r,c = dim m in 
-    if r<>2 || c<>2 then raise MatrixError 
-    else let b = N.add (get m 0 0) (get m 1 1) in 
-      let det = determinant m in 
-      let sol1 = N.div (N.add b (N.pow (N.sub (N.mul b b) (N.mul (N.make_Int 4) det))(N.make_Float 0.5)))
-          (N.make_Int 2) in 
-      let sol2 = N.div (N.sub b (N.pow (N.sub (N.mul b b) (N.mul (N.make_Int 4) det))(N.make_Float 0.5)))
-          (N.make_Int 2) in 
-      [sol1;sol2]
-
-  let rec eigenvalues = fun (m:matrix) -> 
-    let r,c = dim m in 
-    (* Format.fprintf (format) m "\n"; *)
-    if r=2 && c=2 then eigenv_2x2 m else
-    if r <> c then raise MatrixError 
-    else 
-    if triangular_enough m then
-      diagonal_vals m r
-    else
-      let q,r = qr_fact m in 
-      let a = mul r q in 
-      eigenvalues a
 
   let change_of_basis = fun (b1:matrix) (b2:matrix) -> 
     let r1,c1 = dim b1 in 
@@ -602,10 +658,8 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       let empty_vec = make rows 1 N.zero [[]] in 
       let vec_array = Array.make rows empty_vec in 
       let u = ref m in 
-
       let pivs = pivots (reduce m) in
       let curr_idx = ref 0 in
-
       let pivot_coors = Hashtbl.fold (fun (x,y) boolean acc -> if 
                                        (Hashtbl.find pivs (x,y)) then y::acc
                                        else acc) pivs [] in
@@ -639,6 +693,4 @@ module MAKE_MATRIX : MATRIX_MAKER = functor (T:NUM) -> struct
       !l,!u
 
     in try (lu_decomp_helper m) with N.ArithmeticError -> raise MatrixError
-
-  let eigenvectors = fun (m:matrix) -> failwith "TODO"
 end
