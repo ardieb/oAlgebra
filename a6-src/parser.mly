@@ -2,7 +2,7 @@
   open Ast
 %}
 
-%token <Ast.num> NUM
+%token <Ast.value> NUM
 %token <Ast.matrix> MATRIX
 %token VAR
 %token EQUALS

@@ -1,7 +1,11 @@
-type num
-type matrix
+open Matrix
+open Rationals
+module MAT : MATRIX with module N := RATIONAL 
 
-val num_of : string -> num
+type value = MAT.value
+type matrix = MAT.matrix
+
+val num_of : string -> value
 val matrix_of : string -> matrix
 
 type unaryop =
@@ -30,7 +34,7 @@ type binaryop =
 
 type expr =
 | Matrix of matrix
-| Num of num
+| Num of value
 | Unary of (unaryop * expr)
 | Binary of (expr * binaryop * expr)
 | List of expr list

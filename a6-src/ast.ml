@@ -3,9 +3,9 @@ open Matrix
 open ArrayMatrix
 open Rationals
 
-module RM = MAKE_MATRIX(RATIONAL)
-type num = RATIONAL.t
-type matrix = RM.matrix
+module MAT = MAKE_MATRIX(RATIONAL)
+type value = MAT.value
+type matrix = MAT.matrix
 (* END HEADER *)
 
 (* Functions for working with regex strings *)
@@ -72,7 +72,7 @@ let matrix_of = fun (s:string) ->
     if List.length row != len then 
       failwith "Invalid matrix: row lengths differ" 
     else ()) mat;
-  RM.make (List.length mat) len (Int 0) mat
+  MAT.make (List.length mat) len (Int 0) mat
 
 (** [unaryop] is a type that classifies operations with one argument *)
 type unaryop =
@@ -103,7 +103,7 @@ type binaryop =
 (** [expr] is a type that classifies operations on matricies and numbers*)
 type expr =
 | Matrix of matrix
-| Num of num
+| Num of value
 | Unary of (unaryop * expr)
 | Binary of (expr * binaryop * expr)
 | List of expr list
@@ -178,20 +178,20 @@ let eval = fun (e:expr) ->
     | Matrix m -> m
     | _ -> failwith "Type mismatch" in 
     match op with
-    | Reduce -> Matrix (RM.reduce arg)
-    | Inverse -> Matrix (RM.inverse arg)
-    | Transpose -> Matrix (RM.transpose arg)
-    | Det -> Num (RM.determinant arg)
+    | Reduce -> Matrix (MAT.reduce arg)
+    | Inverse -> Matrix (MAT.inverse arg)
+    | Transpose -> Matrix (MAT.transpose arg)
+    | Det -> Num (MAT.determinant arg)
     | Nullspace -> List (List.fold_right (fun e init ->
-      (Matrix e)::init) (RM.null_space arg) [])
+      (Matrix e)::init) (MAT.null_space arg) [])
     | Colspace -> List (List.fold_right (fun e init -> 
-      (Matrix e)::init) (RM.col_space arg) [])
+      (Matrix e)::init) (MAT.col_space arg) [])
     | Rowspace -> List (List.fold_right (fun e init ->
-      (Matrix e)::init) (RM.row_space arg) [])
-    | QRFactor -> let q,r = RM.qr_fact arg in
+      (Matrix e)::init) (MAT.row_space arg) [])
+    | QRFactor -> let q,r = MAT.qr_fact arg in
       List ((Matrix q)::(Matrix r)::[])
     | LuDecomp -> 
-      let l,u = RM.lu_decomp arg in
+      let l,u = MAT.lu_decomp arg in
       List ((Matrix l)::(Matrix u)::[])
   end
   | Binary (arg1, Scale, arg2) -> 
@@ -199,43 +199,43 @@ let eval = fun (e:expr) ->
     match eval' arg1, eval' arg2 with
     | Num n, Matrix m -> n, m
     | _, _ -> failwith "Type mismatch" in
-    Matrix (RM.scale arg1 arg2)
+    Matrix (MAT.scale arg1 arg2)
   | Binary (arg1, op, arg2) -> begin
     match eval' arg1, op, eval' arg2 with
-    | Matrix m, Add, Matrix n -> Matrix (RM.add m n)
+    | Matrix m, Add, Matrix n -> Matrix (MAT.add m n)
     | Num m, Add, Num n -> Num (RATIONAL.add m n)
-    | Matrix m, Mul, Matrix n -> Matrix (RM.mul m n)
+    | Matrix m, Mul, Matrix n -> Matrix (MAT.mul m n)
     | Num m, Mul, Num n -> Num (RATIONAL.mul m n)
-    | Matrix m, Sub, Matrix n -> Matrix (RM.subtract m n)
+    | Matrix m, Sub, Matrix n -> Matrix (MAT.subtract m n)
     | Num m, Sub, Num n -> Num (RATIONAL.sub m n)
     | Num m, Div, Num n -> Num (RATIONAL.div m n)
-    | Matrix m, Dot, Matrix n -> Num (RM.dot m n)
+    | Matrix m, Dot, Matrix n -> Num (MAT.dot m n)
     | Matrix m, Solve, Matrix n -> begin
       try
-        let sol = RM.solve m n in
+        let sol = MAT.solve m n in
         List ((Matrix (fst sol))::
         (List.fold_right (fun e init ->
-        (Matrix e)::init) (RM.solve m n |> snd) []))
+        (Matrix e)::init) (MAT.solve m n |> snd) []))
       with
-        RM.MatrixError ->
+        MAT.MatrixError ->
         print_endline ("No exact solution found. Approximate solution is: ");
-        Matrix (RM.least_square m n)
+        Matrix (MAT.least_square m n)
       end
     | Matrix oldbasis, ChangeBasis, Matrix newbasis -> 
-      Matrix (RM.change_of_basis oldbasis newbasis)
+      Matrix (MAT.change_of_basis oldbasis newbasis)
     | Matrix vector, OrthProject, Matrix basis ->
-      Matrix (RM.orth_proj basis vector)
+      Matrix (MAT.orth_proj basis vector)
     | Matrix vector, DistToBasis, Matrix basis ->
-      Num (RM.distance basis vector)
+      Num (MAT.distance basis vector)
     | Matrix vector, Decomp, Matrix basis ->
-      let col_proj, orth_proj = RM.orth_decomp basis vector in
+      let col_proj, orth_proj = MAT.orth_decomp basis vector in
       List ((Matrix col_proj)::(Matrix orth_proj)::[])
     | _, _, _ -> failwith "Type mismatch"
     end in eval' e 
 
 (** [format_expr e] is the printing function for the [e]xpr *)
 let rec format_expr fmt = function
-| Matrix m -> RM.format fmt m
+| Matrix m -> MAT.format fmt m
 | Num n -> RATIONAL.format fmt n
 | Unary (op, e) -> begin
   match op with

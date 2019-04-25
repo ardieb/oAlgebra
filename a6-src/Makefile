@@ -1,9 +1,10 @@
-MODULES=rationals matrix arrayMatrix test ast main
+MODULES=rationals matrix arrayMatrix test ast main parser lexer
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
 TEST=test.byte
 MAIN=main.byte
+EXAMPLE=example.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind -use-menhir 
 PKGS=unix,oUnit,str,qcheck,ANSITerminal
 
@@ -16,6 +17,9 @@ generate-parser:
 
 run:
 	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
+
+example:
+	$(OCAMLBUILD) $(EXAMPLE) && ./$(EXAMPLE)
 
 build:
 	$(OCAMLBUILD) $(OBJECTS)
