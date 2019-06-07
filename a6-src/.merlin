@@ -1,5 +1,0 @@
-B _build
-PKG oUnit
-PKG str
-PKG unix
-PKG qcheck
